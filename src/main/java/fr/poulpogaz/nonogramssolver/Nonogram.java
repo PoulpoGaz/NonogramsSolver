@@ -72,26 +72,116 @@ public class Nonogram {
     private final int width;
     private final int height;
 
-    private final int[][] rows;
-    private final int[][] columns;
+    private final Row[] rows;
+    private final Row[] columns;
 
-    private Cell[][] solution;
+    private CellWrapper[][] solution;
     private SolutionStatus status = SolutionStatus.NOT_SOLVED;
 
     public Nonogram(int width, int height, int[][] rows, int[][] columns) {
         this.width = width;
         this.height = height;
-        this.rows = rows;
-        this.columns = columns;
 
-        solution = new Cell[height][width];
+        solution = new CellWrapper[height][width];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                solution[y][x] = Cell.EMPTY;
+                solution[y][x] = new CellWrapper(Cell.EMPTY);
             }
         }
+
+        this.rows = createRows(rows);
+        this.columns = createColumns(columns);
     }
+
+    private Row[] createRows(int[][] rows) {
+        Row[] r = new Row[height];
+
+        for (int y = 0; y < height; y++) {
+            r[y] = new Row(rows[y], solution[y]);
+        }
+
+        return r;
+    }
+
+    private Row[] createColumns(int[][] columns) {
+        Row[] r = new Row[width];
+
+        for (int x = 0; x < width; x++) {
+            CellWrapper[] wrappers = new CellWrapper[height];
+
+            for (int y = 0; y < height; y++) {
+                wrappers[y] = solution[y][x];
+            }
+
+            r[x] = new Row(columns[x], wrappers);
+        }
+
+        return r;
+    }
+
+    // SOLVER!
+
+    public void solve() {
+        /*while (true) {
+
+
+        }*/
+
+        rows[3].getCells()[4].set(Cell.FILLED);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // END OF SOLVER!
+
+    public BufferedImage asImage(int squareSize) {
+        BufferedImage image = new BufferedImage(squareSize * width, squareSize * height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2D = image.createGraphics();
+
+        int drawX = 0;
+        int drawY = 0;
+        for (int y = 0; y < height; y++) {
+
+            drawX = 0;
+            for (int x = 0; x < width; x++) {
+                CellWrapper cell = solution[y][x];
+
+                if (cell.isEmpty()) {
+                    g2D.setColor(Color.WHITE);
+                    g2D.fillRect(drawX, drawY, squareSize, squareSize);
+
+                } else if (cell.isFilled()) {
+                    g2D.setColor(Color.BLACK);
+                    g2D.fillRect(drawX, drawY, squareSize, squareSize);
+
+                } else if (cell.isCrossed() && squareSize >= 3) {
+                    g2D.setColor(Color.BLACK);
+                    g2D.drawLine(drawX, drawY, drawX + squareSize, drawY + squareSize);
+                    g2D.drawLine(drawX + squareSize, drawY, drawX, drawY + squareSize);
+                }
+
+                drawX += squareSize;
+            }
+
+            drawY += squareSize;
+        }
+
+        g2D.dispose();
+
+        return image;
+    }
+
 
     @Override
     public String toString() {
@@ -99,19 +189,19 @@ public class Nonogram {
 
         int maxNumberInRow = 0;
         int squareSize = 1;
-        for (int[] row : rows) {
-            maxNumberInRow = Math.max(maxNumberInRow, row.length);
+        for (Row row : rows) {
+            maxNumberInRow = Math.max(maxNumberInRow, row.nNumber());
 
-            for (int n : row) {
+            for (int n : row.getNumbers()) {
                 squareSize = Math.max(squareSize, Utils.nDigit(n));
             }
         }
 
         int maxNumberInCol = 0;
-        for (int[] column : columns) {
-            maxNumberInCol = Math.max(maxNumberInCol, column.length);
+        for (Row column : columns) {
+            maxNumberInCol = Math.max(maxNumberInCol, column.nNumber());
 
-            for (int n : column) {
+            for (int n : column.getNumbers()) {
                 squareSize = Math.max(squareSize, Utils.nDigit(n));
             }
         }
@@ -125,7 +215,7 @@ public class Nonogram {
         // columns
         int drawX = maxNumberInRow * squareSize;
         for (int x = 0; x < width; x++) {
-            drawColNumbers(surface, columns[x], maxNumberInCol, squareSize, drawX);
+            drawColNumbers(surface, columns[x].getNumbers(), maxNumberInCol, squareSize, drawX);
 
             drawX += squareSize;
         }
@@ -133,7 +223,7 @@ public class Nonogram {
         // rows
         int drawY = maxNumberInCol * squareSize;
         for (int y = 0; y < height; y++) {
-            drawRowNumbers(surface, rows[y], maxNumberInRow, squareSize, drawY);
+            drawRowNumbers(surface, rows[y].getNumbers(), maxNumberInRow, squareSize, drawY);
 
             drawY += squareSize;
         }
@@ -145,11 +235,11 @@ public class Nonogram {
             xDraw = maxNumberInCol * squareSize;
 
             for (int x = 0; x < width; x++) {
-                Cell cell = solution[y][x];
+                CellWrapper cell = solution[y][x];
 
                 for (int x2 = 0; x2 < squareSize; x2++) {
                     for (int y2 = 0; y2 < squareSize; y2++) {
-                        surface.set(xDraw + x2, yDraw + y2, cell.getChar());
+                        surface.set(xDraw + x2, yDraw + y2, cell.get().getChar());
                     }
                 }
 

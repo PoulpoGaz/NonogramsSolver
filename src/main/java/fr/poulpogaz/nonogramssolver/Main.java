@@ -17,5 +17,15 @@ public class Main {
 
         Nonogram nonogram = Nonogram.fromImage(image);
         System.out.println(nonogram);
+
+        nonogram.solve();
+
+        BufferedImage solution = nonogram.asImage(5);
+
+        try {
+            ImageIO.write(solution, "png", new File("solution.png"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
