@@ -72,10 +72,10 @@ public class Nonogram {
     private final int width;
     private final int height;
 
-    private final Row[] rows;
-    private final Row[] columns;
+    private final Descriptor[] rows;
+    private final Descriptor[] columns;
 
-    private CellWrapper[][] solution;
+    private final CellWrapper[][] solution;
     private SolutionStatus status = SolutionStatus.NOT_SOLVED;
 
     public Nonogram(int width, int height, int[][] rows, int[][] columns) {
@@ -86,7 +86,7 @@ public class Nonogram {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                solution[y][x] = new CellWrapper(Cell.EMPTY);
+                solution[y][x] = new CellWrapper(Cell.EMPTY, x, y);
             }
         }
 
@@ -94,18 +94,18 @@ public class Nonogram {
         this.columns = createColumns(columns);
     }
 
-    private Row[] createRows(int[][] rows) {
-        Row[] r = new Row[height];
+    private Descriptor[] createRows(int[][] rows) {
+        Descriptor[] r = new Descriptor[height];
 
         for (int y = 0; y < height; y++) {
-            r[y] = new Row(rows[y], solution[y]);
+            r[y] = new Descriptor(rows[y], solution[y], true);
         }
 
         return r;
     }
 
-    private Row[] createColumns(int[][] columns) {
-        Row[] r = new Row[width];
+    private Descriptor[] createColumns(int[][] columns) {
+        Descriptor[] r = new Descriptor[width];
 
         for (int x = 0; x < width; x++) {
             CellWrapper[] wrappers = new CellWrapper[height];
@@ -114,7 +114,7 @@ public class Nonogram {
                 wrappers[y] = solution[y][x];
             }
 
-            r[x] = new Row(columns[x], wrappers);
+            r[x] = new Descriptor(columns[x], wrappers, false);
         }
 
         return r;
@@ -189,19 +189,19 @@ public class Nonogram {
 
         int maxNumberInRow = 0;
         int squareSize = 1;
-        for (Row row : rows) {
-            maxNumberInRow = Math.max(maxNumberInRow, row.nNumber());
+        for (Descriptor descriptor : rows) {
+            maxNumberInRow = Math.max(maxNumberInRow, descriptor.nClues());
 
-            for (int n : row.getNumbers()) {
+            for (int n : descriptor.getClues()) {
                 squareSize = Math.max(squareSize, Utils.nDigit(n));
             }
         }
 
         int maxNumberInCol = 0;
-        for (Row column : columns) {
-            maxNumberInCol = Math.max(maxNumberInCol, column.nNumber());
+        for (Descriptor descriptor : columns) {
+            maxNumberInCol = Math.max(maxNumberInCol, descriptor.nClues());
 
-            for (int n : column.getNumbers()) {
+            for (int n : descriptor.getClues()) {
                 squareSize = Math.max(squareSize, Utils.nDigit(n));
             }
         }
@@ -215,7 +215,7 @@ public class Nonogram {
         // columns
         int drawX = maxNumberInRow * squareSize;
         for (int x = 0; x < width; x++) {
-            drawColNumbers(surface, columns[x].getNumbers(), maxNumberInCol, squareSize, drawX);
+            drawColNumbers(surface, columns[x].getClues(), maxNumberInCol, squareSize, drawX);
 
             drawX += squareSize;
         }
@@ -223,7 +223,7 @@ public class Nonogram {
         // rows
         int drawY = maxNumberInCol * squareSize;
         for (int y = 0; y < height; y++) {
-            drawRowNumbers(surface, rows[y].getNumbers(), maxNumberInRow, squareSize, drawY);
+            drawRowNumbers(surface, rows[y].getClues(), maxNumberInRow, squareSize, drawY);
 
             drawY += squareSize;
         }
