@@ -10,8 +10,8 @@ public class Region {
 
     private final Descriptor descriptor;
 
-    private final int start;
-    private final int length;
+    private int start;
+    private int end;
 
     /**
      * Contains all lines ordered by {@link Line#start()}.
@@ -27,12 +27,12 @@ public class Region {
 
     /**
      * @param start  the start of the region
-     * @param length the length of the region
+     * @param end the length of the region
      */
-    public Region(Descriptor descriptor, int start, int length) {
+    public Region(Descriptor descriptor, int start, int end) {
         this.descriptor = descriptor;
         this.start = start;
-        this.length = length;
+        this.end = end;
         this.possibilities = Arrays.stream(descriptor.getClues())
                 .boxed()
                 .collect(Collectors.toCollection(HashSet::new));
@@ -44,7 +44,7 @@ public class Region {
      * This method must only update lines and possibilities if and only if the cell is not filled
      */
     public void fill(int from, int to) {
-        if (from < start || to < start || from + to > start + length) {
+        if (from < start || to < start || to > end) {
             throw new IllegalArgumentException("from/to outside of valid range: " + from + " - " + to);
         }
 
@@ -94,6 +94,55 @@ public class Region {
         }
     }
 
+    public Region[] split(int from, int to) {
+        if (from < start || to < start || to > end) {
+            throw new IllegalArgumentException("from/to outside of valid range: " + from + " - " + to);
+        }
+
+        for (int i = from; i < to; i++) {
+            CellWrapper w = descriptor.getCells()[i];
+
+            if (w.isEmpty() || w.isCrossed()) {
+                w.set(Cell.CROSSED);
+            } else {
+                throw new IllegalStateException("Attempt to replace a filled cell by a crossed cell");
+            }
+        }
+
+        if (from == start && to == end) {
+            return new Region[0];
+        } else if (from == start) {
+            start = to;
+            return new Region[] {this};
+        } else if (end == to) {
+            end = from;
+            return new Region[] {this};
+        } else {
+            // lines of the 2nd region
+            Region newRegion = new Region(descriptor, to, end);
+            end = from;
+
+            boolean removeAdd = false;
+            int i;
+            for (i = 0; i < lines.size(); i++) {
+                Line line = lines.get(i);
+
+                if (!removeAdd) {
+                    if (line.start() >= newRegion.start()) {
+                        removeAdd = true;
+                    }
+                }
+
+                if (removeAdd) {
+                    lines.remove(i);
+                    newRegion.lines.add(line);
+                }
+            }
+
+            return new Region[] {this, newRegion};
+        }
+    }
+
     public void removePossibility(int index) {
         possibilities.remove(index);
     }
@@ -106,21 +155,23 @@ public class Region {
         return start;
     }
 
-    public int length() {
-        return length;
+    public int end() {
+        return end;
     }
 
     public List<Line> lines() {
         return lines;
     }
 
-
+    public Descriptor getDescriptor() {
+        return descriptor;
+    }
 
     @Override
     public String toString() {
         return "Region[" +
                 "start=" + start + ", " +
-                "length=" + length + ", " +
+                "end=" + end + ", " +
                 "lines=" + lines + ']';
     }
 }

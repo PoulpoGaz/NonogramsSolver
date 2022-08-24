@@ -77,7 +77,7 @@ public class Descriptor implements CellListener {
     private Region getRegion(int n) {
         for (Region region : regions) {
             if (region.start() <= n) {
-                if (n < region.start() + region.length()) {
+                if (n < region.start() + region.end()) {
                     return region;
                 } else {
                     return null; // outside
