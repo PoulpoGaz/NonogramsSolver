@@ -11,6 +11,8 @@ public class CellWrapper {
 
     private Cell content;
 
+    private Cell toFire;
+
     public CellWrapper(int x, int y) {
         this.x = x;
         this.y = y;
@@ -47,6 +49,19 @@ public class CellWrapper {
             Cell old = this.content;
             this.content = content;
             fireListeners(old);
+        }
+    }
+
+    public void setNoFire(Cell content) {
+        if (content != this.content) {
+            toFire = this.content;
+            this.content = content;
+        }
+    }
+
+    public void fire() {
+        if (toFire != null) {
+            fireListeners(toFire);
         }
     }
 

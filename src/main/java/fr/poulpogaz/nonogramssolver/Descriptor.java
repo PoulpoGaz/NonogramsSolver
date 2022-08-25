@@ -29,7 +29,7 @@ public class Descriptor implements CellListener {
         descriptorLength = length(0, clues.length);
         maxClue = getMaxClue();
 
-        regions.add(new Region(this, 0, cells.length - 1));
+        regions.add(new Region(this, 0, cells.length));
 
         for (CellWrapper wrapper : cells) {
             wrapper.addListener(this);
@@ -55,20 +55,24 @@ public class Descriptor implements CellListener {
             throw new IllegalStateException();
         }
 
-        /*int n;
+        int n;
         if (isRow) {
             n = wrapper.getX();
         } else {
             n = wrapper.getY();
         }
-        Region region = Objects.requireNonNull(getRegion(n));
 
         if (wrapper.isFilled()) { // add a new line, merge two lines or continue a line
-            // region.fill(n);
+            Region region = Objects.requireNonNull(getRegion(n));
+            region.fill(n, n + 1);
             
         } else if (wrapper.isCrossed()) { // split region
-            //region.split(n);
-        }*/
+            Region region = getRegion(n);
+
+            if (region != null) {
+                region.split(n, n + 1);
+            }
+        }
     }
 
     /**
@@ -77,7 +81,7 @@ public class Descriptor implements CellListener {
     private Region getRegion(int n) {
         for (Region region : regions) {
             if (region.start() <= n) {
-                if (n < region.start() + region.end()) {
+                if (n < region.end()) {
                     return region;
                 } else {
                     return null; // outside

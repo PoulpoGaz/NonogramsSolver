@@ -1,5 +1,6 @@
 package fr.poulpogaz.nonogramssolver;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Utils {
@@ -13,6 +14,16 @@ public class Utils {
 
 
         return ints;
+    }
+
+    public static List<Integer> toList(int[] ints) {
+        List<Integer> list = new ArrayList<>(ints.length);
+
+        for (int i : ints) {
+            list.add(i);
+        }
+
+        return list;
     }
 
     public static int nDigit(int i) {

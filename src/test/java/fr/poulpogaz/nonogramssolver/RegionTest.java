@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Objects;
 
 public class RegionTest {
 
@@ -35,6 +36,8 @@ public class RegionTest {
         Assertions.assertNotNull(t2);
         t2.checkSize(50, 80);
         t.checkSize(0, 40);
+        Assertions.assertEquals(t2.region, t.region.next());
+        Assertions.assertEquals(t.region, t2.region.previous());
 
         Assertions.assertNull(t.split(20, 40));
         t.checkSize(0, 20);

@@ -1,7 +1,8 @@
 package fr.poulpogaz.nonogramssolver;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Location in the row that contains no crossed cell
@@ -9,6 +10,8 @@ import java.util.stream.Collectors;
 public class Region {
 
     private final Descriptor descriptor;
+    private Region previous;
+    private Region next;
 
     private int start;
     private int end;
@@ -19,11 +22,7 @@ public class Region {
      */
     private final List<Line> lines = new ArrayList<>();
 
-    // index of numbers that we are sure must be here
-    private final Set<Integer> contains;
-
-    // index of numbers that may be here
-    private final Set<Integer> possibilities;
+    private PossibleClue[] clues;
 
     /**
      * @param start  the start of the region
@@ -33,11 +32,9 @@ public class Region {
         this.descriptor = descriptor;
         this.start = start;
         this.end = end;
-        this.possibilities = Arrays.stream(descriptor.getClues())
-                .boxed()
-                .collect(Collectors.toCollection(HashSet::new));
-        //noinspection unchecked
-        this.contains = (Set<Integer>) ((HashSet<Integer>) possibilities).clone();
+        this.clues = Arrays.stream(descriptor.getClues())
+                .mapToObj(PossibleClue::new)
+                .toArray(PossibleClue[]::new);
     }
 
     /**
@@ -53,13 +50,17 @@ public class Region {
             CellWrapper w = descriptor.getCells()[i];
 
             if (!w.isFilled()) {
-                w.set(Cell.FILLED);
+                w.setNoFire(Cell.FILLED);
                 update = true;
             }
         }
 
         if (!update) {
             return;
+        } else {
+            for (int i = from; i < to; i++) {
+                descriptor.getCells()[i].fire();
+            }
         }
 
         // index of the first line that is connected to the newLine
@@ -110,6 +111,14 @@ public class Region {
         }
 
         if (from == start && to == end) {
+            if (previous != null) {
+                previous.next = next;
+            }
+
+            if (next != null) {
+                next.previous = previous;
+            }
+
             return new Region[0];
         } else if (from == start) {
             start = to;
@@ -139,16 +148,17 @@ public class Region {
                 }
             }
 
+            newRegion.previous = this;
+            newRegion.next = next;
+
+            if (next != null) {
+                next.previous = newRegion;
+            }
+
+            next = newRegion;
+
             return new Region[] {this, newRegion};
         }
-    }
-
-    public void removePossibility(int index) {
-        possibilities.remove(index);
-    }
-
-    public void addPossibility(int index) {
-        possibilities.add(index);
     }
 
     public int start() {
@@ -157,6 +167,14 @@ public class Region {
 
     public int end() {
         return end;
+    }
+
+    public Region next() {
+        return next;
+    }
+
+    public Region previous() {
+        return previous;
     }
 
     public List<Line> lines() {
@@ -173,5 +191,20 @@ public class Region {
                 "start=" + start + ", " +
                 "end=" + end + ", " +
                 "lines=" + lines + ']';
+    }
+
+    private static class PossibleClue {
+
+        private final int clue;
+
+        /**
+         * false if the region may contain the clue
+         * true if the region contain the clue
+         */
+        private boolean contains;
+
+        public PossibleClue(int clue) {
+            this.clue = clue;
+        }
     }
 }
