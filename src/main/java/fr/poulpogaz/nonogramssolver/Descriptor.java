@@ -1,8 +1,6 @@
 package fr.poulpogaz.nonogramssolver;
 
-import java.util.*;
-
-public class Descriptor implements CellListener {
+public class Descriptor {
 
     /**
      * row if true, column if false
@@ -11,9 +9,6 @@ public class Descriptor implements CellListener {
     
     private final int[] clues;
     private final CellWrapper[] cells;
-
-    private final List<Region> regions = new ArrayList<>();
-    private final List<Line> lines = new ArrayList<>();
 
     /**
      * the sum of all numbers and the empty cell between them
@@ -28,12 +23,6 @@ public class Descriptor implements CellListener {
 
         descriptorLength = length(0, clues.length);
         maxClue = getMaxClue();
-
-        regions.add(new Region(this, 0, cells.length));
-
-        for (CellWrapper wrapper : cells) {
-            wrapper.addListener(this);
-        }
     }
 
     /**
@@ -41,55 +30,8 @@ public class Descriptor implements CellListener {
      * @return true if it set at least one cell to filled or crossed
      */
     public boolean trySolve() {
-        if (regions.isEmpty()) { // the row is fully crossed
-            return false;
-        }
 
         return true;
-    }
-
-
-    @Override
-    public void valueChange(CellWrapper wrapper, Cell oldValue) {
-        if (oldValue == Cell.CROSSED || oldValue == Cell.FILLED) { // this means that a contradiction has been found
-            throw new IllegalStateException();
-        }
-
-        int n;
-        if (isRow) {
-            n = wrapper.getX();
-        } else {
-            n = wrapper.getY();
-        }
-
-        if (wrapper.isFilled()) { // add a new line, merge two lines or continue a line
-            Region region = Objects.requireNonNull(getRegion(n));
-            region.fill(n, n + 1);
-            
-        } else if (wrapper.isCrossed()) { // split region
-            Region region = getRegion(n);
-
-            if (region != null) {
-                region.split(n, n + 1);
-            }
-        }
-    }
-
-    /**
-     * @return the region that contains the n-th cell
-     */
-    private Region getRegion(int n) {
-        for (Region region : regions) {
-            if (region.start() <= n) {
-                if (n < region.end()) {
-                    return region;
-                } else {
-                    return null; // outside
-                }
-            }
-        }
-
-        return null;
     }
 
 

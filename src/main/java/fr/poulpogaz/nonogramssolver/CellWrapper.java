@@ -1,17 +1,11 @@
 package fr.poulpogaz.nonogramssolver;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class CellWrapper {
 
-    private final List<CellListener> listeners = new ArrayList<>();
     private final int x;
     private final int y;
 
     private Cell content;
-
-    private Cell toFire;
 
     public CellWrapper(int x, int y) {
         this.x = x;
@@ -45,24 +39,7 @@ public class CellWrapper {
     }
 
     public void set(Cell content) {
-        if (content != this.content) {
-            Cell old = this.content;
-            this.content = content;
-            fireListeners(old);
-        }
-    }
-
-    public void setNoFire(Cell content) {
-        if (content != this.content) {
-            toFire = this.content;
-            this.content = content;
-        }
-    }
-
-    public void fire() {
-        if (toFire != null) {
-            fireListeners(toFire);
-        }
+        this.content = content;
     }
 
     public int getX() {
@@ -71,19 +48,5 @@ public class CellWrapper {
 
     public int getY() {
         return y;
-    }
-
-    public void addListener(CellListener listener) {
-        listeners.add(listener);
-    }
-
-    public void removeListener(CellListener listener) {
-        listeners.remove(listener);
-    }
-
-    private void fireListeners(Cell oldValue) {
-        for (CellListener listener : listeners) {
-            listener.valueChange(this, oldValue);
-        }
     }
 }

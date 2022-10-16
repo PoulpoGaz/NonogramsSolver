@@ -5,7 +5,6 @@ package fr.poulpogaz.nonogramssolver;
  */
 public class Line {
 
-    private Region region;
     private int start;
     private int end;
 
@@ -13,8 +12,7 @@ public class Line {
      * @param start line start, inclusive
      * @param end line end, exclusive
      */
-    public Line(Region region, int start, int end) {
-        this.region = region;
+    public Line(int start, int end) {
         this.start = start;
         this.end = end;
 
@@ -59,14 +57,6 @@ public class Line {
 
     public void setEnd(int end) {
         this.end = end;
-    }
-
-    public Region getRegion() {
-        return region;
-    }
-
-    public void setRegion(Region region) {
-        this.region = region;
     }
 
     @Override
