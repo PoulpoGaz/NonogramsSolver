@@ -65,6 +65,9 @@ public class Nonogram {
             y += yAdd;
         }
 
+        if (length > 0) {
+            ints.add(length);
+        }
 
         return Utils.toArray(ints);
     }
@@ -98,7 +101,7 @@ public class Nonogram {
         Descriptor[] r = new Descriptor[height];
 
         for (int y = 0; y < height; y++) {
-            r[y] = new Descriptor(rows[y], solution[y], true);
+            r[y] = new Descriptor(true, y, rows[y], solution[y]);
         }
 
         return r;
@@ -114,7 +117,7 @@ public class Nonogram {
                 wrappers[y] = solution[y][x];
             }
 
-            r[x] = new Descriptor(columns[x], wrappers, false);
+            r[x] = new Descriptor(false, x, columns[x], wrappers);
         }
 
         return r;
@@ -123,12 +126,16 @@ public class Nonogram {
     // SOLVER!
 
     public void solve() {
-        /*while (true) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < columns.length; j++) {
+                Descriptor col = columns[j];
+                col.trySolve();
+            }
 
-
-        }*/
-
-        rows[3].getCells()[4].set(Cell.FILLED);
+            for (Descriptor row : rows) {
+                row.trySolve();
+            }
+        }
     }
 
 
@@ -166,6 +173,9 @@ public class Nonogram {
                     g2D.fillRect(drawX, drawY, squareSize, squareSize);
 
                 } else if (cell.isCrossed() && squareSize >= 3) {
+                    g2D.setColor(Color.WHITE);
+                    g2D.fillRect(drawX, drawY, squareSize, squareSize);
+
                     g2D.setColor(Color.BLACK);
                     g2D.drawLine(drawX, drawY, drawX + squareSize, drawY + squareSize);
                     g2D.drawLine(drawX + squareSize, drawY, drawX, drawY + squareSize);

@@ -7,7 +7,7 @@ public class LineTest {
 
     @Test
     void connectedTest() {
-        Line line = new Line(null, 5, 10);
+        Line line = new Line(5, 10);
         Assertions.assertFalse(line.connected(0, 4));
         Assertions.assertFalse(line.connected(11, 20));
         Assertions.assertFalse(line.connected(100, 1000));

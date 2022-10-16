@@ -10,7 +10,7 @@ public class Main {
     public static void main(String[] args) {
         BufferedImage image;
         try {
-            image = ImageIO.read(new File("007.png"));
+            image = ImageIO.read(new File("std_mouse.png"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
