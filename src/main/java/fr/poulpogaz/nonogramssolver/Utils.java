@@ -1,6 +1,7 @@
 package fr.poulpogaz.nonogramssolver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Utils {
@@ -24,6 +25,12 @@ public class Utils {
         }
 
         return list;
+    }
+
+    public static void fill(boolean[][] tab, boolean value) {
+        for (boolean[] booleans : tab) {
+            Arrays.fill(booleans, value);
+        }
     }
 
     public static int nDigit(int i) {

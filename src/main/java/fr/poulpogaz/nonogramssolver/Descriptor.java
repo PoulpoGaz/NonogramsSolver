@@ -1,8 +1,6 @@
 package fr.poulpogaz.nonogramssolver;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Descriptor {
 
@@ -23,6 +21,13 @@ public class Descriptor {
 
     private int step = 0;
 
+    /**
+     * For each cell, contains an array of length the number of clue
+     * containing true if the i-th clue can be present at the cell
+     */
+    private final boolean[][] possibilities;
+    private final ClueIterator clueIt;
+
     public Descriptor(boolean isRow, int index, int[] clues, CellWrapper[] cells) {
         this.isRow = isRow;
         this.index = index;
@@ -31,6 +36,14 @@ public class Descriptor {
 
         descriptorLength = length(0, clues.length);
         maxClue = getMaxClue();
+
+        possibilities = new boolean[cells.length][clues.length];
+
+        for (int i = 0; i < cells.length; i++) {
+            possibilities[i] = new boolean[clues.length];
+        }
+
+        clueIt = new ClueIterator(this);
     }
 
     /**
@@ -38,6 +51,7 @@ public class Descriptor {
      * @return true if it set at least one cell to filled or crossed
      */
     public boolean trySolve() {
+        Utils.fill(possibilities, false);
         int available = getAvailableSpace();
         int empty = available - descriptorLength;
 
@@ -70,65 +84,63 @@ public class Descriptor {
                 }
             }
 
-            Possibilities[] possibilities = new Possibilities[cells.length];
+            computePossibilities();
+            tryCross();
+            tryFill();
+        }
 
-            for (int i = 0; i < cells.length; i++) {
-                possibilities[i] = new Possibilities();
-            }
+        return true;
+    }
 
-            System.out.println("-------------------------------------");
-            System.out.printf("Row: %b. Index: %d%n", isRow, index);
-            System.out.println("Clues: " + Arrays.toString(clues));
-            int i = 0;
-            int remaining = descriptorLength;
+    private void computePossibilities() {
+        System.out.println("-------------------------------------");
+        System.out.printf("Row: %b. Index: %d%n", isRow, index);
+        System.out.println("Clues: " + Arrays.toString(clues));
 
-            for (int k = 0; k < clues.length; k++) {
-                int clue = clues[k];
-                remaining = Math.max(remaining - clue - 1, 0);
+        clueIt.reset();
 
-                int max = cells.length - remaining;
+        while (clueIt.hasNext()) {
+            int clue = clueIt.next();
 
-                if (k + 1 < clues.length) {
-                    max--;
-                }
+            System.out.printf("Clue: %d. i=%d. max=%d%n", clue, clueIt.getMinI(), clueIt.getMaxI());
+            int k = clueIt.getMinI();
+            for (; k + clue < clueIt.getMaxI(); k++) {
+                boolean fit = fit(clue, k);
 
-                System.out.printf("Clue: %d. i=%d. max=%d (remaining=%d)%n", clue, i, max, remaining);
-                int j = i;
-                for (; j + clue < max; j++) {
-                    boolean fit = fit(clue, j);
-
-                    System.out.printf("Fit: %b. At %d%n", fit, j);
-                    if (fit) {
-                        for (int l = j; l < j + clue; l++) {
-                            possibilities[l].add(clue);
-                        }
+                System.out.printf("Fit: %b. At %d%n", fit, k);
+                if (fit) {
+                    for (int l = k; l < k + clue; l++) {
+                        possibilities[l][clueIt.getIndex()] = true;
                     }
                 }
-
-                if (j < max) {
-                    boolean fit = fit(clue, max - clue);
-
-                    if (fit) {
-                        for (int l = j; l < max; l++) {
-                            possibilities[l].add(clue);
-                        }
-                    }
-                }
-
-                i += clue + 1;
             }
 
-            for (int j = 0; j < possibilities.length; j++) {
-                Possibilities p = possibilities[j];
-                if (p.isEmpty()) {
-                    if (cells[j].isEmpty() || cells[j].isCrossed()) {
-                        cells[j].set(Cell.CROSSED);
+            if (k < clueIt.getMaxI()) {
+                boolean fit = fit(clue, clueIt.getMaxI() - clue);
+
+                if (fit) {
+                    for (int l = k; l < clueIt.getMaxI(); l++) {
+                        possibilities[l][clueIt.getIndex()] = true;
                     }
                 }
             }
         }
+    }
 
-        return true;
+    private void tryCross() {
+        for (int j = 0; j < possibilities.length; j++) {
+            if (haveZeroPossibility(j)) {
+                if (cells[j].isEmpty() || cells[j].isCrossed()) {
+                    cells[j].set(Cell.CROSSED);
+                } else {
+                    throw new IllegalStateException();
+                }
+            }
+        }
+    }
+
+    private void tryFill() {
+
     }
 
     /**
@@ -148,6 +160,16 @@ public class Descriptor {
 
             return true;
         }
+    }
+
+    private boolean haveZeroPossibility(int cell) {
+        for (int i = 0; i < clues.length; i++) {
+            if (possibilities[cell][i]) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private int getAvailableSpace() {
@@ -213,9 +235,5 @@ public class Descriptor {
 
     public CellWrapper[] getCells() {
         return cells;
-    }
-
-    private static class Possibilities extends ArrayList<Integer> {
-
     }
 }
