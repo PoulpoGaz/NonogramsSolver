@@ -20,7 +20,7 @@ public class Main {
 
         nonogram.solve();
 
-        BufferedImage solution = nonogram.asImage(5);
+        BufferedImage solution = nonogram.asImage(20);
 
         try {
             ImageIO.write(solution, "png", new File("solution.png"));

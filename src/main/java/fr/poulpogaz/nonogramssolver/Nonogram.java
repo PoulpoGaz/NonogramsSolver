@@ -126,7 +126,7 @@ public class Nonogram {
     // SOLVER!
 
     public void solve() {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 1; i++) {
             for (int j = 0; j < columns.length; j++) {
                 Descriptor col = columns[j];
                 col.trySolve();
@@ -154,7 +154,7 @@ public class Nonogram {
 
     public BufferedImage asImage(int squareSize) {
         BufferedImage image = new BufferedImage(squareSize * width, squareSize * height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2D = image.createGraphics();
+        Graphics2D g2d = image.createGraphics();
 
         int drawX = 0;
         int drawY = 0;
@@ -165,20 +165,20 @@ public class Nonogram {
                 CellWrapper cell = solution[y][x];
 
                 if (cell.isEmpty()) {
-                    g2D.setColor(Color.WHITE);
-                    g2D.fillRect(drawX, drawY, squareSize, squareSize);
+                    g2d.setColor(Color.WHITE);
+                    g2d.fillRect(drawX, drawY, squareSize, squareSize);
 
                 } else if (cell.isFilled()) {
-                    g2D.setColor(Color.BLACK);
-                    g2D.fillRect(drawX, drawY, squareSize, squareSize);
+                    g2d.setColor(Color.BLACK);
+                    g2d.fillRect(drawX, drawY, squareSize, squareSize);
 
                 } else if (cell.isCrossed() && squareSize >= 3) {
-                    g2D.setColor(Color.WHITE);
-                    g2D.fillRect(drawX, drawY, squareSize, squareSize);
+                    g2d.setColor(Color.WHITE);
+                    g2d.fillRect(drawX, drawY, squareSize, squareSize);
 
-                    g2D.setColor(Color.BLACK);
-                    g2D.drawLine(drawX, drawY, drawX + squareSize, drawY + squareSize);
-                    g2D.drawLine(drawX + squareSize, drawY, drawX, drawY + squareSize);
+                    g2d.setColor(Color.BLACK);
+                    g2d.drawLine(drawX, drawY, drawX + squareSize, drawY + squareSize);
+                    g2d.drawLine(drawX + squareSize, drawY, drawX, drawY + squareSize);
                 }
 
                 drawX += squareSize;
@@ -187,7 +187,18 @@ public class Nonogram {
             drawY += squareSize;
         }
 
-        g2D.dispose();
+        if (squareSize > 10) {
+            g2d.setColor(Color.BLACK);
+            for (int y = 1; y < height; y++) {
+                g2d.drawLine(0, y * squareSize, width * squareSize, y * squareSize);
+            }
+
+            for (int x = 1; x < width; x++) {
+                g2d.drawLine(x * squareSize, 0, x * squareSize, height * squareSize);
+            }
+        }
+
+        g2d.dispose();
 
         return image;
     }

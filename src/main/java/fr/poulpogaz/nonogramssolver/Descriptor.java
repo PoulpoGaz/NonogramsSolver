@@ -19,8 +19,6 @@ public class Descriptor {
     private final int descriptorLength;
     private int maxClue = -1;
 
-    private int step = 0;
-
     /**
      * For each cell, contains an array of length the number of clue
      * containing true if the i-th clue can be present at the cell
@@ -51,63 +49,45 @@ public class Descriptor {
      * @return true if it set at least one cell to filled or crossed
      */
     public boolean trySolve() {
+        System.out.println("-------------------------------------");
+        System.out.printf("Row: %b. Index: %d%n", isRow, index);
+        System.out.println("Clues: " + Arrays.toString(clues));
+
         Utils.fill(possibilities, false);
-        int available = getAvailableSpace();
-        int empty = available - descriptorLength;
 
-        if (step == 0) {
-            if (empty < maxClue) {
-                int i = 0;
-                for (int clue : clues) {
+        List<Line> lines = new ArrayList<>();
 
-                    for (int k = i + empty; k < i + clue; k++) {
-                        cells[k].set(Cell.FILLED);
-                    }
+        int length = 0;
+        for (int i = 0; i < cells.length; i++) {
+            CellWrapper cell = cells[i];
 
-                    i += clue + 1;
-                }
+            if (cell.isFilled()) {
+                length++;
+            } else if (length > 0) {
+                lines.add(new Line(i - length, i));
+                length = 0;
             }
-
-            step++;
-        } else {
-            List<Line> lines = new ArrayList<>();
-
-            int length = 0;
-            for (int i = 0; i < cells.length; i++) {
-                CellWrapper cell = cells[i];
-
-                if (cell.isFilled()) {
-                    length++;
-                } else if (length > 0) {
-                    lines.add(new Line(i - length, i));
-                    length = 0;
-                }
-            }
-
-            computePossibilities();
-            tryCross();
-            tryFill();
         }
+
+        computePossibilities();
+        tryCross();
+        tryFill();
 
         return true;
     }
 
     private void computePossibilities() {
-        System.out.println("-------------------------------------");
-        System.out.printf("Row: %b. Index: %d%n", isRow, index);
-        System.out.println("Clues: " + Arrays.toString(clues));
-
         clueIt.reset();
 
         while (clueIt.hasNext()) {
             int clue = clueIt.next();
 
-            System.out.printf("Clue: %d. i=%d. max=%d%n", clue, clueIt.getMinI(), clueIt.getMaxI());
+            //System.out.printf("Clue: %d. i=%d. max=%d%n", clue, clueIt.getMinI(), clueIt.getMaxI());
             int k = clueIt.getMinI();
             for (; k + clue < clueIt.getMaxI(); k++) {
                 boolean fit = fit(clue, k);
 
-                System.out.printf("Fit: %b. At %d%n", fit, k);
+                //System.out.printf("Fit: %b. At %d%n", fit, k);
                 if (fit) {
                     for (int l = k; l < k + clue; l++) {
                         possibilities[l][clueIt.getIndex()] = true;
@@ -132,15 +112,106 @@ public class Descriptor {
             if (haveZeroPossibility(j)) {
                 if (cells[j].isEmpty() || cells[j].isCrossed()) {
                     cells[j].set(Cell.CROSSED);
-                } else {
+                } /*else {
                     throw new IllegalStateException();
-                }
+                }*/
             }
         }
     }
 
     private void tryFill() {
+        // simple space technique
+        clueIt.reset();
 
+        while (clueIt.hasNext()) {
+            int clue = clueIt.next();
+
+            int minPossible = Integer.MAX_VALUE;
+            int maxPossible = Integer.MIN_VALUE;
+
+            for (int i = clueIt.getMinI(); i < clueIt.getMaxI(); i++) {
+                if (possibilities[i][clueIt.getIndex()]) {
+                    minPossible = Math.min(i, minPossible);
+                    maxPossible = Math.max(i, maxPossible);
+                }
+            }
+
+            int length = maxPossible - minPossible + 1;
+            if (length < 2 * clue) {
+                System.out.println("Filling...");
+                System.out.printf("Clue: %d, between: %d and %d%n", clue, minPossible, maxPossible);
+
+                int s = length - clue;
+
+                for (int i = minPossible + s; i <= maxPossible - s; i++) {
+                    cells[i].set(Cell.FILLED);
+                }
+            }
+        }
+
+
+        // glue
+        for (int i = 0; i < cells.length; i++) {
+            if (cells[i].isFilled()) {
+                int p = getUniquePossibility(i);
+
+                if (p == -1) {
+                    continue;
+                }
+
+                int right = distanceToWallRight(i);
+                int left = distanceToWallLeft(i);
+
+                System.out.printf("At i=%d. Dist to left: %d. Dist to right: %d%n", i, left, right);
+
+                // -1 because I don't want to count the current cell
+                if (right <= p - 1) {
+                    int min = i - (p - right);
+                    for (int j = i - 1; j >= min; j--) {
+                        cells[j].set(Cell.FILLED);
+                    }
+                }
+
+                if (left <= p - 1) {
+                    int max = i + (p - left);
+
+                    for (int j = i + 1; j < max; j++) {
+                        cells[j].set(Cell.FILLED);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @return the distance from the cell and the nearest crossed cell on the right.
+     * If there is no crossed cell. It returns the distance between the cell and the right of the nonogram.
+     * The number is strictly superior to zero because the crossed cell is counted
+     */
+    private int distanceToWallRight(int cell) {
+        for (int i = cell + 1; i < cells.length; i++) {
+            if (cells[i].isCrossed()) {
+                return i - cell;
+            }
+        }
+
+        return cells.length - cell;
+    }
+
+
+    /**
+     * @return the distance from the cell and the nearest crossed cell on the left.
+     * If there is no crossed cell. It returns the distance between the cell and the left of the nonogram.
+     * The number is strictly superior to zero because the crossed cell is counted
+     */
+    private int distanceToWallLeft(int cell) {
+        for (int i = cell - 1; i >= 0; i--) {
+            if (cells[i].isCrossed()) {
+                return cell - i;
+            }
+        }
+
+        return cell + 1;
     }
 
     /**
@@ -160,6 +231,22 @@ public class Descriptor {
 
             return true;
         }
+    }
+
+    private int getUniquePossibility(int cell) {
+        int possibility = -1;
+
+        for (int i = 0; i < clues.length; i++) {
+            if (possibilities[cell][i]) {
+                if (possibility == -1) {
+                    possibility = i;
+                } else {
+                    return -1;
+                }
+            }
+        }
+
+        return possibility;
     }
 
     private boolean haveZeroPossibility(int cell) {
