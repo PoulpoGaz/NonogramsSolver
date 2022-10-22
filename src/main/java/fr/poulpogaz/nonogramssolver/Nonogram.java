@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class Nonogram {
 
@@ -125,9 +126,8 @@ public class Nonogram {
 
     // SOLVER!
 
-    public List<BufferedImage> solveStepByStep(int max, int squareSize) {
-        List<BufferedImage> images = new ArrayList<>();
-        for (int i = 0; i < max; i++) {
+    public void solve(Consumer<Nonogram> consumer) {
+        while (!isSolved()) {
             for (Descriptor col : columns) {
                 col.trySolve();
             }
@@ -136,20 +136,45 @@ public class Nonogram {
                 row.trySolve();
             }
 
-            images.add(asImage(squareSize));
-        }
+            boolean changed = false;
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if (solution[y][x].hasChanged()) {
+                        changed = true;
+                    }
 
-        return images;
+                    solution[y][x].setHasChanged(false);
+                }
+            }
+
+            if (!changed) {
+                System.out.println("Can't find a solution");
+                return;
+            }
+
+            consumer.accept(this);
+        }
     }
 
+    public void solve() {
+        solve((n) -> {});
+    }
 
+    private boolean isSolved() {
+        for (Descriptor col : columns) {
+            if (!col.isCompleted()) {
+                return false;
+            }
+        }
 
+        for (Descriptor row : rows) {
+            if (!row.isCompleted()) {
+                return false;
+            }
+        }
 
-
-
-
-
-
+        return true;
+    }
 
 
 

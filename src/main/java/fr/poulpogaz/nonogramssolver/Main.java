@@ -1,17 +1,20 @@
 package fr.poulpogaz.nonogramssolver;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) {
-        String input = "std_mouse";
+        String input = "goku";
 
         BufferedImage image;
         try {
@@ -21,9 +24,6 @@ public class Main {
         }
 
         Nonogram nonogram = Nonogram.fromImage(image);
-        System.out.println(nonogram);
-
-        List<BufferedImage> images = nonogram.solveStepByStep(30, 20);
 
         try {
             Path folder = Path.of(input);
@@ -31,10 +31,23 @@ public class Main {
                 Files.createDirectory(folder);
             }
 
-            for (int i = 0; i < images.size(); i++) {
-                BufferedImage img = images.get(i);
-                ImageIO.write(img, "png", new File(input + "/image_" + i + ".png"));
-            }
+            ImageOutputStream ios = new FileImageOutputStream(new File(input + ".gif"));
+            GifSequenceWriter writer = new GifSequenceWriter(ios,
+                    BufferedImage.TYPE_INT_RGB,
+                    200,
+                    false);
+
+
+            nonogram.solve((n) -> {
+                try {
+                    writer.writeToSequence(n.asImage(20));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            writer.close();
+            ios.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -7,6 +7,8 @@ public class CellWrapper {
 
     private Cell content;
 
+    private boolean hasChanged;
+
     public CellWrapper(int x, int y) {
         this.x = x;
         this.y = y;
@@ -39,7 +41,10 @@ public class CellWrapper {
     }
 
     public void set(Cell content) {
-        this.content = content;
+        if (this.content != content) {
+            this.content = content;
+            hasChanged = true;
+        }
     }
 
     public int getX() {
@@ -48,6 +53,14 @@ public class CellWrapper {
 
     public int getY() {
         return y;
+    }
+
+    public boolean hasChanged() {
+        return hasChanged;
+    }
+
+    public void setHasChanged(boolean hasChanged) {
+        this.hasChanged = hasChanged;
     }
 
     @Override

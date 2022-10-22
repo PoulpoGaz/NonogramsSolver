@@ -52,33 +52,16 @@ public class Descriptor extends AbstractRegion {
         lastClueIndex = clues.length;
     }
 
-    /**
-     *
-     * @return true if it set at least one cell to filled or crossed
-     */
     @Override
     public void trySolve() {
         if (clues.length == 0) {
             fill(0, cells.length, Cell.CROSSED);
+            return;
         }
 
         System.out.println("-------------------------------------");
         System.out.printf("Row: %b. Index: %d%n", isRow, index);
         System.out.println("Clues: " + Arrays.toString(clues));
-
-        List<Line> lines = new ArrayList<>();
-
-        int length = 0;
-        for (int i = 0; i < cells.length; i++) {
-            CellWrapper cell = cells[i];
-
-            if (cell.isFilled()) {
-                length++;
-            } else if (length > 0) {
-                lines.add(new Line(i - length, i));
-                length = 0;
-            }
-        }
 
         shrink();
         initClues();
@@ -159,6 +142,50 @@ public class Descriptor extends AbstractRegion {
         }
 
         return regions;
+    }
+
+    public boolean isCompleted() {
+        if (clues.length == 0) {
+            for (CellWrapper cell : cells) {
+                if (cell.isFilled()) {
+                    return false;
+                }
+            }
+
+            return true;
+        } else {
+            int clueIndex = 0;
+            int count = 0;
+
+            for (CellWrapper cell : cells) {
+                if (clueIndex >= clues.length) {
+                    if (cell.isFilled()) {
+                        return false;
+                    }
+                } else {
+                    if (cell.isFilled()) {
+                        count++;
+
+                        if (count > clues[clueIndex].getLength()) { // invalid
+                            return false;
+                        }
+                    } else if (count > 0) {
+                        if (count != clues[clueIndex].getLength()) {
+                            return false;
+                        }
+
+                        clueIndex++;
+                        count = 0;
+                    }
+                }
+            }
+
+            if (clueIndex == clues.length) {
+                return true;
+            } else {
+                return clues[clueIndex].getLength() == count;
+            }
+        }
     }
 
     private int getAvailableSpace() {

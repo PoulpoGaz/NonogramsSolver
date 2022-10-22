@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static fr.poulpogaz.nonogramssolver.Cell.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DescriptorTest {
 
@@ -533,7 +533,49 @@ public class DescriptorTest {
 
 
 
+    @Test
+    void isCompletedTest1() {
+        CellWrapper[] wrappers = create(
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY
+        );
+        int[] clues = new int[] {2, 6, 2};
 
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        assertFalse(descriptor.isCompleted());
+    }
+
+    @Test
+    void isCompletedTest2() {
+        CellWrapper[] wrappers = create(
+                EMPTY, FILLED, FILLED, CROSSED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, EMPTY, EMPTY, FILLED, FILLED, EMPTY
+        );
+        int[] clues = new int[] {2, 6, 2};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        assertTrue(descriptor.isCompleted());
+    }
+
+    @Test
+    void isCompletedTest3() {
+        CellWrapper[] wrappers = create(
+                CROSSED, FILLED, CROSSED, CROSSED, CROSSED, CROSSED, FILLED, CROSSED, CROSSED, CROSSED, EMPTY, FILLED, FILLED, EMPTY, FILLED
+        );
+        int[] clues = new int[] {1, 1, 2, 1};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        assertTrue(descriptor.isCompleted());
+    }
+
+    @Test
+    void isCompletedTest4() {
+        CellWrapper[] wrappers = create(
+                EMPTY, EMPTY, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY
+        );
+        int[] clues = new int[] {};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        assertFalse(descriptor.isCompleted());
+    }
 
 
     private void arrayEquals(boolean[][] expected, boolean[][] current) {
