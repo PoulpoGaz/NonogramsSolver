@@ -80,6 +80,7 @@ public class Descriptor extends AbstractRegion {
             }
         }
 
+        shrink();
         initClues();
         computePossibilities();
         optimizeCluesBoundWithOnePossibility();
@@ -93,6 +94,24 @@ public class Descriptor extends AbstractRegion {
             }
         } else {
             tryFill();
+        }
+    }
+
+    protected void shrink() {
+        for (int i = 0; i < cells.length; i++) {
+            if (cells[i].isCrossed()) {
+                start = i + 1;
+            } else {
+                break;
+            }
+        }
+
+        for (int i = cells.length - 1; i >= 0; i--) {
+            if (cells[i].isCrossed()) {
+                end = i;
+            } else {
+                break;
+            }
         }
     }
 

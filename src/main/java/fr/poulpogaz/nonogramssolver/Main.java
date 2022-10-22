@@ -23,7 +23,7 @@ public class Main {
         Nonogram nonogram = Nonogram.fromImage(image);
         System.out.println(nonogram);
 
-        List<BufferedImage> images = nonogram.solveStepByStep(20, 20);
+        List<BufferedImage> images = nonogram.solveStepByStep(30, 20);
 
         try {
             Path folder = Path.of(input);

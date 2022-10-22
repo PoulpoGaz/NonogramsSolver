@@ -513,19 +513,17 @@ public class DescriptorTest {
     @Test
     void completeTest2() {
         CellWrapper[] wrappers = create(
-                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, EMPTY, FILLED, EMPTY, EMPTY, CROSSED
+                CROSSED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, FILLED, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY
         );
-        int[] clues = new int[] {3, 1, 2, 1};
+        int[] clues = new int[] {2, 6, 2};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        descriptor.shrink();
         descriptor.initClues();
         descriptor.computePossibilities();
         descriptor.optimizeCluesBoundWithOnePossibility();
-
-        List<Region> regions = descriptor.split();
-        System.out.println(regions);
-
-
+        descriptor.tryFill();
+        cellsEquals(wrappers, CROSSED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, FILLED, FILLED, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     }
 
 
