@@ -3,10 +3,10 @@ package fr.poulpogaz.nonogramssolver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
-import static fr.poulpogaz.nonogramssolver.Cell.EMPTY;
-import static fr.poulpogaz.nonogramssolver.Cell.FILLED;
+import static fr.poulpogaz.nonogramssolver.Cell.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DescriptorTest {
@@ -133,6 +133,9 @@ public class DescriptorTest {
         };
 
         arrayEquals(expected, descriptor.getPossibilities());
+        clueEquals(0, 5, descriptor.getClue(0));
+        clueEquals(3, 12, descriptor.getClue(1));
+        clueEquals(10, 15, descriptor.getClue(2));
     }
 
 
@@ -168,6 +171,8 @@ public class DescriptorTest {
         };
 
         arrayEquals(expected, descriptor.getPossibilities());
+        clueEquals(0, 12, descriptor.getClue(0));
+        clueEquals(6, 15, descriptor.getClue(1));
     }
 
     @Test
@@ -202,6 +207,10 @@ public class DescriptorTest {
         };
 
         arrayEquals(expected, descriptor.getPossibilities());
+        clueEquals(0, 6, descriptor.getClue(0));
+        clueEquals(3, 9, descriptor.getClue(1));
+        clueEquals(6, 12, descriptor.getClue(2));
+        clueEquals(9, 15, descriptor.getClue(3));
     }
 
 
@@ -243,6 +252,9 @@ public class DescriptorTest {
         };
 
         arrayEquals(expected, descriptor.getPossibilities());
+        clueEquals(1, 4, descriptor.getClue(0));
+        clueEquals(4, 11, descriptor.getClue(1));
+        clueEquals(11, 14, descriptor.getClue(2));
     }
 
 
@@ -280,6 +292,48 @@ public class DescriptorTest {
         };
 
         arrayEquals(expected, descriptor.getPossibilities());
+        clueEquals(0, 10, descriptor.getClue(0));
+        clueEquals(6, 13, descriptor.getClue(1));
+    }
+
+    @Test
+    void possibilitiesTestWithCell3() {
+        // 15 | 5 2 2
+
+        CellWrapper[] wrappers = create(
+                EMPTY, EMPTY, FILLED, FILLED, EMPTY, FILLED, FILLED, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, FILLED, EMPTY, EMPTY
+        );
+        int[] clues = new int[] {5, 2, 2};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        descriptor.initClues();
+        descriptor.computePossibilities();
+        descriptor.optimizeCluesBoundWithOnePossibility();
+
+        // cell then clue (5, 2)
+        boolean[][] expected = new boolean[][] {
+                //             5      2      2
+                new boolean[] {false, false, false},
+                new boolean[] {false, false, false},
+                new boolean[] {true,  false, false},
+                new boolean[] {true,  false, false},
+                new boolean[] {true,  false, false},
+                new boolean[] {true,  false, false},
+                new boolean[] {true,  false, false},
+                new boolean[] {false, false, false},
+                new boolean[] {false, false, false},
+                new boolean[] {false, true, false},
+                new boolean[] {false, true, false},
+                new boolean[] {false, false, false},
+                new boolean[] {false, false, true},
+                new boolean[] {false, false, true},
+                new boolean[] {false, false, false},
+        };
+
+        arrayEquals(expected, descriptor.getPossibilities());
+        clueEquals(2, 7, descriptor.getClue(0));
+        clueEquals(9, 11, descriptor.getClue(1));
+        clueEquals(12, 14, descriptor.getClue(2));
     }
 
 
@@ -329,6 +383,45 @@ public class DescriptorTest {
         assertEquals(13, descriptor.getClues()[1].getMaxI());
     }
 
+    @Test
+    void optimizeCluesBoundWithOnePossibilitiesTest2() {
+        // 15 | 5 2 2
+
+        CellWrapper[] wrappers = create(
+                EMPTY, EMPTY, FILLED, FILLED, EMPTY, FILLED, FILLED, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, FILLED, EMPTY, EMPTY
+        );
+        int[] clues = new int[] {5, 2, 2};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        descriptor.initClues();
+        descriptor.computePossibilities();
+        descriptor.optimizeCluesBoundWithOnePossibility();
+
+        // cell then clue (5, 2)
+        boolean[][] expected = new boolean[][] {
+                //             5      2      2
+                new boolean[] {false, false, false},
+                new boolean[] {false, false, false},
+                new boolean[] {true,  false, false},
+                new boolean[] {true,  false, false},
+                new boolean[] {true,  false, false},
+                new boolean[] {true,  false, false},
+                new boolean[] {true,  false, false},
+                new boolean[] {false, false, false},
+                new boolean[] {false, false, false},
+                new boolean[] {false, true, false},
+                new boolean[] {false, true, false},
+                new boolean[] {false, false, false},
+                new boolean[] {false, false, true},
+                new boolean[] {false, false, true},
+                new boolean[] {false, false, false},
+        };
+
+        arrayEquals(expected, descriptor.getPossibilities());
+        clueEquals(2, 7, descriptor.getClue(0));
+        clueEquals(9, 11, descriptor.getClue(1));
+        clueEquals(12, 14, descriptor.getClue(2));
+    }
 
 
 
@@ -348,7 +441,7 @@ public class DescriptorTest {
         List<Region> regions = descriptor.split();
 
         assertEquals(1, regions.size());
-        assertEquals(new Region(descriptor, 0, 15, 0, 2), regions.get(0));
+        assertEquals(new Region(descriptor, 0, 15, 0, 3), regions.get(0));
     }
 
     @Test
@@ -365,8 +458,8 @@ public class DescriptorTest {
         List<Region> regions = descriptor.split();
 
         assertEquals(2, regions.size());
-        assertEquals(new Region(descriptor, 0, 7, 0, 0), regions.get(0));
-        assertEquals(new Region(descriptor, 11, 13, 1, 1), regions.get(1));
+        assertEquals(new Region(descriptor, 0, 7, 0, 1), regions.get(0));
+        assertEquals(new Region(descriptor, 11, 13, 1, 2), regions.get(1));
     }
 
     @Test
@@ -383,10 +476,66 @@ public class DescriptorTest {
         List<Region> regions = descriptor.split();
 
         assertEquals(3, regions.size());
-        assertEquals(new Region(descriptor, 2, 7, 0, 0), regions.get(0));
-        assertEquals(new Region(descriptor, 9, 11, 1, 1), regions.get(1));
-        assertEquals(new Region(descriptor, 12, 14, 2, 2), regions.get(2));
+        assertEquals(new Region(descriptor, 2, 7, 0, 1), regions.get(0));
+        assertEquals(new Region(descriptor, 9, 11, 1, 2), regions.get(1));
+        assertEquals(new Region(descriptor, 12, 14, 2, 3), regions.get(2));
     }
+
+
+
+
+
+
+
+
+
+
+
+
+    @Test
+    void completeTest1() {
+        CellWrapper[] wrappers = create(
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, CROSSED, EMPTY, FILLED
+        );
+        int[] clues = new int[] {2, 2, 2};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        descriptor.initClues();
+        descriptor.computePossibilities();
+        descriptor.optimizeCluesBoundWithOnePossibility();
+
+        List<Region> regions = descriptor.split();
+        regions.get(1).trySolve();
+
+        cellsEquals(wrappers, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, CROSSED, FILLED, FILLED);
+    }
+
+    @Test
+    void completeTest2() {
+        CellWrapper[] wrappers = create(
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, EMPTY, FILLED, EMPTY, EMPTY, CROSSED
+        );
+        int[] clues = new int[] {3, 1, 2, 1};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        descriptor.initClues();
+        descriptor.computePossibilities();
+        descriptor.optimizeCluesBoundWithOnePossibility();
+
+        List<Region> regions = descriptor.split();
+        System.out.println(regions);
+
+
+    }
+
+
+
+
+
+
+
+
+
 
 
     private void arrayEquals(boolean[][] expected, boolean[][] current) {
@@ -394,6 +543,17 @@ public class DescriptorTest {
             for (int j = 0; j < expected[i].length; j++) {
                 Assertions.assertEquals(expected[i][j], current[i][j], "At (%d; %d)".formatted(i, j));
             }
+        }
+    }
+
+    private void clueEquals(int expectedMinI, int expectedMaxI, Clue clue) {
+        assertEquals(expectedMinI, clue.getMinI());
+        assertEquals(expectedMaxI, clue.getMaxI());
+    }
+
+    private void cellsEquals(CellWrapper[] input, Cell... expected) {
+        for (int i = 0; i < input.length; i++) {
+            assertEquals(expected[i], input[i].get());
         }
     }
 

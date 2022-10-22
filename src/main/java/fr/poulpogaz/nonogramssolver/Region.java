@@ -3,13 +3,9 @@ package fr.poulpogaz.nonogramssolver;
 /**
  * A region is a part of a column/row that contains cell that shares the same possibilities
  */
-public class Region {
+public class Region extends AbstractRegion {
 
     private final Descriptor descriptor;
-    private int start;
-    private int end;
-    private int firstClueIndex;
-    private int lastClueIndex;
 
     public Region(Descriptor descriptor) {
         this.descriptor = descriptor;
@@ -23,32 +19,29 @@ public class Region {
         this.lastClueIndex = lastClueIndex;
     }
 
-    public void trySolve() {
-        for (int i = firstClueIndex; i < lastClueIndex; i++) {
-            Clue clue = descriptor.getClue(i);
+    @Override
+    protected CellWrapper getCell(int index) {
+        return descriptor.getCell(index);
+    }
 
-            int minPossible = Integer.MAX_VALUE;
-            int maxPossible = Integer.MIN_VALUE;
+    @Override
+    protected void setCell(int index, Cell cell) {
+        descriptor.setCell(index, cell);
+    }
 
-            for (int j = clue.getMinI(); j < clue.getMaxI(); j++) {
-                if (descriptor.getPossibilities()[j][i]) {
-                    minPossible = Math.min(j, minPossible);
-                    maxPossible = Math.max(j, maxPossible);
-                }
-            }
+    @Override
+    protected Clue getClue(int index) {
+        return descriptor.getClue(index);
+    }
 
-            int length = maxPossible - minPossible + 1;
-            if (length < 2 * clue.getLength()) {
-                System.out.println("Filling...");
-                System.out.printf("Clue: %d, between: %d and %d%n", clue.getLength(), minPossible, maxPossible);
+    @Override
+    protected void setPossibility(int cell, int clueIndex, boolean possibility) {
+        descriptor.setPossibility(cell, clueIndex, possibility);
+    }
 
-                int s = length - clue.getLength();
-
-                for (int j = minPossible + s; j <= maxPossible - s; j++) {
-                    descriptor.getCells()[j].set(Cell.FILLED);
-                }
-            }
-        }
+    @Override
+    protected boolean possibility(int cell, int clueIndex) {
+        return descriptor.possibility(cell, clueIndex);
     }
 
     public int getStart() {
