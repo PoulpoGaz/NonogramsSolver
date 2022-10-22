@@ -10,7 +10,7 @@ public class Descriptor {
     private final boolean isRow;
     private final int index;
     
-    private final int[] clues;
+    private final Clue[] clues;
     private final CellWrapper[] cells;
 
     /**
@@ -24,13 +24,17 @@ public class Descriptor {
      * containing true if the i-th clue can be present at the cell
      */
     private final boolean[][] possibilities;
-    private final ClueIterator clueIt;
 
     public Descriptor(boolean isRow, int index, int[] clues, CellWrapper[] cells) {
         this.isRow = isRow;
         this.index = index;
-        this.clues = clues;
         this.cells = cells;
+
+        this.clues = new Clue[clues.length];
+
+        for (int i = 0; i < clues.length; i++) {
+            this.clues[i] = new Clue(clues[i], i);
+        }
 
         descriptorLength = length(0, clues.length);
         maxClue = getMaxClue();
@@ -40,8 +44,6 @@ public class Descriptor {
         for (int i = 0; i < cells.length; i++) {
             possibilities[i] = new boolean[clues.length];
         }
-
-        clueIt = new ClueIterator(this);
     }
 
     /**
@@ -49,11 +51,14 @@ public class Descriptor {
      * @return true if it set at least one cell to filled or crossed
      */
     public boolean trySolve() {
+        if (clues.length == 0) {
+            fill(0, cells.length, Cell.CROSSED);
+            return false;
+        }
+
         System.out.println("-------------------------------------");
         System.out.printf("Row: %b. Index: %d%n", isRow, index);
         System.out.println("Clues: " + Arrays.toString(clues));
-
-        Utils.fill(possibilities, false);
 
         List<Line> lines = new ArrayList<>();
 
@@ -69,45 +74,138 @@ public class Descriptor {
             }
         }
 
+        initClues();
         computePossibilities();
-        tryCross();
-        tryFill();
+        optimizeCluesBoundWithOnePossibility();
+        crossZeroCells();
+        List<Region> regions = split();
+
+        for (Region r : regions) {
+            r.trySolve();
+        }
 
         return true;
     }
 
-    private void computePossibilities() {
-        clueIt.reset();
+    protected void initClues() {
+        int minI = 0;
+        int maxI = cells.length - descriptorLength;
 
-        while (clueIt.hasNext()) {
-            int clue = clueIt.next();
+        for (int i = 0; i < clues.length; i++) {
+            Clue c = clues[i];
 
-            //System.out.printf("Clue: %d. i=%d. max=%d%n", clue, clueIt.getMinI(), clueIt.getMaxI());
-            int k = clueIt.getMinI();
-            for (; k + clue < clueIt.getMaxI(); k++) {
-                boolean fit = fit(clue, k);
+            if (i == 0) {
+                maxI += c.getLength();
+            } else {
+                maxI += c.getLength() + 1;
+                minI += clues[i - 1].getLength() + 1;
+            }
 
-                //System.out.printf("Fit: %b. At %d%n", fit, k);
+            c.setMinI(minI);
+            c.setMaxI(maxI);
+        }
+    }
+
+    /**
+     * Compute possibilities. It doesn't take into account all information that gave the map.
+     * For example, for 15 cells, clues 5 2 and a map looking like this: '  F    F    FF  ',
+     * it won't realize that outside the first two F, it mustn't have a 5.
+     */
+    protected void computePossibilities() {
+        Utils.fill(possibilities, false);
+
+        for (Clue clue : clues) {
+            int k = clue.getMinI();
+            for (; k + clue.getLength() < clue.getMaxI(); k++) {
+                boolean fit = fit(clue.getLength(), k);
+
                 if (fit) {
-                    for (int l = k; l < k + clue; l++) {
-                        possibilities[l][clueIt.getIndex()] = true;
+                    for (int l = k; l < k + clue.getLength(); l++) {
+                        possibilities[l][clue.getIndex()] = true;
                     }
                 }
             }
 
-            if (k < clueIt.getMaxI()) {
-                boolean fit = fit(clue, clueIt.getMaxI() - clue);
+            if (k < clue.getMaxI()) {
+                boolean fit = fit(clue.getLength(), clue.getMaxI() - clue.getLength());
 
                 if (fit) {
-                    for (int l = k; l < clueIt.getMaxI(); l++) {
-                        possibilities[l][clueIt.getIndex()] = true;
+                    for (int l = k; l < clue.getMaxI(); l++) {
+                        possibilities[l][clue.getIndex()] = true;
                     }
                 }
             }
         }
     }
 
-    private void tryCross() {
+    protected void optimizeCluesBoundWithOnePossibility() {
+        for (Clue clue : clues) {
+
+            // find the first index that we are sure it is associated with the clue
+            int firstIndex = -1;
+            for (int i = clue.getMinI(); i < clue.getMaxI(); i++) {
+                if (!cells[i].isFilled()) {
+                    continue;
+                }
+
+                int p = getUniquePossibilityIndex(i);
+
+                if (p != clue.getIndex()) {
+                    continue;
+                }
+
+                // this cell is associated with this clue
+                firstIndex = i;
+                break;
+            }
+
+            if (firstIndex < 0) {
+                continue;
+            }
+
+            // remove other possibilities:
+            // all possibilities that are not glued to the cell
+            // or too far are removed
+
+            // moving to the left
+            int min = clue.getMinI();
+            int max = clue.getMaxI();
+
+            boolean removeAll = false;
+            for (int i = firstIndex - 1; i >= min; i--) {
+                if (!removeAll) {
+                    if (!possibilities[i][clue.getIndex()] || Math.abs(i - firstIndex) >= clue.getLength()) {
+                        removeAll = true;
+                        clue.setMinI(i + 1);
+                    }
+                }
+
+                if (removeAll) {
+                    possibilities[i][clue.getIndex()] = false;
+                }
+            }
+
+            // moving to the right
+            removeAll = false;
+            for (int i = firstIndex + 1; i < max; i++) {
+                if (!removeAll) {
+                    if (!possibilities[i][clue.getIndex()] || Math.abs(i - firstIndex) >= clue.getLength()) {
+                        removeAll = true;
+                        clue.setMaxI(i);
+                    }
+                }
+
+                if (removeAll) {
+                    possibilities[i][clue.getIndex()] = false;
+                }
+            }
+        }
+    }
+
+    /**
+     * Cross every cell that have no possibility
+     */
+    protected void crossZeroCells() {
         for (int j = 0; j < possibilities.length; j++) {
             if (haveZeroPossibility(j)) {
                 if (cells[j].isEmpty() || cells[j].isCrossed()) {
@@ -119,9 +217,39 @@ public class Descriptor {
         }
     }
 
-    private void tryFill() {
+    protected List<Region> split() {
+        List<Region> regions = new ArrayList<>();
+
+        Region current = null;
+        for (int i = 0; i < cells.length; i++) {
+            int first = firstPossibilityIndex(i);
+
+            if (first >= 0) {
+                if (current == null) {
+                    current = new Region(this);
+                    current.setStart(i);
+                    current.setFirstClueIndex(first);
+                }
+            } else if (current != null) {
+                current.setLastClueIndex(lastPossibilityIndex(i - 1) + 1);
+                current.setEnd(i);
+                regions.add(current);
+                current = null;
+            }
+        }
+
+        if (current != null) {
+            current.setLastClueIndex(lastPossibilityIndex(cells.length - 1) + 1);
+            current.setEnd(cells.length);
+            regions.add(current);
+        }
+
+        return regions;
+    }
+
+    protected void tryFill() {
         // simple space technique
-        clueIt.reset();
+        /*clueIt.reset();
 
         while (clueIt.hasNext()) {
             int clue = clueIt.next();
@@ -180,7 +308,7 @@ public class Descriptor {
                     }
                 }
             }
-        }
+        }*/
     }
 
     /**
@@ -233,7 +361,7 @@ public class Descriptor {
         }
     }
 
-    private int getUniquePossibility(int cell) {
+    private int getUniquePossibilityIndex(int cell) {
         int possibility = -1;
 
         for (int i = 0; i < clues.length; i++) {
@@ -249,6 +377,26 @@ public class Descriptor {
         return possibility;
     }
 
+    private int firstPossibilityIndex(int cell) {
+        for (int i = 0; i < clues.length; i++) {
+            if (possibilities[cell][i]) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private int lastPossibilityIndex(int cell) {
+        for (int i = clues.length - 1; i >= 0; i--) {
+            if (possibilities[cell][i]) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     private boolean haveZeroPossibility(int cell) {
         for (int i = 0; i < clues.length; i++) {
             if (possibilities[cell][i]) {
@@ -257,6 +405,12 @@ public class Descriptor {
         }
 
         return true;
+    }
+
+    private void fill(int start, int end, Cell cell) {
+        for (int i = start; i < end; i++) {
+            cells[i].set(cell);
+        }
     }
 
     private int getAvailableSpace() {
@@ -276,10 +430,10 @@ public class Descriptor {
             return 0;
         }
 
-        int l = clues[to - 1];
+        int l = clues[to - 1].getLength();
 
         for (int i = start; i < to - 1; i++) {
-            l += clues[i] + 1;
+            l += clues[i].getLength() + 1;
         }
 
         return l;
@@ -308,16 +462,25 @@ public class Descriptor {
     public int getMaxClue() {
         if (maxClue < 0) {
             maxClue = 0;
-            for (int number : clues) {
-                maxClue = Math.max(maxClue, number);
+
+            for (Clue clue : clues) {
+                maxClue = Math.max(maxClue, clue.getLength());
             }
         }
 
         return maxClue;
     }
 
-    public int[] getClues() {
+    public Clue[] getClues() {
         return clues;
+    }
+
+    public Clue getClue(int i) {
+        return clues[i];
+    }
+
+    public boolean[][] getPossibilities() {
+        return possibilities;
     }
 
     public CellWrapper[] getCells() {

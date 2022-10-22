@@ -4,6 +4,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class Main {
 
@@ -18,14 +19,15 @@ public class Main {
         Nonogram nonogram = Nonogram.fromImage(image);
         System.out.println(nonogram);
 
-        nonogram.solve();
-
-        BufferedImage solution = nonogram.asImage(20);
+        List<BufferedImage> images = nonogram.solveStepByStep(20, 20);
 
         try {
-            ImageIO.write(solution, "png", new File("solution.png"));
+            for (int i = 0; i < images.size(); i++) {
+                BufferedImage img = images.get(i);
+                ImageIO.write(img, "png", new File("output/image_" + i + ".png"));
+            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 }

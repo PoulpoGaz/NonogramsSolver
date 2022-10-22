@@ -125,17 +125,21 @@ public class Nonogram {
 
     // SOLVER!
 
-    public void solve() {
-        for (int i = 0; i < 1; i++) {
-            for (int j = 0; j < columns.length; j++) {
-                Descriptor col = columns[j];
+    public List<BufferedImage> solveStepByStep(int max, int squareSize) {
+        List<BufferedImage> images = new ArrayList<>();
+        for (int i = 0; i < max; i++) {
+            for (Descriptor col : columns) {
                 col.trySolve();
             }
 
             for (Descriptor row : rows) {
                 row.trySolve();
             }
+
+            images.add(asImage(squareSize));
         }
+
+        return images;
     }
 
 
@@ -213,8 +217,8 @@ public class Nonogram {
         for (Descriptor descriptor : rows) {
             maxNumberInRow = Math.max(maxNumberInRow, descriptor.nClues());
 
-            for (int n : descriptor.getClues()) {
-                squareSize = Math.max(squareSize, Utils.nDigit(n));
+            for (Clue c : descriptor.getClues()) {
+                squareSize = Math.max(squareSize, Utils.nDigit(c.getLength()));
             }
         }
 
@@ -222,8 +226,8 @@ public class Nonogram {
         for (Descriptor descriptor : columns) {
             maxNumberInCol = Math.max(maxNumberInCol, descriptor.nClues());
 
-            for (int n : descriptor.getClues()) {
-                squareSize = Math.max(squareSize, Utils.nDigit(n));
+            for (Clue c : descriptor.getClues()) {
+                squareSize = Math.max(squareSize, Utils.nDigit(c.getLength()));
             }
         }
 
@@ -276,24 +280,24 @@ public class Nonogram {
     /**
      * Draw a col
      * @param surface the surface to draw on
-     * @param numbers the numbers to draw
+     * @param clues the clues to draw
      * @param maxNumberInCol the maximal number of number that all cols contains
      */
     private void drawColNumbers(StringSurface surface,
-                                int[] numbers, int maxNumberInCol, int squareSize, int drawX) {
-        int y = (maxNumberInCol - numbers.length) * squareSize;
-        for (int n : numbers) {
-            surface.set(drawX, y, String.valueOf(n));
+                                Clue[] clues, int maxNumberInCol, int squareSize, int drawX) {
+        int y = (maxNumberInCol - clues.length) * squareSize;
+        for (Clue c : clues) {
+            surface.set(drawX, y, String.valueOf(c.getLength()));
 
             y += squareSize;
         }
     }
 
     private void drawRowNumbers(StringSurface surface,
-                                int[] numbers, int maxNumberInRow, int squareSize, int drawY) {
-        int x = (maxNumberInRow - numbers.length) * squareSize;
-        for (int n : numbers) {
-            surface.set(x, drawY, String.valueOf(n));
+                                Clue[] clues, int maxNumberInRow, int squareSize, int drawY) {
+        int x = (maxNumberInRow - clues.length) * squareSize;
+        for (Clue c : clues) {
+            surface.set(x, drawY, String.valueOf(c.getLength()));
 
             x += squareSize;
         }
