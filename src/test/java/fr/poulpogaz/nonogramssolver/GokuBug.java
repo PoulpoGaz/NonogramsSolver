@@ -180,7 +180,6 @@ public class GokuBug {
         descriptor.initClues();
         descriptor.computePossibilities();
         descriptor.optimizeCluesBoundWithOnePossibility();
-        System.out.println(descriptor);
 
         descriptor.crossZeroCells();
 

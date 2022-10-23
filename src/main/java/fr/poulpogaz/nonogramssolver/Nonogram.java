@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Objects;
 
 public class Nonogram {
 
@@ -126,14 +126,18 @@ public class Nonogram {
 
     // SOLVER!
 
-    public void solve(Consumer<Nonogram> consumer) {
+    public boolean solve(SolverListener listener) {
+        Objects.requireNonNull(listener);
+
         while (!isSolved()) {
             for (Descriptor col : columns) {
                 col.trySolve();
+                listener.onColumnTrySolve(this, col);
             }
 
             for (Descriptor row : rows) {
                 row.trySolve();
+                listener.onColumnTrySolve(this, row);
             }
 
             boolean changed = false;
@@ -148,16 +152,19 @@ public class Nonogram {
             }
 
             if (!changed) {
-                System.out.println("Can't find a solution");
-                return;
+                listener.onFail(this);
+                return false;
             }
 
-            consumer.accept(this);
+            listener.onPassFinished(this);
         }
+
+        listener.onSuccess(this);
+        return true;
     }
 
-    public void solve() {
-        solve((n) -> {});
+    public boolean solve() {
+        return solve(SolverListener.EMPTY_LISTENER);
     }
 
     private boolean isSolved() {
@@ -192,6 +199,14 @@ public class Nonogram {
         }
 
         return cells;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     public BufferedImage asImage(int squareSize) {

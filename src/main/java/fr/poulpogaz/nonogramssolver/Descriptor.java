@@ -270,4 +270,12 @@ public class Descriptor extends AbstractRegion {
     public CellWrapper[] getCells() {
         return cells;
     }
+
+    public boolean isRow() {
+        return isRow;
+    }
+
+    public int getIndex() {
+        return index;
+    }
 }
