@@ -1,12 +1,11 @@
 package fr.poulpogaz.nonogramssolver;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static fr.poulpogaz.nonogramssolver.Cell.*;
+import static fr.poulpogaz.nonogramssolver.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DescriptorTest {
@@ -575,45 +574,5 @@ public class DescriptorTest {
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
         assertFalse(descriptor.isCompleted());
-    }
-
-
-    private void arrayEquals(boolean[][] expected, boolean[][] current) {
-        for (int i = 0; i < expected.length; i++) {
-            for (int j = 0; j < expected[i].length; j++) {
-                Assertions.assertEquals(expected[i][j], current[i][j], "At (%d; %d)".formatted(i, j));
-            }
-        }
-    }
-
-    private void clueEquals(int expectedMinI, int expectedMaxI, Clue clue) {
-        assertEquals(expectedMinI, clue.getMinI());
-        assertEquals(expectedMaxI, clue.getMaxI());
-    }
-
-    private void cellsEquals(CellWrapper[] input, Cell... expected) {
-        for (int i = 0; i < input.length; i++) {
-            assertEquals(expected[i], input[i].get());
-        }
-    }
-
-    private CellWrapper[] create(Cell... cells) {
-        CellWrapper[] wrappers = new CellWrapper[cells.length];
-
-        for (int i = 0; i < cells.length; i++) {
-            wrappers[i] = new CellWrapper(cells[i], i, 0);
-        }
-
-        return wrappers;
-    }
-
-    private CellWrapper[] createEmpty(int length) {
-        CellWrapper[] wrappers = new CellWrapper[length];
-
-        for (int i = 0; i < length; i++) {
-            wrappers[i] = new CellWrapper(EMPTY, i, 0);
-        }
-
-        return wrappers;
     }
 }

@@ -98,21 +98,6 @@ public class Descriptor extends AbstractRegion {
         }
     }
 
-    /**
-     * Cross every cell that have no possibility
-     */
-    protected void crossZeroCells() {
-        for (int j = 0; j < possibilities.length; j++) {
-            if (haveZeroPossibility(j)) {
-                if (cells[j].isEmpty() || cells[j].isCrossed()) {
-                    cells[j].set(Cell.CROSSED);
-                } /*else {
-                    throw new IllegalStateException();
-                }*/
-            }
-        }
-    }
-
     protected List<Region> split() {
         List<Region> regions = new ArrayList<>();
 

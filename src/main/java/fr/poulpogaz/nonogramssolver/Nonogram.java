@@ -181,6 +181,19 @@ public class Nonogram {
 
     // END OF SOLVER!
 
+
+    public Cell[][] getSolution() {
+        Cell[][] cells = new Cell[height][width];
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                cells[y][x] = solution[y][x].get();
+            }
+        }
+
+        return cells;
+    }
+
     public BufferedImage asImage(int squareSize) {
         BufferedImage image = new BufferedImage(squareSize * width, squareSize * height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();

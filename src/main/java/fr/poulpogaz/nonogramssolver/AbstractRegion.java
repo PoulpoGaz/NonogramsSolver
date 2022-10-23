@@ -24,6 +24,7 @@ public abstract class AbstractRegion {
         initClues();
         computePossibilities();
         optimizeCluesBoundWithOnePossibility();
+        crossZeroCells();
         tryFill();
     }
 
@@ -50,16 +51,15 @@ public abstract class AbstractRegion {
      * Compute possibilities. It doesn't take into account all information that gave the map.
      * For example, for 15 cells, clues 5 2 and a map looking like this: '  F    F    FF  ',
      * it won't realize that outside the first two F, it mustn't have a 5.
-     *
-     * TODO: this method needs to be a little be optimized
      */
     protected void computePossibilities() {
         clearPossibilitiesLocal();
 
+        int forceMin = -1;
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
             Clue clue = getClue(i);
 
-            int k = clue.getMinI();
+            int k = Math.max(clue.getMinI(), forceMin);
             for (; k + clue.getLength() < clue.getMaxI(); k++) {
                 if (fit(clue.getLength(), k)) {
                     for (int l = k; l < k + clue.getLength(); l++) {
@@ -78,8 +78,10 @@ public abstract class AbstractRegion {
 
 
             // recompute minI and maxI
+            forceMin = -1;
             for (k = clue.getMinI(); k < clue.getMaxI() && !possibility(k, i); k++) {
                 clue.setMinI(k + 1);
+                forceMin = k + 3;
             }
 
             for (k = clue.getMaxI() - 1; k >= clue.getMinI() && !possibility(k, i); k--) {
@@ -100,8 +102,9 @@ public abstract class AbstractRegion {
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
             Clue clue = getClue(i);
 
-            // find the first index that we are sure it is associated with the clue
+            // find the first index (and last) that we are sure it is associated with the clue
             int firstIndex = -1;
+            int lastIndex = -1;
             for (int j = clue.getMinI(); j < clue.getMaxI(); j++) {
                 if (!getCell(j).isFilled()) {
                     continue;
@@ -114,8 +117,10 @@ public abstract class AbstractRegion {
                 }
 
                 // this cell is associated with this clue
-                firstIndex = j;
-                break;
+                if (firstIndex < 0) {
+                    firstIndex = j;
+                }
+                lastIndex = j;
             }
 
             if (firstIndex < 0) {
@@ -130,10 +135,12 @@ public abstract class AbstractRegion {
             int min = clue.getMinI();
             int max = clue.getMaxI();
 
+            int maxDist = clue.getLength() - (lastIndex - firstIndex);
+
             boolean removeAll = false;
             for (int j = firstIndex - 1; j >= min; j--) {
                 if (!removeAll) {
-                    if (!possibility(j, clue.getIndex()) || Math.abs(j - firstIndex) >= clue.getLength()) {
+                    if (!possibility(j, clue.getIndex()) || Math.abs(j - firstIndex) >= maxDist) {
                         removeAll = true;
                         clue.setMinI(j + 1);
                     }
@@ -146,9 +153,9 @@ public abstract class AbstractRegion {
 
             // moving to the right
             removeAll = false;
-            for (int j = firstIndex + 1; j < max; j++) {
+            for (int j = lastIndex + 1; j < max; j++) {
                 if (!removeAll) {
-                    if (!possibility(j, clue.getIndex()) || Math.abs(j - firstIndex) >= clue.getLength()) {
+                    if (!possibility(j, clue.getIndex()) || Math.abs(j - lastIndex) >= maxDist) {
                         removeAll = true;
                         clue.setMaxI(j);
                     }
@@ -156,6 +163,19 @@ public abstract class AbstractRegion {
 
                 if (removeAll) {
                     setPossibility(j, clue.getIndex(), false);
+                }
+            }
+        }
+    }
+
+    /**
+     * Cross every cell that have no possibility
+     */
+    protected void crossZeroCells() {
+        for (int j = start; j < end; j++) {
+            if (haveZeroPossibility(j)) {
+                if (getCell(j).isEmpty() || getCell(j).isCrossed()) {
+                    getCell(j).set(Cell.CROSSED);
                 }
             }
         }
