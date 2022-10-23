@@ -101,14 +101,4 @@ public class Region extends AbstractRegion {
         result = 31 * result + lastClueIndex;
         return result;
     }
-
-    @Override
-    public String toString() {
-        return "Region{" +
-                "start=" + start +
-                ", end=" + end +
-                ", firstClueIndex=" + firstClueIndex +
-                ", lastClueIndex=" + lastClueIndex +
-                '}';
-    }
 }

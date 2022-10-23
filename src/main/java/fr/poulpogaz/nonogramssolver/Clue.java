@@ -7,19 +7,9 @@ public class Clue {
     private int minI;
     private int maxI;
 
-    private boolean completed;
-
     public Clue(int length, int index) {
         this.length = length;
         this.index = index;
-    }
-
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
     }
 
     public int getLength() {
@@ -59,7 +49,6 @@ public class Clue {
                 ", index=" + index +
                 ", minI=" + minI +
                 ", maxI=" + maxI +
-                ", completed=" + completed +
                 '}';
     }
 }

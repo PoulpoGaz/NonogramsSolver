@@ -12,7 +12,7 @@ import java.nio.file.Path;
 public class Main {
 
     public static void main(String[] args) {
-        String input = "std_mouse";
+        String input = "goku";
 
         BufferedImage image;
         try {

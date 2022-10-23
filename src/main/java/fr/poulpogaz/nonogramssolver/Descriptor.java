@@ -82,7 +82,7 @@ public class Descriptor extends AbstractRegion {
 
     protected void shrink() {
         for (int i = 0; i < cells.length; i++) {
-            if (cells[i].isCrossed()) {
+            if (isCrossed(i)) {
                 start = i + 1;
             } else {
                 break;
@@ -90,7 +90,7 @@ public class Descriptor extends AbstractRegion {
         }
 
         for (int i = cells.length - 1; i >= 0; i--) {
-            if (cells[i].isCrossed()) {
+            if (isCrossed(i)) {
                 end = i;
             } else {
                 break;
@@ -151,11 +151,11 @@ public class Descriptor extends AbstractRegion {
                     if (cell.isFilled()) {
                         count++;
 
-                        if (count > clues[clueIndex].getLength()) { // invalid
+                        if (count > getClueLength(clueIndex)) { // invalid
                             return false;
                         }
                     } else if (count > 0) {
-                        if (count != clues[clueIndex].getLength()) {
+                        if (count != getClueLength(clueIndex)) {
                             return false;
                         }
 
@@ -168,7 +168,7 @@ public class Descriptor extends AbstractRegion {
             if (clueIndex == clues.length) {
                 return true;
             } else {
-                return clues[clueIndex].getLength() == count;
+                return getClueLength(clueIndex) == count;
             }
         }
     }
@@ -190,10 +190,10 @@ public class Descriptor extends AbstractRegion {
             return 0;
         }
 
-        int l = clues[to - 1].getLength();
+        int l = getClueLength(to - 1);
 
         for (int i = start; i < to - 1; i++) {
-            l += clues[i].getLength() + 1;
+            l += getClueLength(i) + 1;
         }
 
         return l;

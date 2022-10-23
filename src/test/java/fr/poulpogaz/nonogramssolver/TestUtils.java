@@ -2,6 +2,8 @@ package fr.poulpogaz.nonogramssolver;
 
 import org.junit.jupiter.api.Assertions;
 
+import java.util.List;
+
 import static fr.poulpogaz.nonogramssolver.Cell.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -44,5 +46,12 @@ public class TestUtils {
         }
 
         return wrappers;
+    }
+
+    public static void printRegions(List<Region> regions) {
+        for (Region r : regions) {
+            System.out.println(r);
+            System.out.println();
+        }
     }
 }

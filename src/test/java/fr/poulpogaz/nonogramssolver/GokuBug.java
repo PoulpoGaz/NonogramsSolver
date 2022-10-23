@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static fr.poulpogaz.nonogramssolver.Cell.*;
-import static fr.poulpogaz.nonogramssolver.TestUtils.cellsEquals;
-import static fr.poulpogaz.nonogramssolver.TestUtils.create;
+import static fr.poulpogaz.nonogramssolver.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -177,13 +176,17 @@ public class GokuBug {
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
         assertTrue(descriptor.isCompleted());
 
+        descriptor.shrink();
         descriptor.initClues();
         descriptor.computePossibilities();
         descriptor.optimizeCluesBoundWithOnePossibility();
+        System.out.println(descriptor);
+
         descriptor.crossZeroCells();
 
         List<Region> regions = descriptor.split();
-        System.out.println(regions);
+        regions.get(3).trySolve();
+        printRegions(regions);
 
         cellsEquals(wrappers,
                 FILLED, FILLED,
@@ -192,11 +195,11 @@ public class GokuBug {
                 CROSSED,
                 FILLED,
                 CROSSED,
-                EMPTY, EMPTY,
+                CROSSED, CROSSED, // now crossed!
                 CROSSED,
                 FILLED, FILLED,
                 CROSSED,
-                EMPTY, EMPTY, EMPTY, EMPTY,
+                CROSSED, CROSSED, CROSSED, CROSSED, // now crossed!
                 CROSSED, CROSSED, CROSSED, CROSSED,
                 FILLED, FILLED,
                 CROSSED, CROSSED, CROSSED,
