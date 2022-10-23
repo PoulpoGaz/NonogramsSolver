@@ -47,10 +47,10 @@ public class Main implements Runnable {
         try {
             File output = new File(input + ".gif");
 
-            Path folder = Path.of(input);
+            /*Path folder = Path.of(input);
             if (Files.notExists(folder)) {
                 Files.createDirectory(folder);
-            }
+            }*/
 
             AbstractGifOutput listener;
             if (outputFormat == OutputFormat.IMAGE) {
@@ -184,6 +184,16 @@ public class Main implements Runnable {
         }
 
         protected abstract int defaultTimeBetweenFrames();
+
+        @Override
+        public void onFail(Nonogram n) {
+            System.err.println("Failed to solve this nonogram. It requires advanced techniques like 'trial and error' or recursion");
+        }
+
+        @Override
+        public void onSuccess(Nonogram n) {
+            System.out.println("Nonogram solved!");
+        }
 
         @Override
         public void close() throws IOException {
