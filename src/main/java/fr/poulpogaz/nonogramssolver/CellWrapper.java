@@ -1,5 +1,7 @@
 package fr.poulpogaz.nonogramssolver;
 
+import java.util.Objects;
+
 public class CellWrapper {
 
     private final int x;
@@ -7,15 +9,13 @@ public class CellWrapper {
 
     private Cell content;
 
+    private Descriptor row;
+    private Descriptor column;
+
     private boolean hasChanged;
 
-    public CellWrapper(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
     public CellWrapper(Cell content, int x, int y) {
-        this.content = content;
+        this.content = Objects.requireNonNull(content);
         this.x = x;
         this.y = y;
     }
@@ -32,10 +32,6 @@ public class CellWrapper {
         return content == Cell.CROSSED;
     }
 
-    public boolean isNull() {
-        return content == null;
-    }
-
     public Cell get() {
         return content;
     }
@@ -44,6 +40,9 @@ public class CellWrapper {
         if (this.content != content) {
             this.content = content;
             hasChanged = true;
+
+            row.setHasChanged(true);
+            column.setHasChanged(true);
         }
     }
 
@@ -61,6 +60,22 @@ public class CellWrapper {
 
     public void setHasChanged(boolean hasChanged) {
         this.hasChanged = hasChanged;
+    }
+
+    public Descriptor getRow() {
+        return row;
+    }
+
+    public void setRow(Descriptor row) {
+        this.row = row;
+    }
+
+    public Descriptor getColumn() {
+        return column;
+    }
+
+    public void setColumn(Descriptor column) {
+        this.column = column;
     }
 
     @Override

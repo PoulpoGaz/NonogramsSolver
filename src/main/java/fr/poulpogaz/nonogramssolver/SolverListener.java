@@ -33,19 +33,22 @@ public interface SolverListener {
 
 
     /**
-     * Call by {@link Nonogram#solve(SolverListener)} after a call of {@link Descriptor#trySolve()}.
+     * Call by {@link Nonogram#solve(SolverListener)} after a call of {@link Descriptor#trySolve()}
+     * and if the column changed.
      * The descriptor is of course a column
      */
     void onColumnTrySolve(Nonogram n, Descriptor d);
 
     /**
-     * Call by {@link Nonogram#solve(SolverListener)} after a call of {@link Descriptor#trySolve()}.
+     * Call by {@link Nonogram#solve(SolverListener)} after a call of {@link Descriptor#trySolve()}
+     * and if the row changed.
      * The descriptor is of course a row
      */
     void onRowTrySolve(Nonogram n, Descriptor d);
 
     /**
      * Call by {@link Nonogram#solve(SolverListener)} after that all columns and rows are processed
+     * and at least one row or column changed
      */
     void onPassFinished(Nonogram n);
 

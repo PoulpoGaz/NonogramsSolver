@@ -44,6 +44,7 @@ public class Main implements Runnable {
 
         Nonogram nonogram = Nonogram.fromImage(image);
 
+        long time = System.currentTimeMillis();
         try {
             File output = new File(input + ".gif");
 
@@ -69,13 +70,14 @@ public class Main implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        long time2 = System.currentTimeMillis();
+        System.out.println("Time elapsed: " + (time2 - time));
     }
 
     private static class DetailedGifOutput extends AbstractGifOutput {
 
         private final int squareSize;
-
-        private Cell[][] last;
 
         public DetailedGifOutput(File output, int timeBetweenFrames, int squareSize) throws IOException {
             super(output, timeBetweenFrames);
@@ -84,49 +86,19 @@ public class Main implements Runnable {
 
         @Override
         public void onColumnTrySolve(Nonogram n, Descriptor d) {
-            if (hasChanged(n, d)) {
-                try {
-                    writer.writeToSequence(n.asImage(squareSize));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            try {
+                writer.writeToSequence(n.asImage(squareSize));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
 
         @Override
         public void onRowTrySolve(Nonogram n, Descriptor d) {
-            if (hasChanged(n, d)) {
-                try {
-                    writer.writeToSequence(n.asImage(squareSize));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        private boolean hasChanged(Nonogram n, Descriptor d) {
-            if (last == null) {
-                last = n.getSolution();
-
-                return true;
-            } else {
-                boolean changed = false;
-
-                for (int i = 0; i < d.size(); i++) {
-                    if (d.isRow()) {
-                        if (last[d.getIndex()][i] != d.getCell(i).get()) {
-                            changed = true;
-                            last[d.getIndex()][i] = d.getCell(i).get();
-                        }
-                    } else {
-                        if (last[i][d.getIndex()] != d.getCell(i).get()) {
-                            changed = true;
-                            last[i][d.getIndex()] = d.getCell(i).get();
-                        }
-                    }
-                }
-
-                return changed;
+            try {
+                writer.writeToSequence(n.asImage(squareSize));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
 

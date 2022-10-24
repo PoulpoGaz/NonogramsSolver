@@ -28,6 +28,9 @@ public abstract class AbstractRegion {
         tryFill();
     }
 
+    /**
+     * Set minI and maxI for all clues without checking the map
+     */
     protected void initClues() {
         int minI = start;
         int maxI = end - descriptorLength();
@@ -223,6 +226,10 @@ public abstract class AbstractRegion {
         }
     }
 
+    protected boolean fitReverse(int line, int i) {
+        return fit(line, i - line);
+    }
+
     protected int getUniquePossibilityIndex(int cell) {
         int possibility = -1;
 
@@ -354,14 +361,17 @@ public abstract class AbstractRegion {
 
     @Override
     public String toString() {
+        String indent = "    ";
+
         StringBuilder sb = new StringBuilder();
-        sb.append("start=").append(start)
+        sb.append("Region[").append(System.lineSeparator());
+        sb.append(indent).append("start=").append(start)
                 .append(", end=").append(end)
                 .append(", firstClueIndex=").append(firstClueIndex)
                 .append(", lastClueIndex=").append(lastClueIndex)
                 .append(System.lineSeparator());
 
-        sb.append("Clues=[");
+        sb.append(indent).append("Clues=[");
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
             sb.append(getClue(i));
 
@@ -372,7 +382,7 @@ public abstract class AbstractRegion {
         sb.append(']').append(System.lineSeparator());
 
 
-        sb.append("Cells=[");
+        sb.append(indent).append("Cells=[");
         for (int i = start; i < end; i++) {
             sb.append(getCell(i).get().getChar());
         }
@@ -380,9 +390,11 @@ public abstract class AbstractRegion {
 
 
         if (firstClueIndex != lastClueIndex) {
-            sb.append("Possibilities={").append(System.lineSeparator());
+            sb.append(indent).append("Possibilities={").append(System.lineSeparator());
             for (int i = start; i < end; i++) {
-                sb.append("    {");
+                sb.append(indent).append(indent)
+                        .append('\'').append(getCell(i).get().getChar()).append("', ")
+                        .append("{");
 
                 for (int j = firstClueIndex; j < lastClueIndex; j++) {
                     if (possibility(i, j)) {
@@ -408,8 +420,10 @@ public abstract class AbstractRegion {
 
                 sb.append(System.lineSeparator());
             }
-            sb.append('}');
+            sb.append(indent).append('}').append(System.lineSeparator());
         }
+
+        sb.append(']').append(System.lineSeparator());
 
         return sb.toString();
     }

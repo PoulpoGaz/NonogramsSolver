@@ -25,11 +25,12 @@ public class Descriptor extends AbstractRegion {
      */
     private final boolean[][] possibilities;
 
+    private boolean changed = true;
+
     public Descriptor(boolean isRow, int index, int[] clues, CellWrapper[] cells) {
         this.isRow = isRow;
         this.index = index;
         this.cells = cells;
-
         this.clues = new Clue[clues.length];
 
         for (int i = 0; i < clues.length; i++) {
@@ -45,6 +46,14 @@ public class Descriptor extends AbstractRegion {
             possibilities[i] = new boolean[clues.length];
         }
 
+         for (CellWrapper w : cells) {
+            if (isRow) {
+                w.setRow(this);
+            } else {
+                w.setColumn(this);
+            }
+        }
+
 
         start = 0;
         end = cells.length;
@@ -54,6 +63,11 @@ public class Descriptor extends AbstractRegion {
 
     @Override
     public void trySolve() {
+        if (!changed) {
+            return;
+        }
+        changed = false;
+
         if (clues.length == 0) {
             fill(0, cells.length, Cell.CROSSED);
             return;
@@ -277,5 +291,13 @@ public class Descriptor extends AbstractRegion {
 
     public int getIndex() {
         return index;
+    }
+
+    public void setHasChanged(boolean changed) {
+        this.changed = changed;
+    }
+
+    public boolean hasChanged() {
+        return changed;
     }
 }

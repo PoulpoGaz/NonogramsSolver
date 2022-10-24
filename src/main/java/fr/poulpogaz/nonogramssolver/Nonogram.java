@@ -130,24 +130,26 @@ public class Nonogram {
         Objects.requireNonNull(listener);
 
         while (!isSolved()) {
+            boolean changed = false;
             for (Descriptor col : columns) {
-                col.trySolve();
-                listener.onColumnTrySolve(this, col);
+                if (col.hasChanged()) {
+                    col.trySolve();
+
+                    if (col.hasChanged()) {
+                        listener.onColumnTrySolve(this, col);
+                        changed = true;
+                    }
+                }
             }
 
             for (Descriptor row : rows) {
-                row.trySolve();
-                listener.onColumnTrySolve(this, row);
-            }
+                if (row.hasChanged()) {
+                    row.trySolve();
 
-            boolean changed = false;
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    if (solution[y][x].hasChanged()) {
+                    if (row.hasChanged()) {
+                        listener.onRowTrySolve(this, row);
                         changed = true;
                     }
-
-                    solution[y][x].setHasChanged(false);
                 }
             }
 
@@ -244,7 +246,7 @@ public class Nonogram {
             drawY += squareSize;
         }
 
-        if (squareSize > 10) {
+        if (squareSize > 5) {
             g2d.setColor(Color.BLACK);
             for (int y = 1; y < height; y++) {
                 g2d.drawLine(0, y * squareSize, width * squareSize, y * squareSize);
