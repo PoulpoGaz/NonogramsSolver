@@ -81,6 +81,8 @@ public class Descriptor extends AbstractRegion {
         initClues();
         computePossibilities();
         optimizeCluesBoundWithOnePossibility();
+        List<Line> lines = createLines();
+        comparePossibilitiesAndLines(lines);
         crossZeroCells();
 
         List<Region> regions = split();
@@ -90,7 +92,7 @@ public class Descriptor extends AbstractRegion {
                 r.trySolve();
             }
         } else {
-            tryFill();
+            tryFill(lines);
         }
     }
 

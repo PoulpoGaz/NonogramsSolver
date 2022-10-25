@@ -1,5 +1,8 @@
 package fr.poulpogaz.nonogramssolver;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A region is a part of a column/row that contains cell that shares the same possibilities
  */
@@ -21,11 +24,30 @@ public abstract class AbstractRegion {
             return;
         }
 
+        List<Line> lines = createLines();
+
         initClues();
         computePossibilities();
         optimizeCluesBoundWithOnePossibility();
+        comparePossibilitiesAndLines(lines);
         crossZeroCells();
-        tryFill();
+        tryFill(lines);
+    }
+
+    protected List<Line> createLines() {
+        List<Line> lines = new ArrayList<>();
+
+        int length = 0;
+        for (int i = start; i < end; i++) {
+            if (isFilled(i)) {
+                length++;
+            } else if (length > 0) {
+                lines.add(new Line(i - length, i));
+                length = 0;
+            }
+        }
+
+        return lines;
     }
 
     /**
@@ -62,14 +84,10 @@ public abstract class AbstractRegion {
             Clue clue = getClue(i);
 
             int j = clue.getMinI();
-            for (; j + clue.getLength() < clue.getMaxI(); j++) {
+            for (; j + clue.getLength() <= clue.getMaxI(); j++) {
                 if (fit(clue.getLength(), j)) {
                     markPossible(j, clue);
                 }
-            }
-
-            if (fit(clue.getLength(), clue.getMaxI() - clue.getLength())) {
-                markPossible(j, clue);
             }
 
 
@@ -194,6 +212,65 @@ public abstract class AbstractRegion {
         }
     }
 
+    protected void comparePossibilitiesAndLines(List<Line> lines) {
+        for (int i = 0; i < lines.size(); i++) {
+            Line line = lines.get(i);
+
+            int p = firstPossibilityIndex(line.start());
+
+            if (p < 0) {
+                continue;
+            }
+
+            Clue firstClue = getClue(p);
+
+            int max = Math.min(line.start() + firstClue.getLength(), end);
+            int maxLineEnd = -1;
+            for (int j = line.end(); j < max; j++) {
+                maxLineEnd = j;
+
+                if (isCrossed(j)) {
+                    break;
+                }
+            }
+
+            if (maxLineEnd >= 0) {
+                for (int j = maxLineEnd + 1; j < end; j++) {
+                    setPossibility(j, firstClue.getIndex(), false);
+                }
+            }
+        }
+
+        // reverse
+        for (int i = lines.size() - 1; i >= 0; i--) {
+            Line line = lines.get(i);
+
+            int p = lastPossibilityIndex(line.start());
+
+            if (p < 0) {
+                continue;
+            }
+
+            Clue lastClue = getClue(p);
+
+            int min = Math.max(line.end() - lastClue.getLength(), start);
+            int minLineEnd = -1;
+            for (int j = line.start(); j >= min; j--) {
+                minLineEnd = j;
+
+                if (isCrossed(j)) {
+                    break;
+                }
+            }
+
+            if (minLineEnd >= 0) {
+                for (int j = minLineEnd - 1; j >= start; j--) {
+                    setPossibility(j, lastClue.getIndex(), false);
+                }
+            }
+        }
+    }
+
     /**
      * Cross every cell that have no possibility
      */
@@ -213,7 +290,7 @@ public abstract class AbstractRegion {
     protected boolean fit(int line, int i) {
         if (i > 0 && isFilled(i - 1)) {
             return false;
-        } else if (i + line < size() && isFilled(i + line)) {
+        } else if (i + line > end || (i + line < end && isFilled(i + line))) {
             return false;
         } else {
             for (int j = 0; j < line; j++) {
@@ -276,7 +353,8 @@ public abstract class AbstractRegion {
         return true;
     }
 
-    protected void tryFill() {
+    protected void tryFill(List<Line> lines) {
+        // simple space method
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
             Clue clue = getClue(i);
 
@@ -299,6 +377,51 @@ public abstract class AbstractRegion {
                 int s = length - clue.getLength();
 
                 fill(minPossible + s, maxPossible - s + 1, Cell.FILLED);
+            }
+        }
+
+        // check line length
+        for (Line line : lines) {
+            int minLength = Integer.MAX_VALUE;
+
+            for (int i = firstClueIndex; i < lastClueIndex; i++) {
+                minLength = Math.min(minLength, getClueLength(i));
+            }
+
+            if (minLength == Integer.MAX_VALUE) {
+                continue;
+            }
+
+            int minPossible = line.start();
+            int maxPossible = line.end() - 1;
+
+            for (int i = line.start() - 1; i >= start; i--) {
+                if (line.end() - i <= minLength && !isCrossed(i)) {
+                    minPossible = i;
+                } else {
+                    break;
+                }
+            }
+
+            for (int i = line.end(); i < end; i++) {
+                if (i - line.start() <= minLength && !isCrossed(i)) {
+                    maxPossible = i;
+                } else {
+                    break;
+                }
+
+            }
+
+            int length = maxPossible + 1 - minPossible;
+            if (length < 2 * minLength) {
+                int s = length - minLength;
+
+                try {
+                    fill(minPossible + s, maxPossible - s, Cell.FILLED);
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println(this);
+                    throw e;
+                }
             }
         }
     }

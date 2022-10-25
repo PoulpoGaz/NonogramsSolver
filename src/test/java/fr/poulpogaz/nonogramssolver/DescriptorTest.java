@@ -521,7 +521,7 @@ public class DescriptorTest {
         descriptor.initClues();
         descriptor.computePossibilities();
         descriptor.optimizeCluesBoundWithOnePossibility();
-        descriptor.tryFill();
+        descriptor.tryFill(List.of());
         cellsEquals(wrappers, CROSSED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, FILLED, FILLED, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     }
 

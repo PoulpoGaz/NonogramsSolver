@@ -41,8 +41,12 @@ public class CellWrapper {
             this.content = content;
             hasChanged = true;
 
-            row.setHasChanged(true);
-            column.setHasChanged(true);
+            if (row != null) {
+                row.setHasChanged(true);
+            }
+            if (column != null) {
+                column.setHasChanged(true);
+            }
         }
     }
 

@@ -16,7 +16,8 @@ public class TotoroBug {
                 EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
                 CROSSED, CROSSED,
                 FILLED,
-                EMPTY, EMPTY,
+                EMPTY, // must be crossed
+                EMPTY,
                 FILLED,
                 CROSSED, CROSSED,
                 EMPTY,
@@ -26,7 +27,7 @@ public class TotoroBug {
                 CROSSED,
                 FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
                 CROSSED, CROSSED, CROSSED
-                );
+        );
         assertEquals(70, wrappers.length);
 
         int[] clues = new int[] {3, 1, 2, 2, 32};
@@ -37,17 +38,19 @@ public class TotoroBug {
         descriptor.initClues();
         descriptor.computePossibilities();
         descriptor.optimizeCluesBoundWithOnePossibility();
-
+        descriptor.comparePossibilitiesAndLines(descriptor.createLines());
         descriptor.crossZeroCells();
 
         List<Region> regions = descriptor.split();
+        regions.get(0).trySolve();
         printRegions(regions);
 
         cellsEquals(wrappers,
                 EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
                 CROSSED, CROSSED,
                 FILLED,
-                EMPTY, EMPTY,
+                CROSSED,
+                EMPTY,
                 FILLED,
                 CROSSED, CROSSED,
                 EMPTY,
