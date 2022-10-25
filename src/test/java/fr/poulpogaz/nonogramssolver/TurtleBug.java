@@ -68,4 +68,121 @@ public class TurtleBug {
                 EMPTY, EMPTY
         );
     }
+
+    @Test
+    void turtleBug2() {
+        CellWrapper[] wrappers = create(
+                EMPTY, EMPTY, EMPTY,
+                EMPTY, // must be filled
+                FILLED,
+                CROSSED,
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+                CROSSED,
+                FILLED,
+                CROSSED,
+                FILLED, FILLED,
+                CROSSED, CROSSED,
+                FILLED,
+                CROSSED,
+                FILLED,
+                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED,
+                FILLED,
+                CROSSED,
+                FILLED,
+                CROSSED
+        );
+        assertEquals(35, wrappers.length);
+
+        int[] clues = new int[] {2, 2, 1, 2, 1, 1, 1, 1};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+
+        descriptor.shrink();
+        descriptor.initClues();
+        descriptor.computePossibilities();
+        descriptor.optimizeCluesBoundWithOnePossibility();
+        descriptor.comparePossibilitiesAndLines(descriptor.createLines());
+        descriptor.crossZeroCells();
+
+        List<Region> regions = descriptor.split();
+        regions.get(0).trySolve();
+        printRegions(regions);
+
+
+        cellsEquals(wrappers,
+                EMPTY, EMPTY, EMPTY,
+                FILLED, // filled
+                FILLED,
+                CROSSED,
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+                CROSSED,
+                FILLED,
+                CROSSED,
+                FILLED, FILLED,
+                CROSSED, CROSSED,
+                FILLED,
+                CROSSED,
+                FILLED,
+                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED,
+                FILLED,
+                CROSSED,
+                FILLED,
+                CROSSED
+        );
+    }
+
+    @Test
+    void turtleBug3() {
+        CellWrapper[] wrappers = create(
+                FILLED, FILLED,
+                CROSSED,
+                FILLED, FILLED,
+                CROSSED,
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+                FILLED,
+                EMPTY,
+                CROSSED,
+                FILLED,
+                EMPTY, EMPTY,
+                FILLED,
+                CROSSED, CROSSED, CROSSED, CROSSED,
+                EMPTY,
+                CROSSED, CROSSED,
+                FILLED,
+                CROSSED,
+                FILLED, FILLED
+        );
+        assertEquals(35, wrappers.length);
+
+        int[] clues = new int[] {2, 2, 6, 2, 2, 1, 1, 2};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+
+        descriptor.shrink();
+        descriptor.initClues();
+        descriptor.computePossibilities();
+        descriptor.optimizeCluesBoundWithOnePossibility();
+        descriptor.comparePossibilitiesAndLines(descriptor.createLines());
+        descriptor.crossZeroCells();
+
+        cellsEquals(wrappers,
+                FILLED, FILLED,
+                CROSSED,
+                FILLED, FILLED,
+                CROSSED,
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+                FILLED,
+                EMPTY,
+                CROSSED,
+                FILLED,
+                EMPTY, CROSSED,
+                FILLED,
+                CROSSED, CROSSED, CROSSED, CROSSED,
+                EMPTY,
+                CROSSED, CROSSED,
+                FILLED,
+                CROSSED,
+                FILLED, FILLED
+        );
+    }
 }

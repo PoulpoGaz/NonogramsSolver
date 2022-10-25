@@ -123,6 +123,34 @@ public abstract class AbstractRegion {
                 }
             }
         }
+
+        // check validity
+        for (int i = firstClueIndex; i < lastClueIndex; i++) {
+            Clue clue = getClue(i);
+
+            int firstTrue = -1;
+            for (int j = clue.getMinI(); j < clue.getMaxI(); j++) {
+                if (possibility(j, i)) {
+                    if (firstTrue < 0) {
+                        firstTrue = j;
+                    }
+                } else if (firstTrue >= 0) {
+                    if (j - firstTrue < clue.getLength()) {
+                        for (int k = firstTrue; k < j; k++) {
+                            setPossibility(k, clue.getIndex(), false);
+                        }
+                    }
+
+                    firstTrue = -1;
+                }
+            }
+
+            if (firstTrue >= 0 && clue.getMaxI() - firstTrue < clue.getLength()) {
+                for (int k = firstTrue; k < clue.getMaxI(); k++) {
+                    setPossibility(k, clue.getIndex(), false);
+                }
+            }
+        }
     }
 
     protected void clearPossibilities() {
@@ -385,7 +413,9 @@ public abstract class AbstractRegion {
             int minLength = Integer.MAX_VALUE;
 
             for (int i = firstClueIndex; i < lastClueIndex; i++) {
-                minLength = Math.min(minLength, getClueLength(i));
+                if (possibility(line.start(), i)) {
+                    minLength = Math.min(minLength, getClueLength(i));
+                }
             }
 
             if (minLength == Integer.MAX_VALUE) {
