@@ -38,6 +38,10 @@ public class CellWrapper {
 
     public void set(Cell content) {
         if (this.content != content) {
+            if (this.content != null && this.content != Cell.EMPTY) {
+                throw new IllegalStateException("Changing cell at (%d; %d) from %s to %s".formatted(x, y, this.content, content));
+            }
+
             this.content = content;
             hasChanged = true;
 

@@ -20,7 +20,7 @@ public abstract class AbstractRegion {
 
     public void trySolve() {
         if (firstClueIndex == lastClueIndex) {
-            fill(start, start - end, Cell.CROSSED);
+            draw(start, start - end, Cell.CROSSED);
             return;
         }
 
@@ -96,20 +96,30 @@ public abstract class AbstractRegion {
                 clue.setMinI(j + 1);
             }
 
+            for (j = clue.getMaxI() - 1; j >= clue.getMinI() && !possibility(j, i); j--) {
+                clue.setMaxI(j);
+            }
+
             // update if necessary next clue's minI
             // it may happen if the space between current clue's minI and next clue's minI is insufficient
+            // for example: if the possibility array is as follows (T=true):
+            // 5: TTTTTTTTTT...
+            // 8:  TTTTTTTTT...
+            // It is impossible that there is the 8 at the six first indices
+            // NB: It must be done in the loop because it has influence over the next clue!
             if (i + 1 < lastClueIndex) {
                 Clue next = getClue(i + 1);
 
                 next.setMinI(Math.max(clue.getMinI() + clue.getLength() + 1, next.getMinI()));
             }
-
-            for (j = clue.getMaxI() - 1; j >= clue.getMinI() && !possibility(j, i); j--) {
-                clue.setMaxI(j);
-            }
         }
 
-        // update max
+        // also update max in reverse order!
+        // It may happen if the space between a clue's maxI and previous clue's maxI is insufficient
+        // for example:
+        // 2: TTTTTT
+        // 3: TTTTTTTT
+        // THe last two possibility for 2 are impossible
         for (int i = lastClueIndex - 1; i > 0; i--) {
             Clue clue = getClue(i);
             Clue previous = getClue(i - 1);
@@ -119,38 +129,20 @@ public abstract class AbstractRegion {
                 previous.setMaxI(clue.getMaxI() - clue.getLength() - 1);
 
                 for (int j = previous.getMaxI(); j < last; j++) {
-                    setPossibility(j, i - 1, false);
+                    setPossibility(j, previous, false);
+                }
+
+                // But some time, we removed so many that the previous clue cannot fit!
+                // example: TurtleBug 3
+                while (!possibility(previous.getMaxI() - 1, previous) ||
+                        !checkClue(previous, previous.getMaxI() - 1)) {
+                    previous.setMaxI(previous.getMaxI() - 1);
+                    setPossibility(previous.getMaxI(), previous, false);
                 }
             }
         }
 
-        // check validity
-        for (int i = firstClueIndex; i < lastClueIndex; i++) {
-            Clue clue = getClue(i);
-
-            int firstTrue = -1;
-            for (int j = clue.getMinI(); j < clue.getMaxI(); j++) {
-                if (possibility(j, i)) {
-                    if (firstTrue < 0) {
-                        firstTrue = j;
-                    }
-                } else if (firstTrue >= 0) {
-                    if (j - firstTrue < clue.getLength()) {
-                        for (int k = firstTrue; k < j; k++) {
-                            setPossibility(k, clue.getIndex(), false);
-                        }
-                    }
-
-                    firstTrue = -1;
-                }
-            }
-
-            if (firstTrue >= 0 && clue.getMaxI() - firstTrue < clue.getLength()) {
-                for (int k = firstTrue; k < clue.getMaxI(); k++) {
-                    setPossibility(k, clue.getIndex(), false);
-                }
-            }
-        }
+        checkClues();
     }
 
     protected void clearPossibilities() {
@@ -166,8 +158,18 @@ public abstract class AbstractRegion {
      */
     protected void markPossible(int i, Clue clue) {
         for (int j = i; j < i + clue.getLength(); j++) {
-            setPossibility(j, clue.getIndex(), true);
+            setPossibility(j, clue, true);
         }
+    }
+
+    protected boolean checkClue(Clue clue, int i) {
+        for (int j = i; j > i - clue.getLength(); j--) {
+            if (!possibility(j, clue)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected void optimizeCluesBoundWithOnePossibility() {
@@ -182,9 +184,7 @@ public abstract class AbstractRegion {
                     continue;
                 }
 
-                int p = getUniquePossibilityIndex(j);
-
-                if (p != clue.getIndex()) {
+                if (getUniquePossibility(j) != clue) {
                     continue;
                 }
 
@@ -200,8 +200,7 @@ public abstract class AbstractRegion {
             }
 
             // remove other possibilities:
-            // all possibilities that are not glued to the cell
-            // or too far are removed
+            // all possibilities that are too far are removed or separated by a crossed cell
 
             // moving to the left
             int min = clue.getMinI();
@@ -219,10 +218,11 @@ public abstract class AbstractRegion {
                 }
 
                 if (removeAll) {
-                    setPossibility(j, clue.getIndex(), false);
+                    setPossibility(j, clue, false);
                 }
             }
 
+            // copied code...
             // moving to the right
             removeAll = false;
             for (int j = lastIndex + 1; j < max; j++) {
@@ -234,69 +234,85 @@ public abstract class AbstractRegion {
                 }
 
                 if (removeAll) {
-                    setPossibility(j, clue.getIndex(), false);
+                    setPossibility(j, clue, false);
                 }
             }
         }
+
+        checkClues();
     }
 
+    /**
+     * For each line, we take the first clue that can represent this line,
+     * and we remove all clues that are too far.
+     * This is also done in reverse order
+     * See TurtleBug 1 and 2
+     */
     protected void comparePossibilitiesAndLines(List<Line> lines) {
+        loop:
         for (int i = 0; i < lines.size(); i++) {
             Line line = lines.get(i);
+            Clue firstClue = firstPossibility(line.start());
 
-            int p = firstPossibilityIndex(line.start());
-
-            if (p < 0) {
+            if (firstClue == null) {
                 continue;
             }
 
-            Clue firstClue = getClue(p);
-
-            int max = Math.min(line.start() + firstClue.getLength(), end);
-            int maxLineEnd = -1;
-            for (int j = line.end(); j < max; j++) {
-                maxLineEnd = j;
-
-                if (isCrossed(j)) {
-                    break;
+            for (int j = i + 1; j < lines.size(); j++) {
+                if (firstPossibility(lines.get(j).start()) == firstClue) {
+                    continue loop;
                 }
             }
 
-            if (maxLineEnd >= 0) {
-                for (int j = maxLineEnd + 1; j < end; j++) {
-                    setPossibility(j, firstClue.getIndex(), false);
+            int max = Math.min(Math.min(line.start() + firstClue.getLength(), end), firstClue.getMaxI());
+            firstClue.setMaxI(max);
+
+            for (int j = line.end(); j < firstClue.getMaxI(); j++) {
+                if (isCrossed(j)) {
+                    firstClue.setMaxI(j);
                 }
+            }
+
+            for (int j = firstClue.getMaxI(); j < end; j++) {
+                setPossibility(j, firstClue, false);
             }
         }
 
         // reverse
+        loop:
         for (int i = lines.size() - 1; i >= 0; i--) {
             Line line = lines.get(i);
 
-            int p = lastPossibilityIndex(line.start());
+            Clue lastClue = lastPossibility(line.start());
 
-            if (p < 0) {
+            if (lastClue == null) {
                 continue;
             }
 
-            Clue lastClue = getClue(p);
-
-            int min = Math.max(line.end() - lastClue.getLength(), start);
-            int minLineEnd = -1;
-            for (int j = line.start(); j >= min; j--) {
-                minLineEnd = j;
-
-                if (isCrossed(j)) {
-                    break;
+            for (int j = i - 1; j >= 0; j--) {
+                if (lastPossibility(lines.get(j).start()) == lastClue) {
+                    continue loop;
                 }
             }
 
-            if (minLineEnd >= 0) {
-                for (int j = minLineEnd - 1; j >= start; j--) {
-                    setPossibility(j, lastClue.getIndex(), false);
+            int min = Math.max(Math.max(line.end() - lastClue.getLength(), start), lastClue.getMinI());
+            lastClue.setMinI(min);
+            for (int j = line.start() - 1; j >= lastClue.getMinI(); j--) {
+                if (isCrossed(j)) {
+                    lastClue.setMinI(j + 1);
                 }
+            }
+
+            for (int j = lastClue.getMinI() - 1; j >= start; j--) {
+                setPossibility(j, lastClue, false);
             }
         }
+
+        checkClues();
+    }
+
+    protected boolean fitReverse(int line, int i) {
+        return fit(line, i - line);
     }
 
     /**
@@ -312,117 +328,29 @@ public abstract class AbstractRegion {
         }
     }
 
-    /**
-     * @return true if a line of length line can be put at the position i
-     */
-    protected boolean fit(int line, int i) {
-        if (i > 0 && isFilled(i - 1)) {
-            return false;
-        } else if (i + line > end || (i + line < end && isFilled(i + line))) {
-            return false;
-        } else {
-            for (int j = 0; j < line; j++) {
-                if (isCrossed(i + j)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    }
-
-    protected boolean fitReverse(int line, int i) {
-        return fit(line, i - line);
-    }
-
-    protected int getUniquePossibilityIndex(int cell) {
-        int possibility = -1;
-
-        for (int i = firstClueIndex; i < lastClueIndex; i++) {
-            if (possibility(cell, i)) {
-                if (possibility == -1) {
-                    possibility = i;
-                } else {
-                    return -1;
-                }
-            }
-        }
-
-        return possibility;
-    }
-
-    protected int firstPossibilityIndex(int cell) {
-        for (int i = firstClueIndex; i < lastClueIndex; i++) {
-            if (possibility(cell, i)) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    protected int lastPossibilityIndex(int cell) {
-        for (int i = lastClueIndex - 1; i >= firstClueIndex; i--) {
-            if (possibility(cell, i)) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    protected boolean haveZeroPossibility(int cell) {
-        for (int i = firstClueIndex; i < lastClueIndex; i++) {
-            if (possibility(cell, i)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     protected void tryFill(List<Line> lines) {
         // simple space method
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
             Clue clue = getClue(i);
 
-            int minPossible = Integer.MAX_VALUE;
-            int maxPossible = Integer.MIN_VALUE;
-
-            for (int j = clue.getMinI(); j < clue.getMaxI(); j++) {
-                if (possibility(j, i)) {
-                    minPossible = Math.min(j, minPossible);
-                    maxPossible = Math.max(j, maxPossible);
-                }
-            }
-
-            if (minPossible < start || minPossible >= end || maxPossible < start || maxPossible >= end) {
-                continue;
-            }
-
-            int length = maxPossible - minPossible + 1;
-            if (length < 2 * clue.getLength()) {
-                int s = length - clue.getLength();
-
-                fill(minPossible + s, maxPossible - s + 1, Cell.FILLED);
-            }
+            drawBetween(clue.getMinI(), clue.getMaxI(), clue.getLength());
         }
 
         // check line length
+        // for each line, we take the clue with the minimal length l,
+        // and we try to draw a line between the minimum and maximum possible
+        // of length l
+        // see TurtleBug 1 and 3
         for (Line line : lines) {
-            int minLength = Integer.MAX_VALUE;
+            int minLength = minClueLength(line.start());
 
-            for (int i = firstClueIndex; i < lastClueIndex; i++) {
-                if (possibility(line.start(), i)) {
-                    minLength = Math.min(minLength, getClueLength(i));
-                }
+            if (minLength < 0) {
+                throw new IllegalStateException(); // should not happen!
             }
 
-            if (minLength == Integer.MAX_VALUE) {
-                continue;
-            }
-
+            // inclusive
             int minPossible = line.start();
+            // inclusive...
             int maxPossible = line.end() - 1;
 
             for (int i = line.start() - 1; i >= start; i--) {
@@ -442,25 +370,169 @@ public abstract class AbstractRegion {
 
             }
 
-            int length = maxPossible + 1 - minPossible;
-            if (length < 2 * minLength) {
-                int s = length - minLength;
+            drawBetween(minPossible, maxPossible + 1, minLength);
+        }
+    }
 
-                try {
-                    fill(minPossible + s, maxPossible - s, Cell.FILLED);
-                } catch (IndexOutOfBoundsException e) {
-                    System.out.println(this);
-                    throw e;
+    /**
+     * Returns true if a line of length line can be put from {@code i} (included) to {@code i + line} (excluded).
+     * It means that if there is a cell at {@code i - 1} it returns false. Same things at {@code i + line}
+     *
+     * @return true if a line of length line can be put at the position i
+     */
+    protected boolean fit(int line, int i) {
+        if (i > 0 && isFilled(i - 1)) {
+            return false;
+        } else if (i + line > end || (i + line < end && isFilled(i + line))) {
+            return false;
+        } else {
+            for (int j = 0; j < line; j++) {
+                if (isCrossed(i + j)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    /**
+     * Returns the unique possibility at {@code cell}. If there is two or more clues that
+     * can match the position, it returns {@code null}
+     *
+     * @param cell the cell
+     * @return the unique possibility or {@code null}
+     */
+    protected Clue getUniquePossibility(int cell) {
+        int possibility = -1;
+
+        for (int i = firstClueIndex; i < lastClueIndex; i++) {
+            if (possibility(cell, i)) {
+                if (possibility == -1) {
+                    possibility = i;
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        if (possibility >= 0) {
+            return getClue(possibility);
+        } else {
+            return null;
+        }
+    }
+
+    protected Clue firstPossibility(int cell) {
+        for (int i = firstClueIndex; i < lastClueIndex; i++) {
+            if (possibility(cell, i)) {
+                return getClue(i);
+            }
+        }
+
+        return null;
+    }
+
+    protected Clue lastPossibility(int cell) {
+        for (int i = lastClueIndex - 1; i >= firstClueIndex; i--) {
+            if (possibility(cell, i)) {
+                return getClue(i);
+            }
+        }
+
+        return null;
+    }
+
+    protected int minClueLength(int cell) {
+        int minLength = Integer.MAX_VALUE;
+        for (int i = lastClueIndex - 1; i >= firstClueIndex; i--) {
+            if (possibility(cell, i)) {
+                minLength = Math.min(getClueLength(i), minLength);
+            }
+        }
+
+        return minLength == Integer.MAX_VALUE ? -1 : minLength;
+    }
+
+    protected int maxClueLength(int cell) {
+        int maxLength = -1;
+        for (int i = lastClueIndex - 1; i >= firstClueIndex; i--) {
+            if (possibility(cell, i)) {
+                maxLength = Math.max(getClueLength(i), maxLength);
+            }
+        }
+
+        return maxLength;
+    }
+
+    /**
+     * @param cell the cell
+     * @return true if the cell must be crossed
+     */
+    protected boolean haveZeroPossibility(int cell) {
+        for (int i = firstClueIndex; i < lastClueIndex; i++) {
+            if (possibility(cell, i)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Try to draw a part of a line of length 'lineLength' between 'min' and 'max'.
+     * It draws where it is certain that cells are filled, which is in the center
+     *
+     * @param min min index (inclusive)
+     * @param max max index (exclusive)
+     * @param lineLength the length of the line
+     */
+    protected void drawBetween(int min, int max, int lineLength) {
+        int totalLength = max - min;
+        if (totalLength < 2 * lineLength) {
+            int s = totalLength - lineLength;
+
+            draw(min + s, max - s, Cell.FILLED);
+        }
+    }
+
+    /**
+     * Draw a line from start (inclusive) to end (exclusive)
+     * @param start start of the line (inclusive)
+     * @param end end of the line (exclusive)
+     * @param cell of what the line is composed
+     */
+    protected void draw(int start, int end, Cell cell) {
+        for (int i = start; i < end; i++) {
+            setCell(i, cell);
+        }
+    }
+
+
+    /**
+     * Debug method that checks if clue minI and maxI are correct
+     */
+    protected void checkClues() {
+        for (int i = firstClueIndex; i < lastClueIndex; i++) {
+            Clue c = getClue(i);
+
+            if (!possibility(c.getMinI(), c)) {
+                throw new IllegalStateException("Invalid minI for clue: " + c + "\n" + this);
+            }
+            if (!possibility(c.getMaxI() - 1, c)) {
+                throw new IllegalStateException("Invalid maxI for clue: " + c + "\n" + this);
+            }
+
+            for (int j = start; j < end; j++) {
+                if (possibility(j, c) && j < c.getMinI()) {
+                    throw new IllegalStateException("Invalid minI for clue: " + c + ". at " + i + "\n" + this);
+                } else if (possibility(j, c) && j >= c.getMaxI()) {
+                    throw new IllegalStateException("Invalid maxI for clue: " + c + ". at " + i + "\n" + this);
                 }
             }
         }
     }
 
-    protected void fill(int start, int end, Cell cell) {
-        for (int i = start; i < end; i++) {
-            setCell(i, cell);
-        }
-    }
 
     /**
      * @return the minimal number of cell needed to match the descriptor
@@ -508,7 +580,15 @@ public abstract class AbstractRegion {
 
     protected abstract Clue getClue(int index);
 
+    protected void setPossibility(int cell, Clue clue, boolean possibility) {
+        setPossibility(cell, clue.getIndex(), possibility);
+    }
+
     protected abstract void setPossibility(int cell, int clueIndex, boolean possibility);
+
+    protected boolean possibility(int cell, Clue clue) {
+        return possibility(cell, clue.getIndex());
+    }
 
     protected abstract boolean possibility(int cell, int clueIndex);
 

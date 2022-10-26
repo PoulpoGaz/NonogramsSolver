@@ -62,4 +62,60 @@ public class TotoroBug {
                 CROSSED, CROSSED, CROSSED
         );
     }
+
+    @Test
+    void totoroBug2() {
+        CellWrapper[] wrappers = create(
+                FILLED,
+                CROSSED,
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED,
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+                FILLED, FILLED, FILLED,
+                EMPTY,
+                CROSSED,
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+                CROSSED,
+                FILLED, FILLED,
+                CROSSED,
+                FILLED, FILLED,
+                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED,
+                FILLED
+
+        );
+        assertEquals(70, wrappers.length);
+
+        int[] clues = new int[] {1, 1, 2, 8, 4, 1, 2, 2, 2, 2, 1};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+
+        descriptor.shrink();
+        descriptor.initClues();
+        descriptor.computePossibilities();
+        descriptor.optimizeCluesBoundWithOnePossibility();
+        descriptor.comparePossibilitiesAndLines(descriptor.createLines());
+        descriptor.crossZeroCells();
+
+        System.out.println(descriptor);
+        List<Region> regions = descriptor.split();
+        printRegions(regions);
+
+        cellsEquals(wrappers,
+                FILLED,
+                CROSSED,
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED,
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+                FILLED, FILLED, FILLED,
+                EMPTY,
+                CROSSED,
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+                CROSSED,
+                FILLED, FILLED,
+                CROSSED,
+                FILLED, FILLED,
+                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED,
+                FILLED
+        );
+    }
 }

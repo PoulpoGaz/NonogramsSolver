@@ -575,4 +575,36 @@ public class DescriptorTest {
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
         assertFalse(descriptor.isCompleted());
     }
+
+
+
+    @Test
+    void drawBetween() {
+        CellWrapper[] wrappers = createEmpty(10);
+        int[] clues = new int[] {};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        descriptor.drawBetween(0, 10, 5);
+        cellsEquals(wrappers, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+        descriptor.drawBetween(0, 10, 6);
+        cellsEquals(wrappers, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, FILLED, EMPTY, EMPTY, EMPTY, EMPTY);
+    }
+
+    @Test
+    void drawBetween2() {
+        CellWrapper[] wrappers = createEmpty(20);
+        int[] clues = new int[] {};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        descriptor.drawBetween(3, 10, 5);
+        cellsEquals(wrappers, EMPTY, EMPTY, EMPTY,
+                EMPTY, EMPTY, FILLED, FILLED, FILLED, EMPTY, EMPTY,
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+        descriptor.drawBetween(6, 15, 8);
+        cellsEquals(wrappers, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED,
+                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, EMPTY,
+                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    }
 }

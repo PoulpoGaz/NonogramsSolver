@@ -23,6 +23,8 @@ public class TestUtils {
     }
 
     public static void cellsEquals(CellWrapper[] input, Cell... expected) {
+        assertEquals(expected.length, input.length);
+
         for (int i = 0; i < input.length; i++) {
             assertEquals(expected[i], input[i].get(), "At: " + i);
         }

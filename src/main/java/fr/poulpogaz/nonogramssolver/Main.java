@@ -64,9 +64,9 @@ public class Main implements Runnable {
                 throw new IllegalStateException();
             }
 
-            nonogram.solve(listener);
-
-            listener.close();
+            try (listener) {
+                nonogram.solve(listener);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
