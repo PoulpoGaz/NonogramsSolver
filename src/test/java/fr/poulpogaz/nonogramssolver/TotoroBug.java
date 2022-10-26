@@ -42,7 +42,7 @@ public class TotoroBug {
         descriptor.crossZeroCells();
 
         List<Region> regions = descriptor.split();
-        regions.get(0).trySolve();
+        //regions.get(0).trySolve();
         printRegions(regions);
 
         cellsEquals(wrappers,
@@ -96,9 +96,8 @@ public class TotoroBug {
         descriptor.comparePossibilitiesAndLines(descriptor.createLines());
         descriptor.crossZeroCells();
 
-        System.out.println(descriptor);
         List<Region> regions = descriptor.split();
-        printRegions(regions);
+        regions.get(2).trySolve();
 
         cellsEquals(wrappers,
                 FILLED,
@@ -109,7 +108,7 @@ public class TotoroBug {
                 FILLED, FILLED, FILLED,
                 EMPTY,
                 CROSSED,
-                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+                EMPTY, EMPTY, EMPTY, FILLED, EMPTY, EMPTY, FILLED, EMPTY,
                 CROSSED,
                 FILLED, FILLED,
                 CROSSED,

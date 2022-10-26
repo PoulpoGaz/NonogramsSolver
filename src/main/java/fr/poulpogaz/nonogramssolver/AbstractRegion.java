@@ -174,72 +174,78 @@ public abstract class AbstractRegion {
 
     protected void optimizeCluesBoundWithOnePossibility() {
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
-            Clue clue = getClue(i);
+            optimizeClueBoundWithOnePossibility(getClue(i));
+        }
 
-            // find the first index (and last) that we are sure it is associated with the clue
-            int firstIndex = -1;
-            int lastIndex = -1;
-            for (int j = clue.getMinI(); j < clue.getMaxI(); j++) {
-                if (!isFilled(j)) {
-                    continue;
-                }
-
-                if (getUniquePossibility(j) != clue) {
-                    continue;
-                }
-
-                // this cell is associated with this clue
-                if (firstIndex < 0) {
-                    firstIndex = j;
-                }
-                lastIndex = j;
-            }
-
-            if (firstIndex < 0) {
-                continue;
-            }
-
-            // remove other possibilities:
-            // all possibilities that are too far are removed or separated by a crossed cell
-
-            // moving to the left
-            int min = clue.getMinI();
-            int max = clue.getMaxI();
-
-            int maxDist = clue.getLength() - (lastIndex - firstIndex);
-
-            boolean removeAll = false;
-            for (int j = firstIndex - 1; j >= min; j--) {
-                if (!removeAll) {
-                    if (!possibility(j, clue.getIndex()) || Math.abs(j - firstIndex) >= maxDist) {
-                        removeAll = true;
-                        clue.setMinI(j + 1);
-                    }
-                }
-
-                if (removeAll) {
-                    setPossibility(j, clue, false);
-                }
-            }
-
-            // copied code...
-            // moving to the right
-            removeAll = false;
-            for (int j = lastIndex + 1; j < max; j++) {
-                if (!removeAll) {
-                    if (!possibility(j, clue.getIndex()) || Math.abs(j - lastIndex) >= maxDist) {
-                        removeAll = true;
-                        clue.setMaxI(j);
-                    }
-                }
-
-                if (removeAll) {
-                    setPossibility(j, clue, false);
-                }
-            }
+        for (int i = lastClueIndex - 1; i >= firstClueIndex; i--) {
+            optimizeClueBoundWithOnePossibility(getClue(i));
         }
 
         checkClues();
+    }
+
+    protected void optimizeClueBoundWithOnePossibility(Clue clue) {
+        // find the first index (and last) that we are sure it is associated with the clue
+        int firstIndex = -1;
+        int lastIndex = -1;
+        for (int j = clue.getMinI(); j < clue.getMaxI(); j++) {
+            if (!isFilled(j)) {
+                continue;
+            }
+
+            if (getUniquePossibility(j) != clue) {
+                continue;
+            }
+
+            // this cell is associated with this clue
+            if (firstIndex < 0) {
+                firstIndex = j;
+            }
+            lastIndex = j;
+        }
+
+        if (firstIndex < 0) {
+            return;
+        }
+
+        // remove other possibilities:
+        // all possibilities that are too far are removed or separated by a crossed cell
+
+        // moving to the left
+        int min = clue.getMinI();
+        int max = clue.getMaxI();
+
+        int maxDist = clue.getLength() - (lastIndex - firstIndex);
+
+        boolean removeAll = false;
+        for (int j = firstIndex - 1; j >= min; j--) {
+            if (!removeAll) {
+                if (!possibility(j, clue.getIndex()) || Math.abs(j - firstIndex) >= maxDist) {
+                    removeAll = true;
+                    clue.setMinI(j + 1);
+                }
+            }
+
+            if (removeAll) {
+                setPossibility(j, clue, false);
+            }
+        }
+
+        // copied code...
+        // moving to the right
+        removeAll = false;
+        for (int j = lastIndex + 1; j < max; j++) {
+            if (!removeAll) {
+                if (!possibility(j, clue.getIndex()) || Math.abs(j - lastIndex) >= maxDist) {
+                    removeAll = true;
+                    clue.setMaxI(j);
+                }
+            }
+
+            if (removeAll) {
+                setPossibility(j, clue, false);
+            }
+        }
     }
 
     /**
@@ -268,7 +274,7 @@ public abstract class AbstractRegion {
             firstClue.setMaxI(max);
 
             for (int j = line.end(); j < firstClue.getMaxI(); j++) {
-                if (isCrossed(j)) {
+                if (isCrossed(j) || !possibility(j, firstClue)) {
                     firstClue.setMaxI(j);
                 }
             }
@@ -298,7 +304,7 @@ public abstract class AbstractRegion {
             int min = Math.max(Math.max(line.end() - lastClue.getLength(), start), lastClue.getMinI());
             lastClue.setMinI(min);
             for (int j = line.start() - 1; j >= lastClue.getMinI(); j--) {
-                if (isCrossed(j)) {
+                if (isCrossed(j) || !possibility(j, lastClue)) {
                     lastClue.setMinI(j + 1);
                 }
             }

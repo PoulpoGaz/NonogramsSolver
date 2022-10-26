@@ -185,4 +185,43 @@ public class TurtleBug {
                 FILLED, FILLED
         );
     }
+
+    @Test
+    void turtleBug4() {
+        CellWrapper[] wrappers = create(
+                CROSSED,
+                EMPTY, EMPTY, EMPTY,
+                FILLED,
+                EMPTY, EMPTY, EMPTY, EMPTY,
+                FILLED,
+                EMPTY,
+                EMPTY, EMPTY, EMPTY, // must be crossed
+                CROSSED, FILLED, CROSSED, FILLED, CROSSED, CROSSED, CROSSED, FILLED, CROSSED, CROSSED, FILLED, FILLED, CROSSED, CROSSED, CROSSED, FILLED
+        );
+        assertEquals(30, wrappers.length);
+
+        int[] clues = new int[] {4, 2, 1, 1, 1, 2, 1};
+
+        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+
+        descriptor.shrink();
+        descriptor.initClues();
+        descriptor.computePossibilities();
+        descriptor.optimizeCluesBoundWithOnePossibility();
+        descriptor.comparePossibilitiesAndLines(descriptor.createLines());
+        descriptor.crossZeroCells();
+
+        printRegions(descriptor.split());
+
+        cellsEquals(wrappers,
+                CROSSED,
+                EMPTY, EMPTY, EMPTY,
+                FILLED,
+                EMPTY, EMPTY, EMPTY, EMPTY,
+                FILLED,
+                EMPTY,
+                CROSSED, CROSSED, CROSSED, // must be crossed
+                CROSSED, FILLED, CROSSED, FILLED, CROSSED, CROSSED, CROSSED, FILLED, CROSSED, CROSSED, FILLED, FILLED, CROSSED, CROSSED, CROSSED, FILLED
+        );
+    }
 }
