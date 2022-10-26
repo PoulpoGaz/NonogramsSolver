@@ -28,7 +28,6 @@ public class TurtleBug {
 
         List<Region> regions = descriptor.split();
         regions.get(0).trySolve();
-        printRegions(regions);
 
         cellsEquals(wrappers, parse("____██XXX______X██X███X__██__X__█__"));
     }
@@ -52,8 +51,6 @@ public class TurtleBug {
 
         List<Region> regions = descriptor.split();
         regions.get(0).trySolve();
-        printRegions(regions);
-
 
         cellsEquals(wrappers, parse("___██X__________X█X██XX█X█XXXXX█X█X"));
     }

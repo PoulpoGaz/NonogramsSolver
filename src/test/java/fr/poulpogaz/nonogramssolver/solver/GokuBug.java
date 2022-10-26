@@ -82,10 +82,6 @@ public class GokuBug {
         descriptor.optimizeCluesBoundWithOnePossibility();
         descriptor.crossZeroCells();
 
-        List<Region> regions = descriptor.split();
-        regions.get(3).trySolve();
-        printRegions(regions);
-
         cellsEquals(wrappers, parse("██XX█████████X█XXXX██XXXXXXXXX██XXX███████X██XXXXX██XXXXXXXXXXXXXXXXXXXXXXXXXXXX"));
     }
 }

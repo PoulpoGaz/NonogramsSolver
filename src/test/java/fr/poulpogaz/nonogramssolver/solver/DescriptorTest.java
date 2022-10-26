@@ -488,7 +488,7 @@ public class DescriptorTest {
         List<Region> regions = descriptor.split();
         regions.get(1).trySolve();
 
-        cellsEquals(wrappers, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, CROSSED, FILLED, FILLED);
+        cellsEquals(wrappers, parse("_____█______X██"));
     }
 
     @Test
@@ -502,7 +502,7 @@ public class DescriptorTest {
         descriptor.computePossibilities();
         descriptor.optimizeCluesBoundWithOnePossibility();
         descriptor.tryFill(List.of());
-        cellsEquals(wrappers, CROSSED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, FILLED, FILLED, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+        cellsEquals(wrappers, parse("X     ████     "));
     }
 
 

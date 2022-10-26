@@ -252,7 +252,8 @@ public abstract class AbstractRegion {
      * For each line, we take the first clue that can represent this line,
      * and we remove all clues that are too far.
      * This is also done in reverse order
-     * See TurtleBug 1 and 2
+     * See TurtleBug 1 and 2 and TotoroBug 1.
+     * Actually, I don't know why it works lol
      */
     protected void comparePossibilitiesAndLines(List<Line> lines) {
         loop:
@@ -264,11 +265,11 @@ public abstract class AbstractRegion {
                 continue;
             }
 
-            for (int j = i + 1; j < lines.size(); j++) {
+            /*for (int j = i + 1; j < lines.size(); j++) {
                 if (firstPossibility(lines.get(j).start()) == firstClue) {
                     continue loop;
                 }
-            }
+            }*/
 
             int max = Math.min(Math.min(line.start() + firstClue.getLength(), end), firstClue.getMaxI());
             firstClue.setMaxI(max);
@@ -295,11 +296,11 @@ public abstract class AbstractRegion {
                 continue;
             }
 
-            for (int j = i - 1; j >= 0; j--) {
+            /*for (int j = i - 1; j >= 0; j--) {
                 if (lastPossibility(lines.get(j).start()) == lastClue) {
                     continue loop;
                 }
-            }
+            }*/
 
             int min = Math.max(Math.max(line.end() - lastClue.getLength(), start), lastClue.getMinI());
             lastClue.setMinI(min);

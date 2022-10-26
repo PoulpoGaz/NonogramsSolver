@@ -61,14 +61,11 @@ public class Descriptor extends AbstractRegion {
         lastClueIndex = clues.length;
     }
 
-    public static int i = 0;
-
     @Override
     public void trySolve() {
         if (!changed) {
             return;
         }
-        i++;
         changed = false;
 
         if (clues.length == 0) {

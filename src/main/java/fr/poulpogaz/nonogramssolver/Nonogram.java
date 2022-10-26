@@ -85,7 +85,6 @@ public class Nonogram {
     private final Descriptor[] columns;
 
     private final CellWrapper[][] solution;
-    private SolutionStatus status = SolutionStatus.NOT_SOLVED;
 
     public Nonogram(int[][] rows, int[][] columns) {
         this.width = columns.length;
