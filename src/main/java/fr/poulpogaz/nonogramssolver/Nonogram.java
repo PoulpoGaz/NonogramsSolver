@@ -1,5 +1,10 @@
 package fr.poulpogaz.nonogramssolver;
 
+import fr.poulpogaz.nonogramssolver.solver.Cell;
+import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
+import fr.poulpogaz.nonogramssolver.solver.Clue;
+import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -20,7 +25,7 @@ public class Nonogram {
             rows[y] = createSideNumbers(image, 0, y, true);
         }
 
-        return new Nonogram(image.getWidth(), image.getHeight(), rows, cols);
+        return new Nonogram(rows, cols);
     }
 
     /**
@@ -82,9 +87,9 @@ public class Nonogram {
     private final CellWrapper[][] solution;
     private SolutionStatus status = SolutionStatus.NOT_SOLVED;
 
-    public Nonogram(int width, int height, int[][] rows, int[][] columns) {
-        this.width = width;
-        this.height = height;
+    public Nonogram(int[][] rows, int[][] columns) {
+        this.width = columns.length;
+        this.height = rows.length;
 
         solution = new CellWrapper[height][width];
 

@@ -1,11 +1,11 @@
-package fr.poulpogaz.nonogramssolver;
+package fr.poulpogaz.nonogramssolver.solver;
 
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static fr.poulpogaz.nonogramssolver.Cell.*;
-import static fr.poulpogaz.nonogramssolver.TestUtils.*;
+import static fr.poulpogaz.nonogramssolver.solver.Cell.*;
+import static fr.poulpogaz.nonogramssolver.solver.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TotoroBug {

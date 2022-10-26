@@ -1,6 +1,6 @@
 package fr.poulpogaz.nonogramssolver;
 
-import java.util.function.Consumer;
+import fr.poulpogaz.nonogramssolver.solver.Descriptor;
 
 public interface SolverListener {
 

@@ -1,10 +1,14 @@
-package fr.poulpogaz.nonogramssolver;
+package fr.poulpogaz.nonogramssolver.solver;
 
+import fr.poulpogaz.nonogramssolver.solver.Cell;
+import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
+import fr.poulpogaz.nonogramssolver.solver.Clue;
+import fr.poulpogaz.nonogramssolver.solver.Region;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.List;
 
-import static fr.poulpogaz.nonogramssolver.Cell.EMPTY;
+import static fr.poulpogaz.nonogramssolver.solver.Cell.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestUtils {

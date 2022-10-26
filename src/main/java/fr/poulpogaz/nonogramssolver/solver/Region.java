@@ -1,4 +1,4 @@
-package fr.poulpogaz.nonogramssolver;
+package fr.poulpogaz.nonogramssolver.solver;
 
 /**
  * A region is a part of a column/row that contains cell that shares the same possibilities

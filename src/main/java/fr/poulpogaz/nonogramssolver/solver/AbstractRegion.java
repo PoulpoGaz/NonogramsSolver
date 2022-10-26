@@ -1,4 +1,4 @@
-package fr.poulpogaz.nonogramssolver;
+package fr.poulpogaz.nonogramssolver.solver;
 
 import java.util.ArrayList;
 import java.util.List;
