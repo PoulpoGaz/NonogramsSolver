@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static fr.poulpogaz.nonogramssolver.solver.Cell.*;
 import static fr.poulpogaz.nonogramssolver.solver.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,16 +12,7 @@ public class GokuBug {
 
     @Test
     void gokuBug1() {
-        CellWrapper[] wrappers = create(
-                FILLED,
-                CROSSED, CROSSED,
-                FILLED, FILLED,
-                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-                EMPTY,
-                FILLED,
-                CROSSED, CROSSED, CROSSED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED
-        );
+        CellWrapper[] wrappers = parse("█XX██XXXXXXXXXXXXX__________________________________________█XXX████████████████");
         assertEquals(80, wrappers.length);
 
         int[] clues = new int[]{1, 2, 10, 2, 2, 1, 16};
@@ -31,40 +21,16 @@ public class GokuBug {
         descriptor.initClues();
         descriptor.computePossibilities();
         descriptor.optimizeCluesBoundWithOnePossibility();
+        descriptor.crossZeroCells();
 
-        List<Region> regions = descriptor.split();
-
-        Region r2 = regions.get(2);
-        r2.trySolve();
-
-        cellsEquals(wrappers,
-                FILLED,
-                CROSSED, CROSSED,
-                FILLED, FILLED,
-                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-                CROSSED, // now crossed!!
-                FILLED,
-                CROSSED, CROSSED, CROSSED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED
-        );
+        cellsEquals(wrappers, parse("█XX██XXXXXXXXXXXXX_________________________________________X█XXX████████████████"));
 
     }
 
     @Test
     void gokuBug2() {
-        CellWrapper[] wrappers = create(
-                CROSSED, EMPTY,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                EMPTY, CROSSED, CROSSED, CROSSED,
-                EMPTY, // must be crossed!
-                FILLED, FILLED,
-                CROSSED,
-                EMPTY, EMPTY, EMPTY, EMPTY,
-                FILLED, FILLED,
-                CROSSED,
-                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED
-        );
+        // must be crossed                            here --> <--
+        CellWrapper[] wrappers = parse("X_████████████████_XXX_██X____██X____________________________XXXXXXXXXXXXXXXXXXX");
         assertEquals(80, wrappers.length);
 
         int[] clues = new int[]{17, 2, 3, 2, 5, 2, 7};
@@ -73,46 +39,15 @@ public class GokuBug {
         descriptor.initClues();
         descriptor.computePossibilities();
         descriptor.optimizeCluesBoundWithOnePossibility();
+        descriptor.crossZeroCells();
 
-        List<Region> regions = descriptor.split();
-
-        Region r1 = regions.get(1);
-        r1.trySolve();
-
-        cellsEquals(wrappers,
-                CROSSED, EMPTY,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                EMPTY, CROSSED, CROSSED, CROSSED,
-                EMPTY, // must be crossed!
-                FILLED, FILLED,
-                CROSSED,
-                EMPTY, EMPTY, EMPTY, EMPTY,
-                FILLED, FILLED,
-                CROSSED,
-                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED
-        );
-
+        cellsEquals(wrappers, parse("X_████████████████_XXXX██X____██X____________________________XXXXXXXXXXXXXXXXXXX"));
     }
 
     @Test
     void gokuBug3() {
-        CellWrapper[] wrappers = create(
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                CROSSED, CROSSED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                CROSSED,
-                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                EMPTY, EMPTY, // must be filled!
-                FILLED, FILLED,
-                CROSSED, CROSSED, CROSSED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                CROSSED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                CROSSED,
-                FILLED
-        );
+        //                                                            must be filled here -->  <--
+        CellWrapper[] wrappers = parse("██████████████XX████████████████████X______██████████__██XXX█████████X████████X█");
         assertEquals(80, wrappers.length);
 
         int[] clues = new int[]{14, 20, 1, 14, 9, 8, 1};
@@ -127,48 +62,13 @@ public class GokuBug {
         Region r3 = regions.get(3);
         r3.trySolve();
 
-        cellsEquals(wrappers,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                CROSSED, CROSSED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                CROSSED,
-                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                FILLED, FILLED, // must be filled!
-                FILLED, FILLED,
-                CROSSED, CROSSED, CROSSED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                CROSSED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                CROSSED,
-                FILLED
-        );
+        cellsEquals(wrappers, parse("██████████████XX████████████████████X______██████████████XXX█████████X████████X█"));
     }
 
     @Test
     void gokuBug4() {
-        CellWrapper[] wrappers = create(
-                FILLED, FILLED,
-                CROSSED, CROSSED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                CROSSED,
-                FILLED,
-                CROSSED,
-                EMPTY, EMPTY, // must be crossed
-                CROSSED,
-                FILLED, FILLED,
-                CROSSED,
-                EMPTY, EMPTY, EMPTY, EMPTY, // must be crossed
-                CROSSED, CROSSED, CROSSED, CROSSED,
-                FILLED, FILLED,
-                CROSSED, CROSSED, CROSSED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                CROSSED,
-                FILLED, FILLED,
-                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED,
-                FILLED, FILLED,
-                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED
-        );
+        // must be crossed                      here -->  <-->    <--
+        CellWrapper[] wrappers = parse("██XX█████████X█X__X██X____XXXX██XXX███████X██XXXXX██XXXXXXXXXXXXXXXXXXXXXXXXXXXX");
         assertEquals(80, wrappers.length);
 
         int[] clues = new int[] {2, 9, 1, 2, 2, 7, 2, 2};
@@ -180,34 +80,12 @@ public class GokuBug {
         descriptor.initClues();
         descriptor.computePossibilities();
         descriptor.optimizeCluesBoundWithOnePossibility();
-
         descriptor.crossZeroCells();
 
         List<Region> regions = descriptor.split();
         regions.get(3).trySolve();
         printRegions(regions);
 
-        cellsEquals(wrappers,
-                FILLED, FILLED,
-                CROSSED, CROSSED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                CROSSED,
-                FILLED,
-                CROSSED,
-                CROSSED, CROSSED, // now crossed!
-                CROSSED,
-                FILLED, FILLED,
-                CROSSED,
-                CROSSED, CROSSED, CROSSED, CROSSED, // now crossed!
-                CROSSED, CROSSED, CROSSED, CROSSED,
-                FILLED, FILLED,
-                CROSSED, CROSSED, CROSSED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED,
-                CROSSED,
-                FILLED, FILLED,
-                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED,
-                FILLED, FILLED,
-                CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED, CROSSED
-        );
+        cellsEquals(wrappers, parse("██XX█████████X█XXXX██XXXXXXXXX██XXX███████X██XXXXX██XXXXXXXXXXXXXXXXXXXXXXXXXXXX"));
     }
 }

@@ -1,9 +1,5 @@
 package fr.poulpogaz.nonogramssolver.solver;
 
-import fr.poulpogaz.nonogramssolver.solver.Cell;
-import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
-import fr.poulpogaz.nonogramssolver.solver.Clue;
-import fr.poulpogaz.nonogramssolver.solver.Region;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.List;
@@ -34,11 +30,29 @@ public class TestUtils {
         }
     }
 
+    public static void cellsEquals(CellWrapper[] input, CellWrapper... expected) {
+        assertEquals(expected.length, input.length);
+
+        for (int i = 0; i < input.length; i++) {
+            assertEquals(expected[i].get(), input[i].get(), "At: " + i);
+        }
+    }
+
     public static CellWrapper[] create(Cell... cells) {
         CellWrapper[] wrappers = new CellWrapper[cells.length];
 
         for (int i = 0; i < cells.length; i++) {
             wrappers[i] = new CellWrapper(cells[i], i, 0);
+        }
+
+        return wrappers;
+    }
+
+    public static CellWrapper[] parse(String str) {
+        CellWrapper[] wrappers = new CellWrapper[str.length()];
+
+        for (int i = 0; i < str.length(); i++) {
+            wrappers[i] = new CellWrapper(Cell.valueOf(str.charAt(i)), i, 0);
         }
 
         return wrappers;

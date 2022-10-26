@@ -219,11 +219,7 @@ public class DescriptorTest {
     void possibilitiesTestWithCell() {
         // 15 | 2 6 2
 
-        CellWrapper[] wrappers = create(
-                EMPTY, EMPTY, FILLED, EMPTY, EMPTY,
-                EMPTY, EMPTY, FILLED, EMPTY, EMPTY,
-                EMPTY, EMPTY, FILLED, EMPTY, EMPTY
-        );
+        CellWrapper[] wrappers = parse("__█____█____█__");
         int[] clues = new int[] {2, 6, 2};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -261,9 +257,7 @@ public class DescriptorTest {
     void possibilitiesTestWithCell2() {
         // 15 | 5 2
 
-        CellWrapper[] wrappers = create(
-                EMPTY, EMPTY, FILLED, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, FILLED, EMPTY, EMPTY
-        );
+        CellWrapper[] wrappers = parse("__█___█____██__");
         int[] clues = new int[] {5, 2};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -299,9 +293,7 @@ public class DescriptorTest {
     void possibilitiesTestWithCell3() {
         // 15 | 5 2 2
 
-        CellWrapper[] wrappers = create(
-                EMPTY, EMPTY, FILLED, FILLED, EMPTY, FILLED, FILLED, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, FILLED, EMPTY, EMPTY
-        );
+        CellWrapper[] wrappers = parse("__██_██___█_█__");
         int[] clues = new int[] {5, 2, 2};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -345,9 +337,7 @@ public class DescriptorTest {
     void optimizeCluesBoundWithOnePossibilitiesTest() {
         // 15 | 5 2
 
-        CellWrapper[] wrappers = create(
-                EMPTY, EMPTY, FILLED, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, FILLED, EMPTY, EMPTY
-        );
+        CellWrapper[] wrappers = parse("__█___█____██__");
         int[] clues = new int[] {5, 2};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -358,8 +348,8 @@ public class DescriptorTest {
         // cell then clue (5, 2)
         boolean[][] expected = new boolean[][] {
                 //             5      2
-                new boolean[] {true,  false},
-                new boolean[] {true,  false},
+                new boolean[] {false,  false},
+                new boolean[] {false,  false},
                 new boolean[] {true,  false},
                 new boolean[] {true,  false},
                 new boolean[] {true,  false},
@@ -376,7 +366,7 @@ public class DescriptorTest {
         };
 
         arrayEquals(expected, descriptor.getPossibilities());
-        assertEquals(0, descriptor.getClues()[0].getMinI());
+        assertEquals(2, descriptor.getClues()[0].getMinI());
         assertEquals(7, descriptor.getClues()[0].getMaxI());
         assertEquals(11, descriptor.getClues()[1].getMinI());
         assertEquals(13, descriptor.getClues()[1].getMaxI());
@@ -386,9 +376,7 @@ public class DescriptorTest {
     void optimizeCluesBoundWithOnePossibilitiesTest2() {
         // 15 | 5 2 2
 
-        CellWrapper[] wrappers = create(
-                EMPTY, EMPTY, FILLED, FILLED, EMPTY, FILLED, FILLED, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, FILLED, EMPTY, EMPTY
-        );
+        CellWrapper[] wrappers = parse("__██_██___█_█__");
         int[] clues = new int[] {5, 2, 2};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -445,9 +433,7 @@ public class DescriptorTest {
 
     @Test
     void splitTest2() {
-        CellWrapper[] wrappers = create(
-                EMPTY, EMPTY, FILLED, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, FILLED, EMPTY, EMPTY
-        );
+        CellWrapper[] wrappers = parse("__█___█____██__");
         int[] clues = new int[] {5, 2};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -457,15 +443,13 @@ public class DescriptorTest {
         List<Region> regions = descriptor.split();
 
         assertEquals(2, regions.size());
-        assertEquals(new Region(descriptor, 0, 7, 0, 1), regions.get(0));
+        assertEquals(new Region(descriptor, 2, 7, 0, 1), regions.get(0));
         assertEquals(new Region(descriptor, 11, 13, 1, 2), regions.get(1));
     }
 
     @Test
     void splitTest3() {
-        CellWrapper[] wrappers = create(
-                EMPTY, EMPTY, FILLED, FILLED, EMPTY, FILLED, FILLED, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, FILLED, EMPTY, EMPTY
-        );
+        CellWrapper[] wrappers = parse("__██_██___█_█__");
         int[] clues = new int[] {5, 2, 2};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -493,9 +477,7 @@ public class DescriptorTest {
 
     @Test
     void completeTest1() {
-        CellWrapper[] wrappers = create(
-                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, CROSSED, EMPTY, FILLED
-        );
+        CellWrapper[] wrappers = parse("_____█______X_█");
         int[] clues = new int[] {2, 2, 2};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -511,9 +493,7 @@ public class DescriptorTest {
 
     @Test
     void completeTest2() {
-        CellWrapper[] wrappers = create(
-                CROSSED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, FILLED, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY
-        );
+        CellWrapper[] wrappers = parse("X_____███______");
         int[] clues = new int[] {2, 6, 2};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -534,9 +514,7 @@ public class DescriptorTest {
 
     @Test
     void isCompletedTest1() {
-        CellWrapper[] wrappers = create(
-                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY
-        );
+        CellWrapper[] wrappers = createEmpty(15);
         int[] clues = new int[] {2, 6, 2};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -545,9 +523,7 @@ public class DescriptorTest {
 
     @Test
     void isCompletedTest2() {
-        CellWrapper[] wrappers = create(
-                EMPTY, FILLED, FILLED, CROSSED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, EMPTY, EMPTY, FILLED, FILLED, EMPTY
-        );
+        CellWrapper[] wrappers = parse("_██X██████__██_");
         int[] clues = new int[] {2, 6, 2};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -556,9 +532,7 @@ public class DescriptorTest {
 
     @Test
     void isCompletedTest3() {
-        CellWrapper[] wrappers = create(
-                CROSSED, FILLED, CROSSED, CROSSED, CROSSED, CROSSED, FILLED, CROSSED, CROSSED, CROSSED, EMPTY, FILLED, FILLED, EMPTY, FILLED
-        );
+        CellWrapper[] wrappers = parse("X█XXXX█XXX_██_█");
         int[] clues = new int[] {1, 1, 2, 1};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -567,9 +541,7 @@ public class DescriptorTest {
 
     @Test
     void isCompletedTest4() {
-        CellWrapper[] wrappers = create(
-                EMPTY, EMPTY, FILLED, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY
-        );
+        CellWrapper[] wrappers = parse("__█____________");
         int[] clues = new int[] {};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
@@ -585,10 +557,10 @@ public class DescriptorTest {
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
         descriptor.drawBetween(0, 10, 5);
-        cellsEquals(wrappers, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+        cellsEquals(wrappers, createEmpty(10));
 
         descriptor.drawBetween(0, 10, 6);
-        cellsEquals(wrappers, EMPTY, EMPTY, EMPTY, EMPTY, FILLED, FILLED, EMPTY, EMPTY, EMPTY, EMPTY);
+        cellsEquals(wrappers, parse("____██____"));
     }
 
     @Test
@@ -598,13 +570,9 @@ public class DescriptorTest {
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
         descriptor.drawBetween(3, 10, 5);
-        cellsEquals(wrappers, EMPTY, EMPTY, EMPTY,
-                EMPTY, EMPTY, FILLED, FILLED, FILLED, EMPTY, EMPTY,
-                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+        cellsEquals(wrappers, parse("_____███____________"));
 
         descriptor.drawBetween(6, 15, 8);
-        cellsEquals(wrappers, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, FILLED,
-                FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, FILLED, EMPTY,
-                EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+        cellsEquals(wrappers, parse("_____█████████______"));
     }
 }
