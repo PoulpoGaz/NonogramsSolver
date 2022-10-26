@@ -14,7 +14,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@CommandLine.Command
+// netero
+// drakkar
+// red_deer
+@CommandLine.Command(version = "1.0")
 public class Main implements Runnable {
 
     public static void main(String[] args) {
