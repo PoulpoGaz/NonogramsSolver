@@ -1,5 +1,8 @@
 package fr.poulpogaz.nonogramssolver;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,5 +38,35 @@ public class Utils {
 
     public static int nDigit(int i) {
         return (int) Math.log10(i) + 1;
+    }
+
+    public static String getExtension(Path path) {
+        String filename = path.getFileName().toString();
+
+        int dot = filename.lastIndexOf('.');
+
+        if (dot < 0) {
+            return "";
+        } else {
+            return filename.substring(dot + 1);
+        }
+    }
+
+    public static String getFileName(Path path) {
+        String filename = path.getFileName().toString();
+
+        int dot = filename.lastIndexOf('.');
+
+        if (dot < 0) {
+            return filename;
+        } else {
+            return filename.substring(0, dot);
+        }
+    }
+
+    public static void createDirectories(Path p) throws IOException {
+        if (!Files.exists(p.getParent())) {
+            Files.createDirectories(p.getParent());
+        }
     }
 }

@@ -215,14 +215,76 @@ public class Nonogram {
     }
 
     public BufferedImage asImage(int squareSize) {
-        BufferedImage image = new BufferedImage(squareSize * width, squareSize * height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = image.createGraphics();
+        return asImage(squareSize, true);
+    }
 
-        int drawX = 0;
-        int drawY = 0;
+    public BufferedImage asImage(int squareSize, boolean withClues) {
+        int imgWidth = squareSize * width;
+        int imgHeight = squareSize * height;
+        int rowWidth = 0;
+        int colHeight = 0;
+
+        int maxDigit = 1;
+
+        if (withClues) {
+            for (Descriptor row : rows) {
+                rowWidth = Math.max(row.nClues() * squareSize, rowWidth);
+
+                for (Clue c : row.getClues()) {
+                    maxDigit = Math.max(maxDigit, Utils.nDigit(c.getLength()));
+                }
+            }
+
+            for (Descriptor col : columns) {
+                colHeight = Math.max(col.nClues() * squareSize, colHeight);
+
+                for (Clue c : col.getClues()) {
+                    maxDigit = Math.max(maxDigit, Utils.nDigit(c.getLength()));
+                }
+            }
+
+            imgWidth += rowWidth;
+            imgHeight += colHeight;
+        }
+
+        BufferedImage image = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g2d = image.createGraphics();
+        try {
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+            g2d.setFont(g2d.getFont().deriveFont((float) squareSize / maxDigit));
+
+            g2d.setColor(Color.WHITE);
+            g2d.fillRect(0, 0, imgWidth, imgHeight);
+
+            int gridOffsetX = rowWidth;
+            int gridOffsetY = colHeight;
+
+            if (rowWidth > 0 && colHeight > 0) {
+                drawColumnsClues(g2d, gridOffsetX, gridOffsetY, squareSize);
+                drawRowsClues(g2d, gridOffsetY, gridOffsetX, squareSize);
+
+                g2d.setClip(0, 0, imgWidth, imgHeight);
+            }
+
+            drawNonogram(g2d, gridOffsetX, gridOffsetY, squareSize);
+            drawGrid(g2d, gridOffsetX, gridOffsetY, imgWidth, imgHeight, squareSize);
+        } finally {
+            g2d.dispose();
+        }
+
+        return image;
+    }
+
+    private void drawNonogram(Graphics2D g2d, int offsetX, int offsetY, int squareSize) {
+        int drawX;
+        int drawY = offsetY;
         for (int y = 0; y < height; y++) {
 
-            drawX = 0;
+            drawX = offsetX;
             for (int x = 0; x < width; x++) {
                 CellWrapper cell = solution[y][x];
 
@@ -248,21 +310,70 @@ public class Nonogram {
 
             drawY += squareSize;
         }
+    }
 
+    private void drawColumnsClues(Graphics2D g2d, int xOffset, int maxY, int squareSize) {
+        g2d.setColor(Color.BLACK);
+        FontMetrics fm = g2d.getFontMetrics();
+
+        int x = xOffset;
+        for (Descriptor col : columns) {
+            int y = maxY - squareSize;
+
+            for (int i = col.nClues() - 1; i >= 0; i--) {
+                String str = Integer.toString(col.getClue(i).getLength());
+
+                g2d.setClip(x, y, squareSize, squareSize);
+                g2d.drawString(str,
+                        x + (squareSize - fm.stringWidth(str)) / 2,
+                        y + (squareSize - fm.getHeight()) / 2 + fm.getAscent());
+
+                y -= squareSize;
+            }
+
+            x += squareSize;
+        }
+    }
+
+    private void drawRowsClues(Graphics2D g2d, int yOffset, int maxX, int squareSize) {
+        g2d.setColor(Color.BLACK);
+        FontMetrics fm = g2d.getFontMetrics();
+
+        int y = yOffset;
+        for (Descriptor row : rows) {
+            int x = maxX - squareSize;
+
+            for (int i = row.nClues() - 1; i >= 0; i--) {
+                String str = Integer.toString(row.getClue(i).getLength());
+
+                g2d.setClip(x, y, squareSize, squareSize);
+                g2d.drawString(str,
+                        x + (squareSize - fm.stringWidth(str)) / 2,
+                        y + (squareSize - fm.getHeight()) / 2 + fm.getAscent());
+
+                x -= squareSize;
+            }
+
+            y += squareSize;
+        }
+    }
+
+    private void drawGrid(Graphics2D g2d, int gridOffsetX, int gridOffsetY, int imgWidth, int imgHeight, int squareSize) {
         if (squareSize > 5) {
             g2d.setColor(Color.BLACK);
-            for (int y = 1; y < height; y++) {
-                g2d.drawLine(0, y * squareSize, width * squareSize, y * squareSize);
+
+            // rows
+            for (int y = 0; y < height; y++) {
+                g2d.drawLine(0, gridOffsetY + y * squareSize,
+                             imgWidth, gridOffsetY + y * squareSize);
             }
 
-            for (int x = 1; x < width; x++) {
-                g2d.drawLine(x * squareSize, 0, x * squareSize, height * squareSize);
+            // cols
+            for (int x = 0; x < width; x++) {
+                g2d.drawLine(gridOffsetX + x * squareSize, 0,
+                             gridOffsetX + x * squareSize, imgHeight);
             }
         }
-
-        g2d.dispose();
-
-        return image;
     }
 
 
