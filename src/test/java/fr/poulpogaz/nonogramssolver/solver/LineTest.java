@@ -1,6 +1,5 @@
 package fr.poulpogaz.nonogramssolver.solver;
 
-import fr.poulpogaz.nonogramssolver.solver.Line;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

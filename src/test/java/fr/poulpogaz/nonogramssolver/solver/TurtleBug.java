@@ -1,5 +1,7 @@
 package fr.poulpogaz.nonogramssolver.solver;
 
+import fr.poulpogaz.nonogramssolver.CellWrapper;
+import fr.poulpogaz.nonogramssolver.Descriptor;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -9,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TurtleBug {
 
+    private static final DefaultLineSolver solver = new DefaultLineSolver();
+    
     @Test
     void turtleBug() {
         // must be filled           here --> <--
@@ -19,14 +23,15 @@ public class TurtleBug {
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
 
-        descriptor.shrink();
-        descriptor.initClues();
-        descriptor.computePossibilities();
-        descriptor.optimizeCluesBoundWithOnePossibility();
-        descriptor.comparePossibilitiesAndLines(descriptor.createLines());
-        descriptor.crossZeroCells();
+        solver.setDescriptor(descriptor);
+        solver.shrink();
+        solver.initClues();
+        solver.computePossibilities();
+        solver.optimizeCluesBoundWithOnePossibility();
+        solver.comparePossibilitiesAndLines(solver.createLines());
+        solver.crossZeroCells();
 
-        List<Region> regions = descriptor.split();
+        List<Region> regions = solver.split();
         regions.get(0).trySolve();
 
         cellsEquals(wrappers, parse("____██XXX______X██X███X__██__X__█__"));
@@ -42,14 +47,15 @@ public class TurtleBug {
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
 
-        descriptor.shrink();
-        descriptor.initClues();
-        descriptor.computePossibilities();
-        descriptor.optimizeCluesBoundWithOnePossibility();
-        descriptor.comparePossibilitiesAndLines(descriptor.createLines());
-        descriptor.crossZeroCells();
+        solver.setDescriptor(descriptor);
+        solver.shrink();
+        solver.initClues();
+        solver.computePossibilities();
+        solver.optimizeCluesBoundWithOnePossibility();
+        solver.comparePossibilitiesAndLines(solver.createLines());
+        solver.crossZeroCells();
 
-        List<Region> regions = descriptor.split();
+        List<Region> regions = solver.split();
         regions.get(0).trySolve();
 
         cellsEquals(wrappers, parse("___██X__________X█X██XX█X█XXXXX█X█X"));
@@ -65,12 +71,13 @@ public class TurtleBug {
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
 
-        descriptor.shrink();
-        descriptor.initClues();
-        descriptor.computePossibilities();
-        descriptor.optimizeCluesBoundWithOnePossibility();
-        descriptor.comparePossibilitiesAndLines(descriptor.createLines());
-        descriptor.crossZeroCells();
+        solver.setDescriptor(descriptor);
+        solver.shrink();
+        solver.initClues();
+        solver.computePossibilities();
+        solver.optimizeCluesBoundWithOnePossibility();
+        solver.comparePossibilitiesAndLines(solver.createLines());
+        solver.crossZeroCells();
 
         cellsEquals(wrappers, parse("██X██X___________█_X█_X█XXXX_XX█X██"));
     }
@@ -85,12 +92,13 @@ public class TurtleBug {
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
 
-        descriptor.shrink();
-        descriptor.initClues();
-        descriptor.computePossibilities();
-        descriptor.optimizeCluesBoundWithOnePossibility();
-        descriptor.comparePossibilitiesAndLines(descriptor.createLines());
-        descriptor.crossZeroCells();
+        solver.setDescriptor(descriptor);
+        solver.shrink();
+        solver.initClues();
+        solver.computePossibilities();
+        solver.optimizeCluesBoundWithOnePossibility();
+        solver.comparePossibilitiesAndLines(solver.createLines());
+        solver.crossZeroCells();
 
         cellsEquals(wrappers, parse("X___█____█_XXXX█X█XXX█XX██XXX█"));
     }

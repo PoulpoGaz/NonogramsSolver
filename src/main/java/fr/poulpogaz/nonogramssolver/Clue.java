@@ -1,4 +1,4 @@
-package fr.poulpogaz.nonogramssolver.solver;
+package fr.poulpogaz.nonogramssolver;
 
 public class Clue {
 

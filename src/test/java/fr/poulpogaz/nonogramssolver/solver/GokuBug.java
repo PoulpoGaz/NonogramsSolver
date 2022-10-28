@@ -1,5 +1,7 @@
 package fr.poulpogaz.nonogramssolver.solver;
 
+import fr.poulpogaz.nonogramssolver.CellWrapper;
+import fr.poulpogaz.nonogramssolver.Descriptor;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -10,6 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GokuBug {
 
+    private static final DefaultLineSolver solver = new DefaultLineSolver();
+    
     @Test
     void gokuBug1() {
         CellWrapper[] wrappers = parse("█XX██XXXXXXXXXXXXX__________________________________________█XXX████████████████");
@@ -18,10 +22,11 @@ public class GokuBug {
         int[] clues = new int[]{1, 2, 10, 2, 2, 1, 16};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        descriptor.initClues();
-        descriptor.computePossibilities();
-        descriptor.optimizeCluesBoundWithOnePossibility();
-        descriptor.crossZeroCells();
+        solver.setDescriptor(descriptor);
+        solver.initClues();
+        solver.computePossibilities();
+        solver.optimizeCluesBoundWithOnePossibility();
+        solver.crossZeroCells();
 
         cellsEquals(wrappers, parse("█XX██XXXXXXXXXXXXX_________________________________________X█XXX████████████████"));
 
@@ -36,10 +41,11 @@ public class GokuBug {
         int[] clues = new int[]{17, 2, 3, 2, 5, 2, 7};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        descriptor.initClues();
-        descriptor.computePossibilities();
-        descriptor.optimizeCluesBoundWithOnePossibility();
-        descriptor.crossZeroCells();
+        solver.setDescriptor(descriptor);
+        solver.initClues();
+        solver.computePossibilities();
+        solver.optimizeCluesBoundWithOnePossibility();
+        solver.crossZeroCells();
 
         cellsEquals(wrappers, parse("X_████████████████_XXXX██X____██X____________________________XXXXXXXXXXXXXXXXXXX"));
     }
@@ -53,11 +59,12 @@ public class GokuBug {
         int[] clues = new int[]{14, 20, 1, 14, 9, 8, 1};
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        descriptor.initClues();
-        descriptor.computePossibilities();
-        descriptor.optimizeCluesBoundWithOnePossibility();
+        solver.setDescriptor(descriptor);
+        solver.initClues();
+        solver.computePossibilities();
+        solver.optimizeCluesBoundWithOnePossibility();
 
-        List<Region> regions = descriptor.split();
+        List<Region> regions = solver.split();
 
         Region r3 = regions.get(3);
         r3.trySolve();
@@ -76,11 +83,12 @@ public class GokuBug {
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
         assertTrue(descriptor.isCompleted());
 
-        descriptor.shrink();
-        descriptor.initClues();
-        descriptor.computePossibilities();
-        descriptor.optimizeCluesBoundWithOnePossibility();
-        descriptor.crossZeroCells();
+        solver.setDescriptor(descriptor);
+        solver.shrink();
+        solver.initClues();
+        solver.computePossibilities();
+        solver.optimizeCluesBoundWithOnePossibility();
+        solver.crossZeroCells();
 
         cellsEquals(wrappers, parse("██XX█████████X█XXXX██XXXXXXXXX██XXX███████X██XXXXX██XXXXXXXXXXXXXXXXXXXXXXXXXXXX"));
     }

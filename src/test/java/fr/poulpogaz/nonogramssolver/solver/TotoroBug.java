@@ -1,5 +1,7 @@
 package fr.poulpogaz.nonogramssolver.solver;
 
+import fr.poulpogaz.nonogramssolver.CellWrapper;
+import fr.poulpogaz.nonogramssolver.Descriptor;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -8,6 +10,8 @@ import static fr.poulpogaz.nonogramssolver.solver.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TotoroBug {
+
+    private static final DefaultLineSolver solver = new DefaultLineSolver();
 
     @Test
     void totoroBug() {
@@ -18,14 +22,15 @@ public class TotoroBug {
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
 
-        descriptor.shrink();
-        descriptor.initClues();
-        descriptor.computePossibilities();
-        descriptor.optimizeCluesBoundWithOnePossibility();
-        descriptor.comparePossibilitiesAndLines(descriptor.createLines());
-        descriptor.crossZeroCells();
+        solver.setDescriptor(descriptor);
+        solver.shrink();
+        solver.initClues();
+        solver.computePossibilities();
+        solver.optimizeCluesBoundWithOnePossibility();
+        solver.comparePossibilitiesAndLines(solver.createLines());
+        solver.crossZeroCells();
 
-        List<Region> regions = descriptor.split();
+        List<Region> regions = solver.split();
         //regions.get(0).trySolve();
         printRegions(regions);
 
@@ -42,14 +47,15 @@ public class TotoroBug {
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
 
-        descriptor.shrink();
-        descriptor.initClues();
-        descriptor.computePossibilities();
-        descriptor.optimizeCluesBoundWithOnePossibility();
-        descriptor.comparePossibilitiesAndLines(descriptor.createLines());
-        descriptor.crossZeroCells();
+        solver.setDescriptor(descriptor);
+        solver.shrink();
+        solver.initClues();
+        solver.computePossibilities();
+        solver.optimizeCluesBoundWithOnePossibility();
+        solver.comparePossibilitiesAndLines(solver.createLines());
+        solver.crossZeroCells();
 
-        List<Region> regions = descriptor.split();
+        List<Region> regions = solver.split();
         regions.get(2).trySolve();
 
         cellsEquals(wrappers, parse("█X_______________XXXXXXXXX_________███_X___█__█_X██X██XXXXXXXXXXXXXXX█"));

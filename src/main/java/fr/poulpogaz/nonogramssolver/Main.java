@@ -1,7 +1,6 @@
 package fr.poulpogaz.nonogramssolver;
 
 import fr.poulpogaz.nonogramssolver.reader.WebpbnReader;
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
 import picocli.CommandLine;
 
 import javax.imageio.ImageIO;

@@ -1,18 +1,23 @@
 package fr.poulpogaz.nonogramssolver.solver;
 
+import fr.poulpogaz.nonogramssolver.Cell;
+import fr.poulpogaz.nonogramssolver.CellWrapper;
+import fr.poulpogaz.nonogramssolver.Clue;
+import fr.poulpogaz.nonogramssolver.Descriptor;
+
 /**
  * A region is a part of a column/row that contains cell that shares the same possibilities
  */
 public class Region extends AbstractRegion {
 
-    private final Descriptor descriptor;
+    private final AbstractRegion ancestor;
 
-    public Region(Descriptor descriptor) {
-        this.descriptor = descriptor;
+    public Region(AbstractRegion ancestor) {
+        this.ancestor = ancestor;
     }
 
-    public Region(Descriptor descriptor, int start, int end, int firstClueIndex, int lastClueIndex) {
-        this.descriptor = descriptor;
+    public Region(AbstractRegion ancestor, int start, int end, int firstClueIndex, int lastClueIndex) {
+        this.ancestor = ancestor;
         this.start = start;
         this.end = end;
         this.firstClueIndex = firstClueIndex;
@@ -21,27 +26,27 @@ public class Region extends AbstractRegion {
 
     @Override
     protected CellWrapper getCell(int index) {
-        return descriptor.getCell(index);
+        return ancestor.getCell(index);
     }
 
     @Override
     protected void setCell(int index, Cell cell) {
-        descriptor.setCell(index, cell);
+        ancestor.setCell(index, cell);
     }
 
     @Override
     protected Clue getClue(int index) {
-        return descriptor.getClue(index);
+        return ancestor.getClue(index);
     }
 
     @Override
     protected void setPossibility(int cell, int clueIndex, boolean possibility) {
-        descriptor.setPossibility(cell, clueIndex, possibility);
+        ancestor.setPossibility(cell, clueIndex, possibility);
     }
 
     @Override
     protected boolean possibility(int cell, int clueIndex) {
-        return descriptor.possibility(cell, clueIndex);
+        return ancestor.possibility(cell, clueIndex);
     }
 
     public int getStart() {

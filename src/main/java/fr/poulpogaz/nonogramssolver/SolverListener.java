@@ -1,7 +1,5 @@
 package fr.poulpogaz.nonogramssolver;
 
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
-
 public interface SolverListener {
 
     SolverListener EMPTY_LISTENER = new SolverListener() {

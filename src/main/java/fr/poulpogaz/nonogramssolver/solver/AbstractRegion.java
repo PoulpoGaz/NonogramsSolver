@@ -1,5 +1,9 @@
 package fr.poulpogaz.nonogramssolver.solver;
 
+import fr.poulpogaz.nonogramssolver.Cell;
+import fr.poulpogaz.nonogramssolver.CellWrapper;
+import fr.poulpogaz.nonogramssolver.Clue;
+
 import java.util.ArrayList;
 import java.util.List;
 

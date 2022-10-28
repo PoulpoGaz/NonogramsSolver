@@ -1,7 +1,5 @@
 package fr.poulpogaz.nonogramssolver;
 
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
-
 public abstract class SolverAdapter implements SolverListener {
     @Override
     public void onColumnTrySolve(Nonogram n, Descriptor d) {

@@ -1,9 +1,6 @@
 package fr.poulpogaz.nonogramssolver;
 
-import fr.poulpogaz.nonogramssolver.solver.Cell;
-import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
-import fr.poulpogaz.nonogramssolver.solver.Clue;
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.DefaultLineSolver;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -133,11 +130,13 @@ public class Nonogram {
     public boolean solve(SolverListener listener) {
         Objects.requireNonNull(listener);
 
+        DefaultLineSolver solver = new DefaultLineSolver();
+
         while (!isSolved()) {
             boolean changed = false;
             for (Descriptor col : columns) {
                 if (col.hasChanged()) {
-                    col.trySolve();
+                    solver.trySolve(col);
 
                     if (col.hasChanged()) {
                         listener.onColumnTrySolve(this, col);
@@ -148,7 +147,7 @@ public class Nonogram {
 
             for (Descriptor row : rows) {
                 if (row.hasChanged()) {
-                    row.trySolve();
+                    solver.trySolve(row);
 
                     if (row.hasChanged()) {
                         listener.onRowTrySolve(this, row);
