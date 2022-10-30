@@ -260,7 +260,6 @@ public abstract class AbstractRegion {
      * Actually, I don't know why it works lol
      */
     protected void comparePossibilitiesAndLines(List<Line> lines) {
-        loop:
         for (int i = 0; i < lines.size(); i++) {
             Line line = lines.get(i);
             Clue firstClue = firstPossibility(line.start());
@@ -268,12 +267,6 @@ public abstract class AbstractRegion {
             if (firstClue == null) {
                 continue;
             }
-
-            /*for (int j = i + 1; j < lines.size(); j++) {
-                if (firstPossibility(lines.get(j).start()) == firstClue) {
-                    continue loop;
-                }
-            }*/
 
             int max = Math.min(Math.min(line.start() + firstClue.getLength(), end), firstClue.getMaxI());
             firstClue.setMaxI(max);
@@ -285,12 +278,15 @@ public abstract class AbstractRegion {
             }
 
             for (int j = firstClue.getMaxI(); j < end; j++) {
-                setPossibility(j, firstClue, false);
+                for (int k = firstClueIndex; k <= firstClue.getIndex(); k++) {
+                    setPossibility(j, k, false);
+                }
             }
+
+            recalculateMinIMaxI();
         }
 
         // reverse
-        loop:
         for (int i = lines.size() - 1; i >= 0; i--) {
             Line line = lines.get(i);
 
@@ -299,12 +295,6 @@ public abstract class AbstractRegion {
             if (lastClue == null) {
                 continue;
             }
-
-            /*for (int j = i - 1; j >= 0; j--) {
-                if (lastPossibility(lines.get(j).start()) == lastClue) {
-                    continue loop;
-                }
-            }*/
 
             int min = Math.max(Math.max(line.end() - lastClue.getLength(), start), lastClue.getMinI());
             lastClue.setMinI(min);
@@ -315,8 +305,12 @@ public abstract class AbstractRegion {
             }
 
             for (int j = lastClue.getMinI() - 1; j >= start; j--) {
-                setPossibility(j, lastClue, false);
+                for (int k = lastClue.getIndex(); k < lastClueIndex; k++) {
+                    setPossibility(j, k, false);
+                }
             }
+
+            recalculateMinIMaxI();
         }
 
         checkClues();
@@ -544,6 +538,24 @@ public abstract class AbstractRegion {
         }
     }
 
+    protected void recalculateMinIMaxI() {
+        for (int i = firstClueIndex; i < lastClueIndex; i++) {
+            Clue clue = getClue(i);
+
+            int minI = Integer.MAX_VALUE;
+            int maxI = 0;
+
+            for (int j = start; j < end; j++) {
+                if (possibility(j, clue)) {
+                    minI = Math.min(minI, j);
+                    maxI = Math.max(maxI, j);
+                }
+            }
+
+            clue.setMinI(minI);
+            clue.setMaxI(maxI + 1);
+        }
+    }
 
     /**
      * @return the minimal number of cell needed to match the descriptor

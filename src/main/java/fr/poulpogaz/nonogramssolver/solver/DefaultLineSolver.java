@@ -36,9 +36,9 @@ public class DefaultLineSolver extends AbstractRegion implements LineSolver {
             return;
         }
 
-        System.out.println("-------------------------------------");
-        System.out.printf("Row: %b. Index: %d%n", descriptor.isRow(), descriptor.getIndex());
-        System.out.println("Clues: " + Arrays.toString(descriptor.getClues()));
+        //System.out.println("-------------------------------------");
+        //System.out.printf("Row: %b. Index: %d%n", descriptor.isRow(), descriptor.getIndex());
+        //System.out.println("Clues: " + Arrays.toString(descriptor.getClues()));
 
         shrink();
         initClues();
