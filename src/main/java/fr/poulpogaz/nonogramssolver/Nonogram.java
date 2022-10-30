@@ -139,11 +139,9 @@ public class Nonogram {
     public boolean solve(SolverListener listener) {
         Objects.requireNonNull(listener);
 
-        LineSolver defaultSolver = new DefaultLineSolver();
-        LineSolver completeSolver = new CompleteLineSolver();
-        LineSolver solver = defaultSolver;
+        LineSolver solver = new DefaultLineSolver();
+        LineSolver complete = new CompleteLineSolver();
 
-        int i = 0;
         while (!isSolved()) {
             boolean changed = false;
             for (Descriptor col : columns) {
@@ -153,7 +151,6 @@ public class Nonogram {
                     if (col.hasChanged()) {
                         listener.onColumnTrySolve(this, col);
                         changed = true;
-                        solver = defaultSolver;
                     }
                 }
             }
@@ -165,34 +162,16 @@ public class Nonogram {
                     if (row.hasChanged()) {
                         listener.onRowTrySolve(this, row);
                         changed = true;
-                        solver = defaultSolver;
                     }
                 }
             }
 
-            if (!changed && solver == completeSolver || i >= 1000) {
+            if (!changed) {
                 listener.onFail(this);
                 return false;
-            } else if (!changed) {
-                solver = completeSolver;
-
-                for (Descriptor r : rows) {
-                    if (!r.isCompleted()) {
-                        r.setHasChanged(true);
-                    }
-                }
-
-                for (Descriptor r : columns) {
-                    if (!r.isCompleted()) {
-                        r.setHasChanged(true);
-                    }
-                }
-
             } else {
                 listener.onPassFinished(this);
             }
-
-            i++;
         }
 
         listener.onSuccess(this);

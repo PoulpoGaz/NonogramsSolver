@@ -65,6 +65,7 @@ public class TurtleBug {
     void turtleBug3() {
         // must be crossed                            here --> <---> <--
         CellWrapper[] wrappers = parse("██X██X___________█_X█__█XXXX_XX█X██");
+        // must be filled                 here -->  <--   --> <--
         assertEquals(35, wrappers.length);
 
         int[] clues = new int[] {2, 2, 6, 2, 2, 1, 1, 2};
@@ -79,7 +80,10 @@ public class TurtleBug {
         solver.comparePossibilitiesAndLines(solver.createLines());
         solver.crossZeroCells();
 
-        cellsEquals(wrappers, parse("██X██X___________█_X█_X█XXXX_XX█X██"));
+        for (AbstractRegion r : solver.split()) {
+            r.trySolve();
+        }
+        cellsEquals(wrappers, parse("██X██X____██_____█_X██X█XXXXXXX█X██"));
     }
 
     @Test

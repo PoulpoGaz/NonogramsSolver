@@ -15,7 +15,9 @@ public class TotoroBug {
 
     @Test
     void totoroBug() {
+        // must be crossed                          here --> <-- -->      <--
         CellWrapper[] wrappers = parse("_________________XX█__█XX_█X______X████████████████████████████████XXX");
+        // must be filled                            here --> <-> <--
         assertEquals(70, wrappers.length);
 
         int[] clues = new int[] {3, 1, 2, 2, 32};
@@ -31,10 +33,11 @@ public class TotoroBug {
         solver.crossZeroCells();
 
         List<Region> regions = solver.split();
-        //regions.get(0).trySolve();
-        printRegions(regions);
+        for (Region r : regions) {
+            r.trySolve();
+        }
 
-        cellsEquals(wrappers, parse("_________________XX█X_█XX_█X______X████████████████████████████████XXX"));
+        cellsEquals(wrappers, parse("_________________XX█X██XX██XXXXXXXX████████████████████████████████XXX"));
     }
 
     @Test
