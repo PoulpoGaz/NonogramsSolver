@@ -3,14 +3,18 @@ package fr.poulpogaz.nonogramssolver.solver;
 import fr.poulpogaz.nonogramssolver.Cell;
 import fr.poulpogaz.nonogramssolver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.Clue;
+import fr.poulpogaz.nonogramssolver.Descriptor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * A region is a part of a column/row that contains cell that shares the same possibilities
  */
 public abstract class AbstractRegion {
+
+    protected Descriptor descriptor;
 
     // included
     protected int start;
@@ -21,6 +25,10 @@ public abstract class AbstractRegion {
     protected int firstClueIndex;
     // excluded
     protected int lastClueIndex;
+
+    public AbstractRegion(Descriptor descriptor) {
+        this.descriptor = descriptor;
+    }
 
     public void trySolve() {
         if (firstClueIndex == lastClueIndex) {
@@ -58,7 +66,7 @@ public abstract class AbstractRegion {
      * Set minI and maxI for all clues without checking the map
      */
     protected void initClues() {
-        int minI = start;
+        /*int minI = start;
         int maxI = end - descriptorLength();
 
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
@@ -73,15 +81,36 @@ public abstract class AbstractRegion {
 
             c.setMinI(minI);
             c.setMaxI(maxI);
-        }
+        }*/
+
+        initClues2();
     }
 
-    /**
-     * Compute possibilities. It doesn't take into account all information that gave the map.
-     * For example, for 15 cells, clues 5 2 and a map looking like this: '  F    F    FF  ',
-     * it won't realize that outside the first two F, it mustn't have a 5.
-     */
-    protected void computePossibilities() {
+    protected void initClues2() {
+        int minI = start;
+        for (int i = firstClueIndex; i < lastClueIndex; i++) {
+            Clue c = getClue(i);
+
+            while (!fit(c.getLength(), minI)) {
+                minI++;
+            }
+
+            c.setMinI(minI);
+            minI += c.getLength() + 1;
+        }
+
+        int maxI = end;
+        for (int i =  lastClueIndex - 1; i >= firstClueIndex; i--) {
+            Clue c = getClue(i);
+
+            while (!fitReverse(c.getLength(), maxI - 1)) {
+                maxI--;
+            }
+
+            c.setMaxI(maxI);
+            maxI -= (c.getLength() + 1);
+        }
+
         clearPossibilities();
 
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
@@ -93,59 +122,17 @@ public abstract class AbstractRegion {
                     markPossible(j, clue);
                 }
             }
-
-
-            // recompute minI and maxI
-            for (j = clue.getMinI(); j < clue.getMaxI() && !possibility(j, i); j++) {
-                clue.setMinI(j + 1);
-            }
-
-            for (j = clue.getMaxI() - 1; j >= clue.getMinI() && !possibility(j, i); j--) {
-                clue.setMaxI(j);
-            }
-
-            // update if necessary next clue's minI
-            // it may happen if the space between current clue's minI and next clue's minI is insufficient
-            // for example: if the possibility array is as follows (T=true):
-            // 5: TTTTTTTTTT...
-            // 8:  TTTTTTTTT...
-            // It is impossible that there is the 8 at the six first indices
-            // NB: It must be done in the loop because it has influence over the next clue!
-            if (i + 1 < lastClueIndex) {
-                Clue next = getClue(i + 1);
-
-                next.setMinI(Math.max(clue.getMinI() + clue.getLength() + 1, next.getMinI()));
-            }
         }
 
-        // also update max in reverse order!
-        // It may happen if the space between a clue's maxI and previous clue's maxI is insufficient
-        // for example:
-        // 2: TTTTTT
-        // 3: TTTTTTTT
-        // THe last two possibility for 2 are impossible
-        for (int i = lastClueIndex - 1; i > 0; i--) {
-            Clue clue = getClue(i);
-            Clue previous = getClue(i - 1);
+        checkClues();
+    }
 
-            if (clue.getMaxI() - previous.getMaxI() < clue.getLength()) {
-                int last = previous.getMaxI();
-                previous.setMaxI(clue.getMaxI() - clue.getLength() - 1);
-
-                for (int j = previous.getMaxI(); j < last; j++) {
-                    setPossibility(j, previous, false);
-                }
-
-                // But some time, we removed so many that the previous clue cannot fit!
-                // example: TurtleBug 3
-                while (!possibility(previous.getMaxI() - 1, previous) ||
-                        !checkClue(previous, previous.getMaxI() - 1)) {
-                    previous.setMaxI(previous.getMaxI() - 1);
-                    setPossibility(previous.getMaxI(), previous, false);
-                }
-            }
-        }
-
+    /**
+     * Compute possibilities. It doesn't take into account all information that gave the map.
+     * For example, for 15 cells, clues 5 2 and a map looking like this: '  F    F    FF  ',
+     * it won't realize that outside the first two F, it mustn't have a 5.
+     */
+    protected void computePossibilities() {
         checkClues();
     }
 
@@ -316,10 +303,6 @@ public abstract class AbstractRegion {
         checkClues();
     }
 
-    protected boolean fitReverse(int line, int i) {
-        return fit(line, i - line);
-    }
-
     /**
      * Cross every cell that have no possibility
      */
@@ -379,26 +362,12 @@ public abstract class AbstractRegion {
         }
     }
 
-    /**
-     * Returns true if a line of length line can be put from {@code i} (included) to {@code i + line} (excluded).
-     * It means that if there is a cell at {@code i - 1} it returns false. Same things at {@code i + line}
-     *
-     * @return true if a line of length line can be put at the position i
-     */
     protected boolean fit(int line, int i) {
-        if (i > 0 && isFilled(i - 1)) {
-            return false;
-        } else if (i + line > end || (i + line < end && isFilled(i + line))) {
-            return false;
-        } else {
-            for (int j = 0; j < line; j++) {
-                if (isCrossed(i + j)) {
-                    return false;
-                }
-            }
+        return SolverUtils.fit(descriptor, line, i);
+    }
 
-            return true;
-        }
+    protected boolean fitReverse(int line, int i) {
+        return SolverUtils.fitReverse(descriptor, line, i);
     }
 
     /**
@@ -582,26 +551,34 @@ public abstract class AbstractRegion {
     }
 
     protected boolean isFilled(int i) {
-        return getCell(i).isFilled();
+        return descriptor.isFilled(i);
     }
 
     protected boolean isCrossed(int i) {
-        return getCell(i).isCrossed();
+        return descriptor.isCrossed(i);
     }
 
     protected boolean isEmpty(int i) {
-        return getCell(i).isEmpty();
+        return descriptor.isEmpty(i);
     }
 
     protected int getClueLength(int i) {
-        return getClue(i).getLength();
+        return descriptor.getClueLength(i);
     }
 
-    protected abstract CellWrapper getCell(int index);
+    protected CellWrapper getCell(int index) {
+        return descriptor.getCell(index);
+    }
 
-    protected abstract void setCell(int index, Cell cell);
+    protected void setCell(int index, Cell cell) {
+        descriptor.setCell(index, cell);
+    }
 
-    protected abstract Clue getClue(int index);
+    protected Clue getClue(int index) {
+        return descriptor.getClue(index);
+    }
+
+
 
     protected void setPossibility(int cell, Clue clue, boolean possibility) {
         setPossibility(cell, clue.getIndex(), possibility);

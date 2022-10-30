@@ -11,8 +11,8 @@ JVM_ARGS="-Dfile.encoding=UTF-8 -classpath ${CLASSPATH} fr.poulpogaz.nonogramsso
 
 for f in example/*.png; do
   echo "$f"
-  java $JVM_ARGS --image "$f" -s 32 -o "temp.gif"
-  ffmpeg -y -i "temp.gif" -loop -1 "${f//.png/.gif}"
+  java $JVM_ARGS --image "$f" -s 16 -o "temp.gif"
+  ffmpeg -y -i "temp.gif" -loop -1 "${f//.png/.gif}" > /dev/null 2>&1
 done
 
 rm "temp.gif"

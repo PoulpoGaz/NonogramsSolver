@@ -18,8 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 // netero
-// drakkar
-// red_deer
 @CommandLine.Command(version = "1.0")
 public class Main implements Runnable {
 

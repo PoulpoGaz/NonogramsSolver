@@ -1,17 +1,13 @@
 package fr.poulpogaz.nonogramssolver.solver;
 
 import fr.poulpogaz.nonogramssolver.Cell;
-import fr.poulpogaz.nonogramssolver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.Clue;
 import fr.poulpogaz.nonogramssolver.Descriptor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class DefaultLineSolver extends AbstractRegion implements LineSolver {
-
-    private Descriptor descriptor;
 
     /**
      * For each cell, contains an array of length the number of clue
@@ -20,6 +16,7 @@ public class DefaultLineSolver extends AbstractRegion implements LineSolver {
     private boolean[][] possibilities;
 
     public DefaultLineSolver() {
+        super(null);
     }
 
     @Override
@@ -124,21 +121,6 @@ public class DefaultLineSolver extends AbstractRegion implements LineSolver {
                 break;
             }
         }
-    }
-
-    @Override
-    protected CellWrapper getCell(int index) {
-        return descriptor.getCell(index);
-    }
-
-    @Override
-    protected void setCell(int index, Cell cell) {
-        descriptor.setCell(index, cell);
-    }
-
-    @Override
-    protected Clue getClue(int index) {
-        return descriptor.getClue(index);
     }
 
     @Override

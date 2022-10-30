@@ -1,10 +1,5 @@
 package fr.poulpogaz.nonogramssolver.solver;
 
-import fr.poulpogaz.nonogramssolver.Cell;
-import fr.poulpogaz.nonogramssolver.CellWrapper;
-import fr.poulpogaz.nonogramssolver.Clue;
-import fr.poulpogaz.nonogramssolver.Descriptor;
-
 /**
  * A region is a part of a column/row that contains cell that shares the same possibilities
  */
@@ -13,30 +8,17 @@ public class Region extends AbstractRegion {
     private final AbstractRegion ancestor;
 
     public Region(AbstractRegion ancestor) {
+        super(ancestor.descriptor);
         this.ancestor = ancestor;
     }
 
     public Region(AbstractRegion ancestor, int start, int end, int firstClueIndex, int lastClueIndex) {
+        super(ancestor.descriptor);
         this.ancestor = ancestor;
         this.start = start;
         this.end = end;
         this.firstClueIndex = firstClueIndex;
         this.lastClueIndex = lastClueIndex;
-    }
-
-    @Override
-    protected CellWrapper getCell(int index) {
-        return ancestor.getCell(index);
-    }
-
-    @Override
-    protected void setCell(int index, Cell cell) {
-        ancestor.setCell(index, cell);
-    }
-
-    @Override
-    protected Clue getClue(int index) {
-        return ancestor.getClue(index);
     }
 
     @Override
