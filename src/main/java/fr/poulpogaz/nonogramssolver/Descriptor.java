@@ -41,6 +41,22 @@ public class Descriptor {
         }
     }
 
+    public boolean isFilled(int i) {
+        return cells[i].isFilled();
+    }
+
+    public boolean isCrossed(int i) {
+        return cells[i].isCrossed();
+    }
+
+    public boolean isEmpty(int i) {
+        return cells[i].isEmpty();
+    }
+
+    public int getClueLength(int i) {
+        return clues[i].getLength();
+    }
+
     public boolean isCompleted() {
         if (clues.length == 0) {
             for (CellWrapper cell : cells) {

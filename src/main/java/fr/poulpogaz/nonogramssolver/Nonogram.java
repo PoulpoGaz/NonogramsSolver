@@ -1,6 +1,8 @@
 package fr.poulpogaz.nonogramssolver;
 
+import fr.poulpogaz.nonogramssolver.solver.CompleteLineSolver;
 import fr.poulpogaz.nonogramssolver.solver.DefaultLineSolver;
+import fr.poulpogaz.nonogramssolver.solver.LineSolver;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -57,7 +59,14 @@ public class Nonogram {
 
         int length = 0;
         while (x < image.getWidth() && y < image.getHeight()) {
-            if (image.getRGB(x, y) == Color.BLACK.getRGB()) {
+            int rgb = image.getRGB(x, y);
+            int red = (rgb >> 16) & 0xFF;
+            int green = (rgb >> 8) & 0xFF;
+            int blue = (rgb >> 0) & 0xFF;
+
+            float gray = (red + green + blue) / (3 * 255f);
+
+            if (gray < 0.5) {
                 length++;
             } else if (length > 0) {
                 ints.add(length);
@@ -130,8 +139,11 @@ public class Nonogram {
     public boolean solve(SolverListener listener) {
         Objects.requireNonNull(listener);
 
-        DefaultLineSolver solver = new DefaultLineSolver();
+        LineSolver defaultSolver = new DefaultLineSolver();
+        LineSolver completeSolver = new CompleteLineSolver();
+        LineSolver solver = defaultSolver;
 
+        int i = 0;
         while (!isSolved()) {
             boolean changed = false;
             for (Descriptor col : columns) {
@@ -141,6 +153,7 @@ public class Nonogram {
                     if (col.hasChanged()) {
                         listener.onColumnTrySolve(this, col);
                         changed = true;
+                        solver = defaultSolver;
                     }
                 }
             }
@@ -152,16 +165,34 @@ public class Nonogram {
                     if (row.hasChanged()) {
                         listener.onRowTrySolve(this, row);
                         changed = true;
+                        solver = defaultSolver;
                     }
                 }
             }
 
-            if (!changed) {
+            if (!changed && solver == completeSolver || i >= 1000) {
                 listener.onFail(this);
                 return false;
+            } else if (!changed) {
+                solver = completeSolver;
+
+                for (Descriptor r : rows) {
+                    if (!r.isCompleted()) {
+                        r.setHasChanged(true);
+                    }
+                }
+
+                for (Descriptor r : columns) {
+                    if (!r.isCompleted()) {
+                        r.setHasChanged(true);
+                    }
+                }
+
+            } else {
+                listener.onPassFinished(this);
             }
 
-            listener.onPassFinished(this);
+            i++;
         }
 
         listener.onSuccess(this);

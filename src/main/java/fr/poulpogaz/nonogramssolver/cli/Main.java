@@ -72,7 +72,7 @@ public class Main implements Runnable {
     @CommandLine.ArgGroup(exclusive = true)
     private Input input;
 
-    @CommandLine.Option(names = {"-o", "--output"}, description = "output", required = true)
+    @CommandLine.Option(names = {"-o", "--output"}, description = "output")
     private Path output;
 
     @CommandLine.Option(names = {"-d", "--detailed"})
