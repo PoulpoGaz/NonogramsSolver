@@ -11,8 +11,11 @@ JVM_ARGS="-Dfile.encoding=UTF-8 -classpath ${CLASSPATH} fr.poulpogaz.nonogramsso
 
 for f in example/*.png; do
   echo "$f"
-  java $JVM_ARGS --image "$f" -s 16 -o "temp.gif"
-  ffmpeg -y -i "temp.gif" -loop -1 "${f//.png/.gif}" > /dev/null 2>&1
+  # if ! [ -f "${f//.png/.gif}" ]; then
+    java $JVM_ARGS --image "$f" -s 16 -o "temp.gif"
+    # wow
+    ffmpeg -y -i "temp.gif" -filter_complex "[0:v] palettegen [p]; [0:v][p] paletteuse" -loop -1 "${f//.png/.gif}" > /dev/null 2>&1
+  # fi
 done
 
 rm "temp.gif"

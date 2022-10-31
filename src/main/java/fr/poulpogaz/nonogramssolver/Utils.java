@@ -65,8 +65,8 @@ public class Utils {
     }
 
     public static void createDirectories(Path p) throws IOException {
-        if (!Files.exists(p.getParent())) {
-            Files.createDirectories(p.getParent());
+        if (Files.notExists(p)) {
+            Files.createDirectories(p);
         }
     }
 }

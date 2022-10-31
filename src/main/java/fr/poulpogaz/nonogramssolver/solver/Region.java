@@ -27,8 +27,8 @@ public class Region extends AbstractRegion {
     }
 
     @Override
-    protected boolean possibility(int cell, int clueIndex) {
-        return ancestor.possibility(cell, clueIndex);
+    protected boolean isPossible(int cell, int clueIndex) {
+        return ancestor.isPossible(cell, clueIndex);
     }
 
     public int getStart() {

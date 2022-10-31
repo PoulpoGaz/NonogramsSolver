@@ -455,7 +455,7 @@ public class DefaultLineSolverTest {
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.tryFill(List.of());
-        cellsEquals(wrappers, parse("X     ████     "));
+        cellsEquals(wrappers, parse("X_____████_____"));
     }
 
 

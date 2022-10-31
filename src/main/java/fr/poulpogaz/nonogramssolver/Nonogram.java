@@ -257,7 +257,7 @@ public class Nonogram {
             imgHeight += colHeight;
         }
 
-        BufferedImage image = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_INT_RGB);
 
         Graphics2D g2d = image.createGraphics();
         try {

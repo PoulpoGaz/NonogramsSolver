@@ -65,7 +65,7 @@ public abstract class AbstractRegion {
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
             Clue c = getClue(i);
 
-            while (!fit(c.getLength(), minI)) {
+            while (!fit(c, minI)) {
                 minI++;
             }
 
@@ -77,7 +77,7 @@ public abstract class AbstractRegion {
         for (int i =  lastClueIndex - 1; i >= firstClueIndex; i--) {
             Clue c = getClue(i);
 
-            while (!fitReverse(c.getLength(), maxI - 1)) {
+            while (!fitReverse(c, maxI - 1)) {
                 maxI--;
             }
 
@@ -101,15 +101,6 @@ public abstract class AbstractRegion {
         checkClues();
     }
 
-    /**
-     * Compute possibilities. It doesn't take into account all information that gave the map.
-     * For example, for 15 cells, clues 5 2 and a map looking like this: '  F    F    FF  ',
-     * it won't realize that outside the first two F, it mustn't have a 5.
-     */
-    /*protected void computePossibilities() {
-        checkClues();
-    }*/
-
     protected void clearPossibilities() {
         for (int i = start; i < end; i++) {
             for (int j = firstClueIndex; j < lastClueIndex; j++) {
@@ -129,7 +120,7 @@ public abstract class AbstractRegion {
 
     protected boolean checkClue(Clue clue, int i) {
         for (int j = i; j > i - clue.getLength(); j--) {
-            if (!possibility(j, clue)) {
+            if (!isPossible(j, clue)) {
                 return false;
             }
         }
@@ -182,35 +173,33 @@ public abstract class AbstractRegion {
 
         int maxDist = clue.getLength() - (lastIndex - firstIndex);
 
-        boolean removeAll = false;
-        for (int j = firstIndex - 1; j >= min; j--) {
-            if (!removeAll) {
-                if (!possibility(j, clue.getIndex()) || Math.abs(j - firstIndex) >= maxDist) {
-                    removeAll = true;
-                    clue.setMinI(j + 1);
-                }
-            }
-
-            if (removeAll) {
+        int j = min;
+        for (; j < firstIndex; j++) {
+            if (Math.abs(j - firstIndex) >= maxDist) {
                 setPossibility(j, clue, false);
+            } else if (!isPossible(j, clue) || !fit(clue, j)) {
+                setPossibility(j, clue, false);
+            } else {
+                break;
             }
         }
 
-        // copied code...
-        // moving to the right
-        removeAll = false;
-        for (int j = lastIndex + 1; j < max; j++) {
-            if (!removeAll) {
-                if (!possibility(j, clue.getIndex()) || Math.abs(j - lastIndex) >= maxDist) {
-                    removeAll = true;
-                    clue.setMaxI(j);
-                }
-            }
+        clue.setMinI(j);
 
-            if (removeAll) {
+        j = max - 1;
+        for (; j >= lastIndex + 1; j--) {
+            if (Math.abs(j - lastIndex) >= maxDist) {
                 setPossibility(j, clue, false);
+            } else if (!isPossible(j, clue) || !fitReverse(clue, j)) {
+                setPossibility(j, clue, false);
+            } else {
+                break;
             }
         }
+
+        clue.setMaxI(j + 1);
+
+       checkClues();
     }
 
     /**
@@ -233,7 +222,7 @@ public abstract class AbstractRegion {
             firstClue.setMaxI(max);
 
             for (int j = line.end(); j < firstClue.getMaxI(); j++) {
-                if (isCrossed(j) || !possibility(j, firstClue)) {
+                if (isCrossed(j) || !isPossible(j, firstClue)) {
                     firstClue.setMaxI(j);
                 }
             }
@@ -260,7 +249,7 @@ public abstract class AbstractRegion {
             int min = Math.max(Math.max(line.end() - lastClue.getLength(), start), lastClue.getMinI());
             lastClue.setMinI(min);
             for (int j = line.start() - 1; j >= lastClue.getMinI(); j--) {
-                if (isCrossed(j) || !possibility(j, lastClue)) {
+                if (isCrossed(j) || !isPossible(j, lastClue)) {
                     lastClue.setMinI(j + 1);
                 }
             }
@@ -336,8 +325,16 @@ public abstract class AbstractRegion {
         }
     }
 
+    protected boolean fit(Clue clue, int i) {
+        return SolverUtils.fit(descriptor, clue, i);
+    }
+
     protected boolean fit(int line, int i) {
         return SolverUtils.fit(descriptor, line, i);
+    }
+
+    protected boolean fitReverse(Clue clue, int i) {
+        return SolverUtils.fitReverse(descriptor, clue, i);
     }
 
     protected boolean fitReverse(int line, int i) {
@@ -355,7 +352,7 @@ public abstract class AbstractRegion {
         int possibility = -1;
 
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
-            if (possibility(cell, i)) {
+            if (isPossible(cell, i)) {
                 if (possibility == -1) {
                     possibility = i;
                 } else {
@@ -373,7 +370,7 @@ public abstract class AbstractRegion {
 
     protected Clue firstPossibility(int cell) {
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
-            if (possibility(cell, i)) {
+            if (isPossible(cell, i)) {
                 return getClue(i);
             }
         }
@@ -383,7 +380,7 @@ public abstract class AbstractRegion {
 
     protected Clue lastPossibility(int cell) {
         for (int i = lastClueIndex - 1; i >= firstClueIndex; i--) {
-            if (possibility(cell, i)) {
+            if (isPossible(cell, i)) {
                 return getClue(i);
             }
         }
@@ -394,7 +391,7 @@ public abstract class AbstractRegion {
     protected int minClueLength(int cell) {
         int minLength = Integer.MAX_VALUE;
         for (int i = lastClueIndex - 1; i >= firstClueIndex; i--) {
-            if (possibility(cell, i)) {
+            if (isPossible(cell, i)) {
                 minLength = Math.min(getClueLength(i), minLength);
             }
         }
@@ -405,7 +402,7 @@ public abstract class AbstractRegion {
     protected int maxClueLength(int cell) {
         int maxLength = -1;
         for (int i = lastClueIndex - 1; i >= firstClueIndex; i--) {
-            if (possibility(cell, i)) {
+            if (isPossible(cell, i)) {
                 maxLength = Math.max(getClueLength(i), maxLength);
             }
         }
@@ -419,7 +416,7 @@ public abstract class AbstractRegion {
      */
     protected boolean haveZeroPossibility(int cell) {
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
-            if (possibility(cell, i)) {
+            if (isPossible(cell, i)) {
                 return false;
             }
         }
@@ -464,17 +461,17 @@ public abstract class AbstractRegion {
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
             Clue c = getClue(i);
 
-            if (!possibility(c.getMinI(), c)) {
+            if (!isPossible(c.getMinI(), c)) {
                 throw new IllegalStateException("Invalid minI for clue: " + c + "\n" + this);
             }
-            if (!possibility(c.getMaxI() - 1, c)) {
+            if (!isPossible(c.getMaxI() - 1, c)) {
                 throw new IllegalStateException("Invalid maxI for clue: " + c + "\n" + this);
             }
 
             for (int j = start; j < end; j++) {
-                if (possibility(j, c) && j < c.getMinI()) {
+                if (isPossible(j, c) && j < c.getMinI()) {
                     throw new IllegalStateException("Invalid minI for clue: " + c + ". at " + i + "\n" + this);
-                } else if (possibility(j, c) && j >= c.getMaxI()) {
+                } else if (isPossible(j, c) && j >= c.getMaxI()) {
                     throw new IllegalStateException("Invalid maxI for clue: " + c + ". at " + i + "\n" + this);
                 }
             }
@@ -489,7 +486,7 @@ public abstract class AbstractRegion {
             int maxI = 0;
 
             for (int j = start; j < end; j++) {
-                if (possibility(j, clue)) {
+                if (isPossible(j, clue)) {
                     minI = Math.min(minI, j);
                     maxI = Math.max(maxI, j);
                 }
@@ -497,6 +494,20 @@ public abstract class AbstractRegion {
 
             clue.setMinI(minI);
             clue.setMaxI(maxI + 1);
+        }
+    }
+
+    protected void setFalseOutsideClueBounds() {
+        for (int i = firstClueIndex; i < lastClueIndex; i++) {
+            Clue clue = getClue(i);
+
+            for (int j = start; j < clue.getMinI(); j++) {
+                setPossibility(j, clue, false);
+            }
+
+            for (int j = clue.getMaxI(); j < end; j++) {
+                setPossibility(j, clue, false);
+            }
         }
     }
 
@@ -560,11 +571,11 @@ public abstract class AbstractRegion {
 
     protected abstract void setPossibility(int cell, int clueIndex, boolean possibility);
 
-    protected boolean possibility(int cell, Clue clue) {
-        return possibility(cell, clue.getIndex());
+    protected boolean isPossible(int cell, Clue clue) {
+        return isPossible(cell, clue.getIndex());
     }
 
-    protected abstract boolean possibility(int cell, int clueIndex);
+    protected abstract boolean isPossible(int cell, int clueIndex);
 
     @Override
     public String toString() {
@@ -604,7 +615,7 @@ public abstract class AbstractRegion {
                         .append("{");
 
                 for (int j = firstClueIndex; j < lastClueIndex; j++) {
-                    if (possibility(i, j)) {
+                    if (isPossible(i, j)) {
                         sb.append("true");
 
                         if (j + 1 < lastClueIndex) {

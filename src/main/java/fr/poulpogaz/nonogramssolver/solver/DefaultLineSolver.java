@@ -109,7 +109,7 @@ public class DefaultLineSolver extends AbstractRegion implements LineSolver {
     }
 
     @Override
-    protected boolean possibility(int cell, int clueIndex) {
+    protected boolean isPossible(int cell, int clueIndex) {
         return possibilities[cell][clueIndex];
     }
 

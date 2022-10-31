@@ -99,6 +99,10 @@ public class Main implements Runnable {
         long time = System.currentTimeMillis();
         try {
             try (BasicListener listener = createOutput()) {
+                if (listener == null) {
+                    return;
+                }
+
                 nonogram.solve(listener);
             }
         } catch (IOException e) {
@@ -110,7 +114,8 @@ public class Main implements Runnable {
     }
 
     protected BasicListener createOutput() throws IOException {
-        if (Files.isDirectory(output)) {
+        if ((Files.notExists(output) && Utils.getExtension(output).isEmpty()) ||
+                Files.isDirectory(output)) {
             Utils.createDirectories(output);
 
             return new MultipleImageOutput(output, input.name(), detailed, squareSize);
