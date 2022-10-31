@@ -7,9 +7,7 @@ CLASSPATH="$PATH_TO_PROJECT"/target/classes:\
 
 JVM_ARGS="-Dfile.encoding=UTF-8 -classpath ${CLASSPATH} fr.poulpogaz.nonogramssolver.cli.Main"
 
-# java $JVM_ARGS --image example/liberty.png -s 32 -o example/liberty.png
-
-for f in example/*.png; do
+for f in example/**.png; do
   echo "$f"
   # if ! [ -f "${f//.png/.gif}" ]; then
     java $JVM_ARGS --image "$f" -s 16 -o "temp.gif"

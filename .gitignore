@@ -1,2 +1,5 @@
 target
 .idea
+
+# Not versionned because it will make the repo too big
+example/other_example
