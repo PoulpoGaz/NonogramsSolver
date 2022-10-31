@@ -58,8 +58,8 @@ public class SolverUtilsTest {
         CellWrapper[] wrappers = parse("█_________"); // 10
 
         Descriptor descriptor = new Descriptor(false, 0, new int[0], wrappers);
-        assertTrue(SolverUtils.fitReverse(descriptor, 5, 5));
-        assertFalse(SolverUtils.fitReverse(descriptor, 5, 6));
+        assertTrue(SolverUtils.fitReverse(descriptor, 5, 4));
+        assertFalse(SolverUtils.fitReverse(descriptor, 5, 5));
     }
 
     @Test
@@ -67,8 +67,8 @@ public class SolverUtilsTest {
         CellWrapper[] wrappers = parse("______X___"); // 10
 
         Descriptor descriptor = new Descriptor(false, 0, new int[0], wrappers);
-        assertFalse(SolverUtils.fitReverse(descriptor, 5, 8));
         assertFalse(SolverUtils.fitReverse(descriptor, 5, 7));
-        assertTrue(SolverUtils.fitReverse(descriptor, 5, 6));
+        assertFalse(SolverUtils.fitReverse(descriptor, 5, 6));
+        assertTrue(SolverUtils.fitReverse(descriptor, 5, 5));
     }
 }

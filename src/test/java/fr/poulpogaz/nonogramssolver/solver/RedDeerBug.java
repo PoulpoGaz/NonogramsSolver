@@ -22,8 +22,6 @@ public class RedDeerBug {
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
 
         solver.setDescriptor(descriptor);
-        solver.shrink();
-        solver.initClues2();
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.comparePossibilitiesAndLines(solver.createLines());

@@ -7,7 +7,6 @@ import fr.poulpogaz.nonogramssolver.Descriptor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * A region is a part of a column/row that contains cell that shares the same possibilities
@@ -38,7 +37,6 @@ public abstract class AbstractRegion {
 
         List<Line> lines = createLines();
 
-        initClues();
         computePossibilities();
         optimizeCluesBoundWithOnePossibility();
         comparePossibilitiesAndLines(lines);
@@ -62,31 +60,7 @@ public abstract class AbstractRegion {
         return lines;
     }
 
-    /**
-     * Set minI and maxI for all clues without checking the map
-     */
-    protected void initClues() {
-        /*int minI = start;
-        int maxI = end - descriptorLength();
-
-        for (int i = firstClueIndex; i < lastClueIndex; i++) {
-            Clue c = getClue(i);
-
-            if (i == firstClueIndex) {
-                maxI += c.getLength();
-            } else {
-                maxI += c.getLength() + 1;
-                minI += getClueLength(i - 1) + 1;
-            }
-
-            c.setMinI(minI);
-            c.setMaxI(maxI);
-        }*/
-
-        initClues2();
-    }
-
-    protected void initClues2() {
+    protected void computePossibilities() {
         int minI = start;
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
             Clue c = getClue(i);
@@ -132,9 +106,9 @@ public abstract class AbstractRegion {
      * For example, for 15 cells, clues 5 2 and a map looking like this: '  F    F    FF  ',
      * it won't realize that outside the first two F, it mustn't have a 5.
      */
-    protected void computePossibilities() {
+    /*protected void computePossibilities() {
         checkClues();
-    }
+    }*/
 
     protected void clearPossibilities() {
         for (int i = start; i < end; i++) {

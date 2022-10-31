@@ -23,7 +23,6 @@ public class GokuBug {
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
         solver.setDescriptor(descriptor);
-        solver.initClues();
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.crossZeroCells();
@@ -42,7 +41,6 @@ public class GokuBug {
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
         solver.setDescriptor(descriptor);
-        solver.initClues();
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.crossZeroCells();
@@ -60,7 +58,6 @@ public class GokuBug {
 
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
         solver.setDescriptor(descriptor);
-        solver.initClues();
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
 
@@ -84,8 +81,6 @@ public class GokuBug {
         assertTrue(descriptor.isCompleted());
 
         solver.setDescriptor(descriptor);
-        solver.shrink();
-        solver.initClues();
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.crossZeroCells();

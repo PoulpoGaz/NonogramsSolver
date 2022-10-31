@@ -37,8 +37,6 @@ public class DefaultLineSolver extends AbstractRegion implements LineSolver {
         //System.out.printf("Row: %b. Index: %d%n", descriptor.isRow(), descriptor.getIndex());
         //System.out.println("Clues: " + Arrays.toString(descriptor.getClues()));
 
-        shrink();
-        initClues();
         computePossibilities();
         optimizeCluesBoundWithOnePossibility();
         List<Line> lines = createLines();
@@ -103,24 +101,6 @@ public class DefaultLineSolver extends AbstractRegion implements LineSolver {
         }
 
         return regions;
-    }
-
-    protected void shrink() {
-        for (int i = 0; i < descriptor.size(); i++) {
-            if (isCrossed(i)) {
-                start = i + 1;
-            } else {
-                break;
-            }
-        }
-
-        for (int i = descriptor.size() - 1; i >= 0; i--) {
-            if (isCrossed(i)) {
-                end = i;
-            } else {
-                break;
-            }
-        }
     }
 
     @Override

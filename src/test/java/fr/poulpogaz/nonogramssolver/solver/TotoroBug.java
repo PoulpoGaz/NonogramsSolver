@@ -25,8 +25,6 @@ public class TotoroBug {
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
 
         solver.setDescriptor(descriptor);
-        solver.shrink();
-        solver.initClues();
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.comparePossibilitiesAndLines(solver.createLines());
@@ -51,8 +49,6 @@ public class TotoroBug {
         Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
 
         solver.setDescriptor(descriptor);
-        solver.shrink();
-        solver.initClues();
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.comparePossibilitiesAndLines(solver.createLines());
