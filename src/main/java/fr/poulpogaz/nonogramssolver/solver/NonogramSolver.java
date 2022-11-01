@@ -35,10 +35,14 @@ public class NonogramSolver {
                 int ret = solveWithLineSolver(solver);
 
                 if (ret == NOT_SOLVED) { // new guess
-                    /*if (solveContradiction(solver)) {
+                    if (solveContradiction(solver)) {
                         return true;
-                    }*/
+                    }
                     Guess g = guess();
+
+                    if (g == null) {
+                        return false;
+                    }
 
                     guesses.push(g);
                 } else if (ret == CONTRADICTION) {
@@ -95,77 +99,108 @@ public class NonogramSolver {
     }
 
 
-    private int solveWithLineSolver(LineSolver solver) {
-        PriorityQueue<Description> queue = new PriorityQueue<>();
+    private int solveWithLineSolver(LineSolver lineSolver) {
+        PriorityQueue<Description> descriptions = new PriorityQueue<>(this::descriptionComparator);
+        fillDescription(descriptions);
 
         while (!isSolved()) {
             boolean changed = false;
-            for (Description col : columns) {
-                if (col.hasChanged()) {
-                    solver.trySolve(col);
 
-                    if (col.hasContradiction()) {
-                        return CONTRADICTION;
-                    }
+            while (!descriptions.isEmpty()) {
+                Description desc = descriptions.poll();
 
-                    changed = true;
+                lineSolver.trySolve(desc);
+
+                if (desc.hasContradiction()) {
+                    return CONTRADICTION;
                 }
-            }
 
-            for (Description row : rows) {
-                if (row.hasChanged()) {
-                    solver.trySolve(row);
-
-                    if (row.hasContradiction()) {
-                        return CONTRADICTION;
-                    }
-
-                    changed = true;
-                }
+                changed = true;
             }
 
             if (!changed) {
                 return NOT_SOLVED;
+            } else {
+                fillDescription(descriptions);
             }
         }
 
         return SOLVED;
     }
 
-    private int lineSolvingDescriptorComparator() {
+    private int descriptionComparator(Description a, Description b) {
+        double sumA = (double) (a.descriptionLength() + a.countSolved()) / (2 * a.size());
+        double sumB = (double) (b.descriptionLength() + b.countSolved()) / (2 * b.size());
 
+        return Double.compare(sumA, sumB);
     }
 
+    private void fillDescription(PriorityQueue<Description> descriptions) {
+        for (Description row : rows) {
+            if (row.hasChanged()) {
+                descriptions.offer(row);
+            }
+        }
 
+        for (Description col : columns) {
+            if (col.hasChanged()) {
+                descriptions.offer(col);
+            }
+        }
+    }
 
 
 
     private boolean solveContradiction(LineSolver solver) {
         System.out.println("Solving contradiction");
 
+        PriorityQueue<Contradiction> queue = new PriorityQueue<>(this::contradictionComparator);
+        fillContradiction(queue);
+
         boolean foundAContradiction;
         do {
             foundAContradiction = false;
 
-            for (int y = 0; y < height(); y++) {
-                for (int x = 0; x < width(); x++) {
-                    int ret = contradictionAt(solver, x, y);
+            while (!queue.isEmpty()) {
+                Contradiction c = queue.poll();
+                int ret = contradictionAt(solver, c.x(), c.y());
 
-                    if (ret == CONTRADICTION) {
-                        foundAContradiction = true;
-                    } else if (ret == SOLVED) {
-                        return true;
-                    }
+                if (ret == CONTRADICTION) {
+                    foundAContradiction = true;
+                } else if (ret == SOLVED) {
+                    return true;
                 }
             }
 
             if (foundAContradiction) {
-                System.out.println("redo");
+                fillContradiction(queue);
             }
 
         } while (foundAContradiction);
 
         return false;
+    }
+
+    private int contradictionComparator(Contradiction a, Contradiction b) {
+        int n = countAdjacentCellSolved(a.x(), a.y()) +
+                rows[a.y()].countSolved() +
+                columns[a.x()].countSolved();
+
+        int n2 = countAdjacentCellSolved(b.x(), b.y()) +
+                rows[b.y()].countSolved() +
+                columns[b.x()].countSolved();
+
+        return Integer.compare(n, n2);
+    }
+
+    private void fillContradiction(PriorityQueue<Contradiction> queue) {
+        for (int y = 0; y < height(); y++) {
+            for (int x = 0; x < width(); x++) {
+                if (cells[y][x].isEmpty()) {
+                    queue.offer(new Contradiction(x, y));
+                }
+            }
+        }
     }
 
     private int contradictionAt(LineSolver solver, int x, int y) {
@@ -182,7 +217,8 @@ public class NonogramSolver {
             if (ret == NOT_SOLVED) {
                 set(copy);
             } else if (ret == CONTRADICTION) {
-                // something weird is happening
+                set(copy);
+                set(Cell.FILLED, x, y);
             }
 
         } else if (ret == CONTRADICTION) {
@@ -192,7 +228,6 @@ public class NonogramSolver {
 
         return ret;
     }
-
 
 
     private Guess guess() {
@@ -231,12 +266,51 @@ public class NonogramSolver {
         return new Guess(xFirst, yFirst, copy);
     }
 
+    private int countAdjacentCellSolved(int x, int y) {
+        int n = 0;
+
+        if (x > 0) {
+            if (!cells[y][x - 1].isEmpty()) {
+                n++;
+            }
+        }
+
+        if (x + 1 < width()) {
+            if (!cells[y][x + 1].isEmpty()) {
+                n++;
+            }
+        }
+
+
+        if (y > 0) {
+            if (!cells[y - 1][x].isEmpty()) {
+                n++;
+            }
+        }
+
+        if (y + 1 < height()) {
+            if (!cells[y + 1][x].isEmpty()) {
+                n++;
+            }
+        }
+
+        return n;
+    }
+
     private boolean filled(int x, int y) {
         if (x < 0 || y < 0 || x >= width() || y >= height()) {
             return false;
         }
 
         return cells[y][x].isFilled();
+    }
+
+    private boolean crossed(int x, int y) {
+        if (x < 0 || y < 0 || x >= width() || y >= height()) {
+            return false;
+        }
+
+        return cells[y][x].isCrossed();
     }
 
     private void undoGuess(Guess guess) {
@@ -311,11 +385,13 @@ public class NonogramSolver {
         return cells;
     }
 
+    private int width() {
+        return nonogram.getWidth();
+    }
+
     private int height() {
         return nonogram.getHeight();
     }
 
-    private int width() {
-        return nonogram.getWidth();
-    }
+    private record Contradiction(int x, int y) {}
 }

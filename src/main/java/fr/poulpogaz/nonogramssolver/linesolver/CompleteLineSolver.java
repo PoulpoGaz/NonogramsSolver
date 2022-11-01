@@ -57,7 +57,7 @@ public class CompleteLineSolver implements LineSolver {
 
         // copied from AbstractRegion#initClues
         int minI = 0;
-        int maxI = description.size() - description.descriptorLength();
+        int maxI = description.size() - description.descriptionLength();
 
         for (int i = 0; i < description.nClues(); i++) {
             Clue c = description.getClue(i);

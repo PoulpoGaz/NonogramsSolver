@@ -16,7 +16,7 @@ public class Description {
     /**
      * the sum of all numbers and the empty cell between them
      */
-    private final int descriptorLength;
+    private final int descriptionLength;
     private int maxClue = -1;
 
     private int status = Status.CHANGED;
@@ -31,7 +31,7 @@ public class Description {
             this.clues[i] = new Clue(clues[i], i);
         }
 
-        descriptorLength = length(0, clues.length);
+        descriptionLength = length(0, clues.length);
         maxClue = getMaxClue();
 
          for (CellWrapper w : cells) {
@@ -103,6 +103,22 @@ public class Description {
         }
     }
 
+    public int countSolved() {
+        int n = 0;
+
+        for (CellWrapper cell : cells) {
+            if (!cell.isEmpty()) {
+                n++;
+            }
+        }
+
+        return n;
+    }
+
+    public double solvedRate() {
+        return (double) countSolved() / cells.length;
+    }
+
     private int getAvailableSpace() {
         int n = 0;
 
@@ -130,10 +146,10 @@ public class Description {
     }
 
     /**
-     * @return the minimal number of cell needed to match the descriptor
+     * @return the minimal number of cell needed to match the description
      */
-    public int descriptorLength() {
-        return descriptorLength;
+    public int descriptionLength() {
+        return descriptionLength;
     }
 
     /**
