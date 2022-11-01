@@ -26,31 +26,30 @@ public class DefaultLineSolver extends AbstractRegion implements LineSolver {
         if (!descriptor.hasChanged()) {
             return;
         }
-        descriptor.setHasChanged(false);
+        descriptor.resetStatus();
 
         if (descriptor.nClues() == 0) {
             draw(0, descriptor.size(), Cell.CROSSED);
             return;
         }
 
-        //System.out.println("-------------------------------------");
-        //System.out.printf("Row: %b. Index: %d%n", descriptor.isRow(), descriptor.getIndex());
-        //System.out.println("Clues: " + Arrays.toString(descriptor.getClues()));
-
         computePossibilities();
         optimizeCluesBoundWithOnePossibility();
         List<Line> lines = createLines();
         comparePossibilitiesAndLines(lines);
-        crossZeroCells();
 
-        List<Region> regions = split();
+        if (!descriptor.hasContradiction()) {
+            crossZeroCells();
 
-        if (regions.size() > 1) {
-            for (Region r : regions) {
-                r.trySolve();
+            List<Region> regions = split();
+
+            if (regions.size() > 1) {
+                for (Region r : regions) {
+                    r.trySolve();
+                }
+            } else {
+                tryFill(lines);
             }
-        } else {
-            tryFill(lines);
         }
     }
 

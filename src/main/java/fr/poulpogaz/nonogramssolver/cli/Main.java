@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-// netero
 @CommandLine.Command(version = "1.0")
 public class Main implements Runnable {
 
@@ -103,7 +102,14 @@ public class Main implements Runnable {
                     return;
                 }
 
-                nonogram.solve(listener);
+                //nonogram.solve(listener);
+                boolean solved = nonogram.solveRecursive();
+
+                if (solved) {
+                    listener.onSuccess(nonogram);
+                } else {
+                    listener.onFail(nonogram);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

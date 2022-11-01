@@ -17,7 +17,7 @@ public class Descriptor {
     private final int descriptorLength;
     private int maxClue = -1;
 
-    private boolean changed = true;
+    private int status = Status.CHANGED;
 
     public Descriptor(boolean isRow, int index, int[] clues, CellWrapper[] cells) {
         this.isRow = isRow;
@@ -188,11 +188,27 @@ public class Descriptor {
         return index;
     }
 
-    public void setHasChanged(boolean changed) {
-        this.changed = changed;
+    public void setChanged() {
+        status = status | Status.CHANGED;
+    }
+
+    public void setContradiction() {
+        status = status | Status.CONTRADICTION;
     }
 
     public boolean hasChanged() {
-        return changed;
+        return Status.hasChanged(status);
+    }
+
+    public boolean hasContradiction() {
+        return Status.hasContradiction(status);
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void resetStatus() {
+        status = Status.NO_CHANGE;
     }
 }

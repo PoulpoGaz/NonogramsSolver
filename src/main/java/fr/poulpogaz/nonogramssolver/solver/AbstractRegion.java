@@ -40,8 +40,11 @@ public abstract class AbstractRegion {
         computePossibilities();
         optimizeCluesBoundWithOnePossibility();
         comparePossibilitiesAndLines(lines);
-        crossZeroCells();
-        tryFill(lines);
+
+        if (!descriptor.hasContradiction()) {
+            crossZeroCells();
+            tryFill(lines);
+        }
     }
 
     protected List<Line> createLines() {
@@ -67,6 +70,11 @@ public abstract class AbstractRegion {
 
             while (!fit(c, minI)) {
                 minI++;
+
+                if (minI + c.getLength() > end) {
+                    descriptor.setContradiction();
+                    return;
+                }
             }
 
             c.setMinI(minI);
@@ -79,6 +87,11 @@ public abstract class AbstractRegion {
 
             while (!fitReverse(c, maxI - 1)) {
                 maxI--;
+
+                if (maxI - c.getLength() < 0) {
+                    descriptor.setContradiction();
+                    return;
+                }
             }
 
             c.setMaxI(maxI);
@@ -129,6 +142,10 @@ public abstract class AbstractRegion {
     }
 
     protected void optimizeCluesBoundWithOnePossibility() {
+        if (descriptor.hasContradiction()) {
+            return;
+        }
+
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
             optimizeClueBoundWithOnePossibility(getClue(i));
         }
@@ -210,6 +227,10 @@ public abstract class AbstractRegion {
      * Actually, I don't know why it works lol
      */
     protected void comparePossibilitiesAndLines(List<Line> lines) {
+        if (descriptor.hasContradiction()) {
+            return;
+        }
+
         for (int i = 0; i < lines.size(); i++) {
             Line line = lines.get(i);
             Clue firstClue = firstPossibility(line.start());
@@ -296,7 +317,8 @@ public abstract class AbstractRegion {
             int minLength = minClueLength(line.start());
 
             if (minLength < 0) {
-                throw new IllegalStateException(); // should not happen!
+                descriptor.setContradiction();
+                return;
             }
 
             // inclusive
@@ -324,6 +346,11 @@ public abstract class AbstractRegion {
             drawBetween(minPossible, maxPossible + 1, minLength);
         }
     }
+
+    // =======================================
+    // * Starting here, some utility methods *
+    // =======================================
+
 
     protected boolean fit(Clue clue, int i) {
         return SolverUtils.fit(descriptor, clue, i);
@@ -458,21 +485,34 @@ public abstract class AbstractRegion {
      * Debug method that checks if clue minI and maxI are correct
      */
     protected void checkClues() {
+        if (descriptor.hasContradiction()) {
+            return;
+        }
+
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
             Clue c = getClue(i);
 
+            if (c.getMaxI() - c.getMinI() < c.getLength()) {
+                descriptor.setContradiction();
+                return;
+            }
+
             if (!isPossible(c.getMinI(), c)) {
-                throw new IllegalStateException("Invalid minI for clue: " + c + "\n" + this);
+                descriptor.setContradiction();
+                return;
             }
             if (!isPossible(c.getMaxI() - 1, c)) {
-                throw new IllegalStateException("Invalid maxI for clue: " + c + "\n" + this);
+                descriptor.setContradiction();
+                return;
             }
 
             for (int j = start; j < end; j++) {
                 if (isPossible(j, c) && j < c.getMinI()) {
-                    throw new IllegalStateException("Invalid minI for clue: " + c + ". at " + i + "\n" + this);
+                    descriptor.setContradiction();
+                    return;
                 } else if (isPossible(j, c) && j >= c.getMaxI()) {
-                    throw new IllegalStateException("Invalid maxI for clue: " + c + ". at " + i + "\n" + this);
+                    descriptor.setContradiction();
+                    return;
                 }
             }
         }
@@ -492,22 +532,13 @@ public abstract class AbstractRegion {
                 }
             }
 
+            if (minI == Integer.MAX_VALUE) {
+                //descriptor.setContradiction();
+                return;
+            }
+
             clue.setMinI(minI);
             clue.setMaxI(maxI + 1);
-        }
-    }
-
-    protected void setFalseOutsideClueBounds() {
-        for (int i = firstClueIndex; i < lastClueIndex; i++) {
-            Clue clue = getClue(i);
-
-            for (int j = start; j < clue.getMinI(); j++) {
-                setPossibility(j, clue, false);
-            }
-
-            for (int j = clue.getMaxI(); j < end; j++) {
-                setPossibility(j, clue, false);
-            }
         }
     }
 
