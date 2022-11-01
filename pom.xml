@@ -29,7 +29,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>fr.poulpogaz.nonogramssolver.cli.Main</mainClass>
+                            <mainClass>fr.poulpogaz.nonogramssolver.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

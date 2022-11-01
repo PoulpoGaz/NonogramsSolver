@@ -1,11 +1,11 @@
-package fr.poulpogaz.nonogramssolver.solver;
+package fr.poulpogaz.nonogramssolver.linesolver;
 
-import fr.poulpogaz.nonogramssolver.CellWrapper;
-import fr.poulpogaz.nonogramssolver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
+import fr.poulpogaz.nonogramssolver.solver.Descriptor;
 import org.junit.jupiter.api.Test;
 
-import static fr.poulpogaz.nonogramssolver.solver.TestUtils.createEmpty;
-import static fr.poulpogaz.nonogramssolver.solver.TestUtils.parse;
+import static fr.poulpogaz.nonogramssolver.linesolver.TestUtils.createEmpty;
+import static fr.poulpogaz.nonogramssolver.linesolver.TestUtils.parse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CompleteLineSolverTest {

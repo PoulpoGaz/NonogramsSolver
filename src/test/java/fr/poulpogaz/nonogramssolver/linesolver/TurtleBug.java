@@ -1,12 +1,12 @@
-package fr.poulpogaz.nonogramssolver.solver;
+package fr.poulpogaz.nonogramssolver.linesolver;
 
-import fr.poulpogaz.nonogramssolver.CellWrapper;
-import fr.poulpogaz.nonogramssolver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
+import fr.poulpogaz.nonogramssolver.solver.Descriptor;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static fr.poulpogaz.nonogramssolver.solver.TestUtils.*;
+import static fr.poulpogaz.nonogramssolver.linesolver.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TurtleBug {

@@ -1,4 +1,4 @@
-package fr.poulpogaz.nonogramssolver.solver;
+package fr.poulpogaz.nonogramssolver.linesolver;
 
 /**
  * 'length' filled cells in a region

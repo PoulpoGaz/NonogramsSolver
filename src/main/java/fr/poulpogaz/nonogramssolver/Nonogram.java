@@ -1,33 +1,22 @@
 package fr.poulpogaz.nonogramssolver;
 
-import fr.poulpogaz.nonogramssolver.solver.DefaultLineSolver;
-import fr.poulpogaz.nonogramssolver.solver.LineSolver;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Stack;
 
 public class Nonogram {
-
-    private static final int SOLVED = 0;
-    private static final int NOT_SOLVED = 1;
-    private static final int CONTRADICTION = 2;
-
-
 
     public static Nonogram fromImage(BufferedImage image) {
         int[][] cols = new int[image.getWidth()][];
         int[][] rows = new int[image.getHeight()][];
 
         for (int x = 0; x < image.getWidth(); x++) {
-            cols[x] = createSideNumbers(image, x, 0, false);
+            cols[x] = createDescription(image, x, 0, false);
         }
 
         for (int y = 0; y < image.getHeight(); y++) {
-            rows[y] = createSideNumbers(image, 0, y, true);
+            rows[y] = createDescription(image, 0, y, true);
         }
 
         return new Nonogram(rows, cols);
@@ -41,7 +30,7 @@ public class Nonogram {
      * @param row
      * @return side numbers
      */
-    private static int[] createSideNumbers(BufferedImage image, int x, int y, boolean row) {
+    private static int[] createDescription(BufferedImage image, int x, int y, boolean row) {
         // precondition checks
         int xAdd = 0;
         int yAdd = 0;
@@ -90,362 +79,33 @@ public class Nonogram {
         return Utils.toArray(ints);
     }
 
+
+
+
+
     private final int width;
     private final int height;
 
-    private final Descriptor[] rows;
-    private final Descriptor[] columns;
+    private final int[][] rows;
+    private final int[][] columns;
 
-    private final CellWrapper[][] solution;
+    private final Cell[][] cells;
 
     public Nonogram(int[][] rows, int[][] columns) {
         this.width = columns.length;
         this.height = rows.length;
-
-        solution = new CellWrapper[height][width];
+        this.rows = rows;
+        this.columns = columns;
+        this.cells = new Cell[height][width];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                solution[y][x] = new CellWrapper(Cell.EMPTY, x, y);
-            }
-        }
-
-        this.rows = createRows(rows);
-        this.columns = createColumns(columns);
-    }
-
-    private Descriptor[] createRows(int[][] rows) {
-        Descriptor[] r = new Descriptor[height];
-
-        for (int y = 0; y < height; y++) {
-            r[y] = new Descriptor(true, y, rows[y], solution[y]);
-        }
-
-        return r;
-    }
-
-    private Descriptor[] createColumns(int[][] columns) {
-        Descriptor[] r = new Descriptor[width];
-
-        for (int x = 0; x < width; x++) {
-            CellWrapper[] wrappers = new CellWrapper[height];
-
-            for (int y = 0; y < height; y++) {
-                wrappers[y] = solution[y][x];
-            }
-
-            r[x] = new Descriptor(false, x, columns[x], wrappers);
-        }
-
-        return r;
-    }
-
-    // SOLVER!
-
-    public boolean solveRecursive() {
-        Stack<Guess> guesses = new Stack<>();
-
-        int n = 0;
-        LineSolver solver = new DefaultLineSolver();
-        while (true) {
-            int ret = solveWithLineSolver(solver);
-
-            if (ret == NOT_SOLVED) { // new guess
-                n++;
-                System.out.println(n);
-                if (solveContradiction(solver) || n >= 2) {
-                    return true;
-                }
-                Guess g = guess();
-
-                guesses.push(g);
-
-            } else if (ret == CONTRADICTION) {
-                System.out.println("Undo guess");
-                while (!guesses.isEmpty()) {
-                    Guess g = guesses.peek();
-
-                    if (g.guess() == Cell.FILLED) {
-                        undoGuess(g);
-                        break;
-                    }
-
-                    guesses.pop();
-                }
-
-                if (guesses.isEmpty()) {
-                    return false;
-                }
-            } else if (ret == SOLVED) {
-                return true;
+                cells[y][x] = Cell.EMPTY;
             }
         }
     }
 
-    private int solveWithLineSolver(LineSolver solver) {
-        while (!isSolved()) {
-            boolean changed = false;
-            for (Descriptor col : columns) {
-                if (col.hasChanged()) {
-                    solver.trySolve(col);
 
-                    if (col.hasContradiction()) {
-                        return CONTRADICTION;
-                    }
-
-                    changed = true;
-                }
-            }
-
-            for (Descriptor row : rows) {
-                if (row.hasChanged()) {
-                    solver.trySolve(row);
-
-                    if (row.hasContradiction()) {
-                        return CONTRADICTION;
-                    }
-
-                    changed = true;
-                }
-            }
-
-            if (!changed) {
-                return NOT_SOLVED;
-            }
-        }
-
-        return SOLVED;
-    }
-
-    private boolean solveContradiction(LineSolver solver) {
-        System.out.println("Solving contradiction");
-
-        boolean foundAContradiction;
-        do {
-            foundAContradiction = false;
-
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    int ret = contradictionAt(solver, x, y);
-
-                    if (ret == CONTRADICTION) {
-                        foundAContradiction = true;
-                    } else if (ret == SOLVED) {
-                        return true;
-                    }
-                }
-            }
-
-            if (foundAContradiction) {
-                System.out.println("redo");
-            }
-
-        } while (foundAContradiction);
-
-        return false;
-    }
-
-    private int contradictionAt(LineSolver solver, int x, int y) {
-        Cell[][] copy = getSolution();
-
-        set(Cell.FILLED, x, y);
-
-        int ret = solveWithLineSolver(solver);
-        if (ret == NOT_SOLVED) {
-            set(copy);
-            set(Cell.CROSSED, x, y);
-
-            ret = solveWithLineSolver(solver);
-            if (ret == NOT_SOLVED) {
-                set(copy);
-            } else if (ret == CONTRADICTION) {
-                // something weird is happening
-            }
-
-        } else if (ret == CONTRADICTION) {
-            set(copy);
-            set(Cell.CROSSED, x, y);
-        }
-
-        return ret;
-    }
-
-
-
-    private Guess guess() {
-        System.out.println("Guessing");
-        int xFirst = -1;
-        int yFirst = -1;
-
-        // bad guessing strategy
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                if (solution[y][x].isEmpty()) {
-                    xFirst = x;
-                    yFirst = y;
-
-                    if (filled(x - 1, y) || filled(x + 1, y) || filled(x, y - 1) || filled(x, y + 1)) {
-                        Cell[][] copy = getSolution();
-                        copy[y][x] = Cell.FILLED;
-
-                        set(Cell.FILLED, x, y);
-
-                        return new Guess(x, y, copy);
-                    }
-                }
-            }
-        }
-
-        if (xFirst < 0) {
-            return null;
-        }
-
-        Cell[][] copy = getSolution();
-        copy[yFirst][xFirst] = Cell.FILLED;
-
-        set(Cell.FILLED, xFirst, yFirst);
-
-        return new Guess(xFirst, yFirst, copy);
-    }
-
-    private boolean filled(int x, int y) {
-        if (x < 0 || y < 0 || x >= width || y >= height) {
-            return false;
-        }
-
-        return solution[y][x].isFilled();
-    }
-
-    private void undoGuess(Guess guess) {
-        //System.out.printf("Undo guess %s at (%d; %d)%n", Cell.FILLED, guess.x(), guess.y());
-        set(guess.cells());
-
-        for (Descriptor row : rows) {
-            row.resetStatus();
-        }
-
-        for (Descriptor cols : columns) {
-            cols.resetStatus();
-        }
-
-        solution[guess.y()][guess.x()].setForce(Cell.CROSSED);
-        solution[guess.y()][guess.x()].setChanged();
-        columns[guess.x()].setChanged();
-        rows[guess.y()].setChanged();
-
-        guess.cells()[guess.y()][guess.x()] = Cell.CROSSED;
-    }
-
-    private void set(Cell[][] cells) {
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                solution[y][x].setForce(cells[y][x]);
-                solution[y][x].resetStatus();
-            }
-        }
-    }
-
-    private void set(Cell cell, int x, int y) {
-        solution[y][x].setForce(cell);
-        solution[y][x].setChanged();
-        columns[x].setChanged();
-        rows[y].setChanged();
-    }
-
-    public boolean solve(SolverListener listener) {
-        Objects.requireNonNull(listener);
-
-        LineSolver solver = new DefaultLineSolver();
-
-        while (!isSolved()) {
-            boolean changed = false;
-            for (Descriptor col : columns) {
-                if (col.hasChanged()) {
-                    solver.trySolve(col);
-
-                    if (col.hasChanged()) {
-                        listener.onColumnTrySolve(this, col);
-                        changed = true;
-                    }
-                }
-            }
-
-            for (Descriptor row : rows) {
-                if (row.hasChanged()) {
-                    solver.trySolve(row);
-
-                    if (row.hasChanged()) {
-                        listener.onRowTrySolve(this, row);
-                        changed = true;
-                    }
-                }
-            }
-
-            if (!changed) {
-                listener.onFail(this);
-                return false;
-            } else {
-                listener.onPassFinished(this);
-            }
-        }
-
-        listener.onSuccess(this);
-        return true;
-    }
-
-    public boolean solve() {
-        return solve(SolverListener.EMPTY_LISTENER);
-    }
-
-    private boolean isSolved() {
-        for (Descriptor col : columns) {
-            if (!col.isCompleted()) {
-                return false;
-            }
-        }
-
-        for (Descriptor row : rows) {
-            if (!row.isCompleted()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-
-
-
-    // END OF SOLVER!
-
-
-    public Cell[][] getSolution() {
-        Cell[][] cells = new Cell[height][width];
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                cells[y][x] = solution[y][x].get();
-            }
-        }
-
-        return cells;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public Descriptor[] getRows() {
-        return rows;
-    }
-
-    public Descriptor[] getColumns() {
-        return columns;
-    }
 
     public BufferedImage asImage(int squareSize) {
         return asImage(squareSize, true);
@@ -460,19 +120,19 @@ public class Nonogram {
         int maxDigit = 1;
 
         if (withClues) {
-            for (Descriptor row : rows) {
-                rowWidth = Math.max(row.nClues() * squareSize, rowWidth);
+            for (int[] clues : rows) {
+                rowWidth = Math.max(clues.length * squareSize, rowWidth);
 
-                for (Clue c : row.getClues()) {
-                    maxDigit = Math.max(maxDigit, Utils.nDigit(c.getLength()));
+                for (int clue : clues) {
+                    maxDigit = Math.max(maxDigit, Utils.nDigit(clue));
                 }
             }
 
-            for (Descriptor col : columns) {
-                colHeight = Math.max(col.nClues() * squareSize, colHeight);
+            for (int[] clues : columns) {
+                colHeight = Math.max(clues.length * squareSize, colHeight);
 
-                for (Clue c : col.getClues()) {
-                    maxDigit = Math.max(maxDigit, Utils.nDigit(c.getLength()));
+                for (int clue : clues) {
+                    maxDigit = Math.max(maxDigit, Utils.nDigit(clue));
                 }
             }
 
@@ -519,23 +179,27 @@ public class Nonogram {
 
             drawX = offsetX;
             for (int x = 0; x < width; x++) {
-                CellWrapper cell = solution[y][x];
+                Cell cell = cells[y][x];
 
-                if (cell.isEmpty()) {
-                    g2d.setColor(Color.WHITE);
-                    g2d.fillRect(drawX, drawY, squareSize, squareSize);
+                switch (cell) {
+                    case FILLED -> {
+                        g2d.setColor(Color.BLACK);
+                        g2d.fillRect(drawX, drawY, squareSize, squareSize);
+                    }
+                    case EMPTY -> {
+                        g2d.setColor(Color.WHITE);
+                        g2d.fillRect(drawX, drawY, squareSize, squareSize);
+                    }
+                    case CROSSED -> {
+                        if (squareSize >= 3) {
+                            g2d.setColor(Color.WHITE);
+                            g2d.fillRect(drawX, drawY, squareSize, squareSize);
 
-                } else if (cell.isFilled()) {
-                    g2d.setColor(Color.BLACK);
-                    g2d.fillRect(drawX, drawY, squareSize, squareSize);
-
-                } else if (cell.isCrossed() && squareSize >= 3) {
-                    g2d.setColor(Color.WHITE);
-                    g2d.fillRect(drawX, drawY, squareSize, squareSize);
-
-                    g2d.setColor(Color.BLACK);
-                    g2d.drawLine(drawX, drawY, drawX + squareSize, drawY + squareSize);
-                    g2d.drawLine(drawX + squareSize, drawY, drawX, drawY + squareSize);
+                            g2d.setColor(Color.BLACK);
+                            g2d.drawLine(drawX, drawY, drawX + squareSize, drawY + squareSize);
+                            g2d.drawLine(drawX + squareSize, drawY, drawX, drawY + squareSize);
+                        }
+                    }
                 }
 
                 drawX += squareSize;
@@ -550,11 +214,11 @@ public class Nonogram {
         FontMetrics fm = g2d.getFontMetrics();
 
         int x = xOffset;
-        for (Descriptor col : columns) {
+        for (int[] clues : columns) {
             int y = maxY - squareSize;
 
-            for (int i = col.nClues() - 1; i >= 0; i--) {
-                String str = Integer.toString(col.getClue(i).getLength());
+            for (int i = clues.length - 1; i >= 0; i--) {
+                String str = Integer.toString(clues[i]);
 
                 g2d.setClip(x, y, squareSize, squareSize);
                 g2d.drawString(str,
@@ -573,11 +237,11 @@ public class Nonogram {
         FontMetrics fm = g2d.getFontMetrics();
 
         int y = yOffset;
-        for (Descriptor row : rows) {
+        for (int[] clues : rows) {
             int x = maxX - squareSize;
 
-            for (int i = row.nClues() - 1; i >= 0; i--) {
-                String str = Integer.toString(row.getClue(i).getLength());
+            for (int i = clues.length - 1; i >= 0; i--) {
+                String str = Integer.toString(clues[i]);
 
                 g2d.setClip(x, y, squareSize, squareSize);
                 g2d.drawString(str,
@@ -598,183 +262,54 @@ public class Nonogram {
             // rows
             for (int y = 0; y < height; y++) {
                 g2d.drawLine(0, gridOffsetY + y * squareSize,
-                             imgWidth, gridOffsetY + y * squareSize);
+                        imgWidth, gridOffsetY + y * squareSize);
             }
 
             // cols
             for (int x = 0; x < width; x++) {
                 g2d.drawLine(gridOffsetX + x * squareSize, 0,
-                             gridOffsetX + x * squareSize, imgHeight);
+                        gridOffsetX + x * squareSize, imgHeight);
             }
         }
     }
 
-
-    @Override
-    public String toString() {
-        // compute size
-
-        int maxNumberInRow = 0;
-        int squareSize = 1;
-        for (Descriptor descriptor : rows) {
-            maxNumberInRow = Math.max(maxNumberInRow, descriptor.nClues());
-
-            for (Clue c : descriptor.getClues()) {
-                squareSize = Math.max(squareSize, Utils.nDigit(c.getLength()));
-            }
-        }
-
-        int maxNumberInCol = 0;
-        for (Descriptor descriptor : columns) {
-            maxNumberInCol = Math.max(maxNumberInCol, descriptor.nClues());
-
-            for (Clue c : descriptor.getClues()) {
-                squareSize = Math.max(squareSize, Utils.nDigit(c.getLength()));
-            }
-        }
-
-        int w = (width + maxNumberInCol) * squareSize;
-        int h = (height + maxNumberInCol) * squareSize;
-
-        StringSurface surface = new StringSurface(w, h);
-
-        // begin draw!
-        // columns
-        int drawX = maxNumberInRow * squareSize;
-        for (int x = 0; x < width; x++) {
-            drawColNumbers(surface, columns[x].getClues(), maxNumberInCol, squareSize, drawX);
-
-            drawX += squareSize;
-        }
-
-        // rows
-        int drawY = maxNumberInCol * squareSize;
-        for (int y = 0; y < height; y++) {
-            drawRowNumbers(surface, rows[y].getClues(), maxNumberInRow, squareSize, drawY);
-
-            drawY += squareSize;
-        }
-
-        // solution
-        int xDraw;
-        int yDraw = maxNumberInRow * squareSize;
-        for (int y = 0; y < height; y++) {
-            xDraw = maxNumberInCol * squareSize;
-
-            for (int x = 0; x < width; x++) {
-                CellWrapper cell = solution[y][x];
-
-                for (int x2 = 0; x2 < squareSize; x2++) {
-                    for (int y2 = 0; y2 < squareSize; y2++) {
-                        surface.set(xDraw + x2, yDraw + y2, cell.get().getChar());
-                    }
-                }
-
-                xDraw += squareSize;
-            }
-
-            yDraw += squareSize;
-        }
-
-        return surface.getBuilder().toString();
+    public Cell[][] getCells() {
+        return cells;
     }
 
-    /**
-     * Draw a col
-     * @param surface the surface to draw on
-     * @param clues the clues to draw
-     * @param maxNumberInCol the maximal number of number that all cols contains
-     */
-    private void drawColNumbers(StringSurface surface,
-                                Clue[] clues, int maxNumberInCol, int squareSize, int drawX) {
-        int y = (maxNumberInCol - clues.length) * squareSize;
-        for (Clue c : clues) {
-            surface.set(drawX, y, String.valueOf(c.getLength()));
-
-            y += squareSize;
-        }
+    public Cell get(int x, int y) {
+        return cells[y][x];
     }
 
-    private void drawRowNumbers(StringSurface surface,
-                                Clue[] clues, int maxNumberInRow, int squareSize, int drawY) {
-        int x = (maxNumberInRow - clues.length) * squareSize;
-        for (Clue c : clues) {
-            surface.set(x, drawY, String.valueOf(c.getLength()));
-
-            x += squareSize;
-        }
+    public void set(Cell cell, int x, int y) {
+        cells[y][x] = cell;
     }
 
+    public boolean isEmpty(int x, int y) {
+        return cells[y][x] == Cell.EMPTY;
+    }
 
-    private static class StringSurface {
+    public boolean isFilled(int x, int y) {
+        return cells[y][x] == Cell.FILLED;
+    }
 
-        private final StringBuilder builder;
-        private final int width;
-        private final int height;
+    public boolean isCrossed(int x, int y) {
+        return cells[y][x] == Cell.CROSSED;
+    }
 
-        private final int widthWithLineSeparator;
+    public int getWidth() {
+        return width;
+    }
 
-        public StringSurface(int width, int height) {
-            this.width = width;
-            this.height = height;
-            this.widthWithLineSeparator = width + System.lineSeparator().length();
+    public int getHeight() {
+        return height;
+    }
 
-            int s = widthWithLineSeparator * height;
-            builder = new StringBuilder(s);
-            builder.setLength(s);
+    public int[][] getRows() {
+        return rows;
+    }
 
-            clear();
-        }
-
-        private void clear() {
-            for (int i = 0; i < builder.length(); i++) {
-                builder.setCharAt(i, ' ');
-            }
-
-            setLineSeparators();
-        }
-
-        private void setLineSeparators() {
-            String line = System.lineSeparator();
-
-            int i = width;
-            for (int y = 0; y < height; y++) {
-                builder.replace(i, i + line.length(), line);
-
-                i += widthWithLineSeparator;
-            }
-        }
-
-        public void set(int x, int y, String str) {
-            check(x, y);
-
-            int start = y * widthWithLineSeparator + x;
-            int end = start + str.length();
-
-            builder.replace(start, end, str);
-        }
-
-        public void set(int x, int y, char c) {
-            check(x, y);
-            builder.setCharAt(y * widthWithLineSeparator + x, c);
-        }
-
-        private void check(int x, int y) {
-            if (x < 0 || y < 0 || x > width || y > height) {
-                throw new IllegalArgumentException("X/Y is out of bounds: coords=(%d; %d) size=(%d; %d)".formatted(x, y, width, height));
-            }
-        }
-
-        public StringBuilder getBuilder() {
-            return builder;
-        }
-
-        public int getWidth() {
-            return width;
-        }
-
-        public int getHeight() {
-            return height;
-        }
+    public int[][] getColumns() {
+        return columns;
     }
 }

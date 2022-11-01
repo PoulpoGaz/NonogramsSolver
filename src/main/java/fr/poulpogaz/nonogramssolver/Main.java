@@ -1,9 +1,8 @@
-package fr.poulpogaz.nonogramssolver.cli;
+package fr.poulpogaz.nonogramssolver;
 
-import fr.poulpogaz.nonogramssolver.Descriptor;
-import fr.poulpogaz.nonogramssolver.Nonogram;
-import fr.poulpogaz.nonogramssolver.SolverAdapter;
-import fr.poulpogaz.nonogramssolver.Utils;
+import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.NonogramSolver;
+import fr.poulpogaz.nonogramssolver.solver.SolverAdapter;
 import fr.poulpogaz.nonogramssolver.reader.WebpbnReader;
 import picocli.CommandLine;
 
@@ -102,8 +101,9 @@ public class Main implements Runnable {
                     return;
                 }
 
-                //nonogram.solve(listener);
-                boolean solved = nonogram.solveRecursive();
+                NonogramSolver solver = new NonogramSolver();
+                // TODO: arguments
+                boolean solved = solver.solve(nonogram, listener, true, true);
 
                 if (solved) {
                     listener.onSuccess(nonogram);

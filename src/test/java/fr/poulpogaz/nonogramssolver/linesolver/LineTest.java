@@ -1,4 +1,4 @@
-package fr.poulpogaz.nonogramssolver.solver;
+package fr.poulpogaz.nonogramssolver.linesolver;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,7 @@
-package fr.poulpogaz.nonogramssolver;
+package fr.poulpogaz.nonogramssolver.solver;
+
+import fr.poulpogaz.nonogramssolver.Cell;
+import fr.poulpogaz.nonogramssolver.Nonogram;
 
 import java.util.Objects;
 
@@ -6,44 +9,45 @@ public class CellWrapper {
 
     private final int x;
     private final int y;
-
-    private Cell content;
+    private final Nonogram nonogram;
 
     private Descriptor row;
     private Descriptor column;
 
     private int status = Status.NO_CHANGE;
 
-    public CellWrapper(Cell content, int x, int y) {
-        this.content = Objects.requireNonNull(content);
+    public CellWrapper(Nonogram nonogram, int x, int y) {
+        this.nonogram = Objects.requireNonNull(nonogram);
         this.x = x;
         this.y = y;
     }
 
     public boolean isEmpty() {
-        return content == Cell.EMPTY;
+        return nonogram.isEmpty(x, y);
     }
 
     public boolean isFilled() {
-        return content == Cell.FILLED;
+        return nonogram.isFilled(x, y);
     }
 
     public boolean isCrossed() {
-        return content == Cell.CROSSED;
+        return nonogram.isCrossed(x, y);
     }
 
     public Cell get() {
-        return content;
+        return nonogram.get(x, y);
     }
 
-    public void setForce(Cell content) {
-        this.content = content;
+    public void setForce(Cell cell) {
+        nonogram.set(cell, x, y);
     }
 
-    public void set(Cell content) {
-        if (this.content != content) {
-            if (this.content != null && this.content != Cell.EMPTY) {
-                // throw new IllegalStateException("Changing cell at (%d; %d) from %s to %s".formatted(x, y, this.content, content));
+    public void set(Cell cell) {
+        Cell current = nonogram.get(x, y);
+
+        if (current != cell) {
+            if (current != null && current != Cell.EMPTY) {
+                // throw new IllegalStateException("Changing cell at (%d; %d) from %s to %s".formatted(x, y, this.cell, cell));
                 setContradiction();
 
                 if (row != null) {
@@ -53,7 +57,7 @@ public class CellWrapper {
                     column.setContradiction();
                 }
             } else {
-                this.content = content;
+                nonogram.set(cell, x, y);
                 setChanged();
 
                 if (row != null) {
@@ -112,6 +116,6 @@ public class CellWrapper {
 
     @Override
     public String toString() {
-        return content.toString();
+        return nonogram.get(x, y).toString();
     }
 }

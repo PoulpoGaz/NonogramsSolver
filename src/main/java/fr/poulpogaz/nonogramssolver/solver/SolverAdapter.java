@@ -1,4 +1,6 @@
-package fr.poulpogaz.nonogramssolver;
+package fr.poulpogaz.nonogramssolver.solver;
+
+import fr.poulpogaz.nonogramssolver.Nonogram;
 
 public abstract class SolverAdapter implements SolverListener {
     @Override
