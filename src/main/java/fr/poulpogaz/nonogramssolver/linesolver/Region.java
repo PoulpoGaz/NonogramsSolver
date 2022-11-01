@@ -8,12 +8,12 @@ public class Region extends AbstractRegion {
     private final AbstractRegion ancestor;
 
     public Region(AbstractRegion ancestor) {
-        super(ancestor.descriptor);
+        super(ancestor.description);
         this.ancestor = ancestor;
     }
 
     public Region(AbstractRegion ancestor, int start, int end, int firstClueIndex, int lastClueIndex) {
-        super(ancestor.descriptor);
+        super(ancestor.description);
         this.ancestor = ancestor;
         this.start = start;
         this.end = end;

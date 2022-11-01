@@ -3,7 +3,7 @@ package fr.poulpogaz.nonogramssolver.linesolver;
 import fr.poulpogaz.nonogramssolver.Cell;
 import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.solver.Clue;
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.Description;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public abstract class AbstractRegion {
 
-    protected Descriptor descriptor;
+    protected Description description;
 
     // included
     protected int start;
@@ -25,8 +25,8 @@ public abstract class AbstractRegion {
     // excluded
     protected int lastClueIndex;
 
-    public AbstractRegion(Descriptor descriptor) {
-        this.descriptor = descriptor;
+    public AbstractRegion(Description description) {
+        this.description = description;
     }
 
     public void trySolve() {
@@ -41,7 +41,7 @@ public abstract class AbstractRegion {
         optimizeCluesBoundWithOnePossibility();
         comparePossibilitiesAndLines(lines);
 
-        if (!descriptor.hasContradiction()) {
+        if (!description.hasContradiction()) {
             crossZeroCells();
             tryFill(lines);
         }
@@ -72,7 +72,7 @@ public abstract class AbstractRegion {
                 minI++;
 
                 if (minI + c.getLength() > end) {
-                    descriptor.setContradiction();
+                    description.setContradiction();
                     return;
                 }
             }
@@ -89,7 +89,7 @@ public abstract class AbstractRegion {
                 maxI--;
 
                 if (maxI - c.getLength() < 0) {
-                    descriptor.setContradiction();
+                    description.setContradiction();
                     return;
                 }
             }
@@ -142,7 +142,7 @@ public abstract class AbstractRegion {
     }
 
     protected void optimizeCluesBoundWithOnePossibility() {
-        if (descriptor.hasContradiction()) {
+        if (description.hasContradiction()) {
             return;
         }
 
@@ -227,7 +227,7 @@ public abstract class AbstractRegion {
      * Actually, I don't know why it works lol
      */
     protected void comparePossibilitiesAndLines(List<Line> lines) {
-        if (descriptor.hasContradiction()) {
+        if (description.hasContradiction()) {
             return;
         }
 
@@ -317,7 +317,7 @@ public abstract class AbstractRegion {
             int minLength = minClueLength(line.start());
 
             if (minLength < 0) {
-                descriptor.setContradiction();
+                description.setContradiction();
                 return;
             }
 
@@ -353,19 +353,19 @@ public abstract class AbstractRegion {
 
 
     protected boolean fit(Clue clue, int i) {
-        return SolverUtils.fit(descriptor, clue, i);
+        return SolverUtils.fit(description, clue, i);
     }
 
     protected boolean fit(int line, int i) {
-        return SolverUtils.fit(descriptor, line, i);
+        return SolverUtils.fit(description, line, i);
     }
 
     protected boolean fitReverse(Clue clue, int i) {
-        return SolverUtils.fitReverse(descriptor, clue, i);
+        return SolverUtils.fitReverse(description, clue, i);
     }
 
     protected boolean fitReverse(int line, int i) {
-        return SolverUtils.fitReverse(descriptor, line, i);
+        return SolverUtils.fitReverse(description, line, i);
     }
 
     /**
@@ -485,7 +485,7 @@ public abstract class AbstractRegion {
      * Debug method that checks if clue minI and maxI are correct
      */
     protected void checkClues() {
-        if (descriptor.hasContradiction()) {
+        if (description.hasContradiction()) {
             return;
         }
 
@@ -493,25 +493,25 @@ public abstract class AbstractRegion {
             Clue c = getClue(i);
 
             if (c.getMaxI() - c.getMinI() < c.getLength()) {
-                descriptor.setContradiction();
+                description.setContradiction();
                 return;
             }
 
             if (!isPossible(c.getMinI(), c)) {
-                descriptor.setContradiction();
+                description.setContradiction();
                 return;
             }
             if (!isPossible(c.getMaxI() - 1, c)) {
-                descriptor.setContradiction();
+                description.setContradiction();
                 return;
             }
 
             for (int j = start; j < end; j++) {
                 if (isPossible(j, c) && j < c.getMinI()) {
-                    descriptor.setContradiction();
+                    description.setContradiction();
                     return;
                 } else if (isPossible(j, c) && j >= c.getMaxI()) {
-                    descriptor.setContradiction();
+                    description.setContradiction();
                     return;
                 }
             }
@@ -567,31 +567,31 @@ public abstract class AbstractRegion {
     }
 
     protected boolean isFilled(int i) {
-        return descriptor.isFilled(i);
+        return description.isFilled(i);
     }
 
     protected boolean isCrossed(int i) {
-        return descriptor.isCrossed(i);
+        return description.isCrossed(i);
     }
 
     protected boolean isEmpty(int i) {
-        return descriptor.isEmpty(i);
+        return description.isEmpty(i);
     }
 
     protected int getClueLength(int i) {
-        return descriptor.getClueLength(i);
+        return description.getClueLength(i);
     }
 
     protected CellWrapper getCell(int index) {
-        return descriptor.getCell(index);
+        return description.getCell(index);
     }
 
     protected void setCell(int index, Cell cell) {
-        descriptor.setCell(index, cell);
+        description.setCell(index, cell);
     }
 
     protected Clue getClue(int index) {
-        return descriptor.getClue(index);
+        return description.getClue(index);
     }
 
 

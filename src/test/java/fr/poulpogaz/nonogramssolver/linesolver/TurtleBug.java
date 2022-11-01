@@ -1,7 +1,7 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
 import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -21,9 +21,9 @@ public class TurtleBug {
 
         int[] clues = new int[] {3, 2, 2, 3, 4, 3};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        Description description = new Description(false, 0, clues, wrappers);
 
-        solver.setDescriptor(descriptor);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.comparePossibilitiesAndLines(solver.createLines());
@@ -43,9 +43,9 @@ public class TurtleBug {
 
         int[] clues = new int[] {2, 2, 1, 2, 1, 1, 1, 1};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        Description description = new Description(false, 0, clues, wrappers);
 
-        solver.setDescriptor(descriptor);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.comparePossibilitiesAndLines(solver.createLines());
@@ -66,9 +66,9 @@ public class TurtleBug {
 
         int[] clues = new int[] {2, 2, 6, 2, 2, 1, 1, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        Description description = new Description(false, 0, clues, wrappers);
 
-        solver.setDescriptor(descriptor);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.comparePossibilitiesAndLines(solver.createLines());
@@ -88,9 +88,9 @@ public class TurtleBug {
 
         int[] clues = new int[] {4, 2, 1, 1, 1, 2, 1};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        Description description = new Description(false, 0, clues, wrappers);
 
-        solver.setDescriptor(descriptor);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.comparePossibilitiesAndLines(solver.createLines());

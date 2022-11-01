@@ -1,7 +1,7 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
 import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
 import static fr.poulpogaz.nonogramssolver.linesolver.TestUtils.*;
@@ -19,9 +19,9 @@ public class NeteroBug {
 
         int[] clues = new int[] {1, 3, 2, 6, 1, 4, 1, 6, 1, 9, 8};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        Description description = new Description(false, 0, clues, wrappers);
 
-        solver.setDescriptor(descriptor);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         System.out.println(solver);

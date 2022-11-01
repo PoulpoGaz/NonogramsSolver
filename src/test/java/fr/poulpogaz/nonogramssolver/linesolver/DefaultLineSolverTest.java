@@ -1,7 +1,7 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
 import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -24,8 +24,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = createEmpty(15);
         int[] clues = new int[] {2, 6, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
 
         // cell then clue (2, 6, 2)
@@ -49,9 +49,9 @@ public class DefaultLineSolverTest {
         };
 
         arrayEquals(expected, solver.getPossibilities());
-        clueEquals(0, 5, descriptor.getClue(0));
-        clueEquals(3, 12, descriptor.getClue(1));
-        clueEquals(10, 15, descriptor.getClue(2));
+        clueEquals(0, 5, description.getClue(0));
+        clueEquals(3, 12, description.getClue(1));
+        clueEquals(10, 15, description.getClue(2));
     }
 
 
@@ -62,8 +62,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = createEmpty(15);
         int[] clues = new int[] {5, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
 
         // cell then clue (5, 2)
@@ -87,8 +87,8 @@ public class DefaultLineSolverTest {
         };
 
         arrayEquals(expected, solver.getPossibilities());
-        clueEquals(0, 12, descriptor.getClue(0));
-        clueEquals(6, 15, descriptor.getClue(1));
+        clueEquals(0, 12, description.getClue(0));
+        clueEquals(6, 15, description.getClue(1));
     }
 
     @Test
@@ -98,8 +98,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = createEmpty(15);
         int[] clues = new int[] {2, 2, 2, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
 
         // cell then clue (5, 2)
@@ -123,10 +123,10 @@ public class DefaultLineSolverTest {
         };
 
         arrayEquals(expected, solver.getPossibilities());
-        clueEquals(0, 6, descriptor.getClue(0));
-        clueEquals(3, 9, descriptor.getClue(1));
-        clueEquals(6, 12, descriptor.getClue(2));
-        clueEquals(9, 15, descriptor.getClue(3));
+        clueEquals(0, 6, description.getClue(0));
+        clueEquals(3, 9, description.getClue(1));
+        clueEquals(6, 12, description.getClue(2));
+        clueEquals(9, 15, description.getClue(3));
     }
 
 
@@ -139,8 +139,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("__█____█____█__");
         int[] clues = new int[] {2, 6, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
 
         // cell then clue (2, 6, 2)
@@ -164,9 +164,9 @@ public class DefaultLineSolverTest {
         };
 
         arrayEquals(expected, solver.getPossibilities());
-        clueEquals(1, 4, descriptor.getClue(0));
-        clueEquals(4, 11, descriptor.getClue(1));
-        clueEquals(11, 14, descriptor.getClue(2));
+        clueEquals(1, 4, description.getClue(0));
+        clueEquals(4, 11, description.getClue(1));
+        clueEquals(11, 14, description.getClue(2));
     }
 
 
@@ -177,8 +177,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("__█___█____██__");
         int[] clues = new int[] {5, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
 
         // cell then clue (5, 2)
@@ -202,8 +202,8 @@ public class DefaultLineSolverTest {
         };
 
         arrayEquals(expected, solver.getPossibilities());
-        clueEquals(0, 10, descriptor.getClue(0));
-        clueEquals(6, 13, descriptor.getClue(1));
+        clueEquals(0, 10, description.getClue(0));
+        clueEquals(6, 13, description.getClue(1));
     }
 
     @Test
@@ -213,8 +213,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("__██_██___█_█__");
         int[] clues = new int[] {5, 2, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
 
@@ -239,9 +239,9 @@ public class DefaultLineSolverTest {
         };
 
         arrayEquals(expected, solver.getPossibilities());
-        clueEquals(2, 7, descriptor.getClue(0));
-        clueEquals(9, 11, descriptor.getClue(1));
-        clueEquals(12, 14, descriptor.getClue(2));
+        clueEquals(2, 7, description.getClue(0));
+        clueEquals(9, 11, description.getClue(1));
+        clueEquals(12, 14, description.getClue(2));
     }
 
     @Test
@@ -251,8 +251,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("__█X___█__X_█XX");
         int[] clues = new int[] {2, 6, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
 
         // cell then clue (2, 6, 2)
@@ -276,9 +276,9 @@ public class DefaultLineSolverTest {
         };
 
         arrayEquals(expected, solver.getPossibilities());
-        clueEquals(1, 3, descriptor.getClue(0));
-        clueEquals(4, 10, descriptor.getClue(1));
-        clueEquals(11, 13, descriptor.getClue(2));
+        clueEquals(1, 3, description.getClue(0));
+        clueEquals(4, 10, description.getClue(1));
+        clueEquals(11, 13, description.getClue(2));
     }
 
 
@@ -294,8 +294,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("__█___█____██__");
         int[] clues = new int[] {5, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
 
@@ -320,10 +320,10 @@ public class DefaultLineSolverTest {
         };
 
         arrayEquals(expected, solver.getPossibilities());
-        assertEquals(2, descriptor.getClues()[0].getMinI());
-        assertEquals(7, descriptor.getClues()[0].getMaxI());
-        assertEquals(11, descriptor.getClues()[1].getMinI());
-        assertEquals(13, descriptor.getClues()[1].getMaxI());
+        assertEquals(2, description.getClues()[0].getMinI());
+        assertEquals(7, description.getClues()[0].getMaxI());
+        assertEquals(11, description.getClues()[1].getMinI());
+        assertEquals(13, description.getClues()[1].getMaxI());
     }
 
     @Test
@@ -333,8 +333,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("__██_██___█_█__");
         int[] clues = new int[] {5, 2, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
 
@@ -359,9 +359,9 @@ public class DefaultLineSolverTest {
         };
 
         arrayEquals(expected, solver.getPossibilities());
-        clueEquals(2, 7, descriptor.getClue(0));
-        clueEquals(9, 11, descriptor.getClue(1));
-        clueEquals(12, 14, descriptor.getClue(2));
+        clueEquals(2, 7, description.getClue(0));
+        clueEquals(9, 11, description.getClue(1));
+        clueEquals(12, 14, description.getClue(2));
     }
 
 
@@ -375,8 +375,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = createEmpty(15);
         int[] clues = new int[] {2, 6, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         List<Region> regions = solver.split();
@@ -390,8 +390,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("__█___█____██__");
         int[] clues = new int[] {5, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         List<Region> regions = solver.split();
@@ -406,8 +406,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("__██_██___█_█__");
         int[] clues = new int[] {5, 2, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         List<Region> regions = solver.split();
@@ -434,8 +434,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("_____█______X_█");
         int[] clues = new int[] {2, 2, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
 
@@ -450,8 +450,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("X_____███______");
         int[] clues = new int[] {2, 6, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.tryFill(List.of());
@@ -470,8 +470,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = createEmpty(15);
         int[] clues = new int[] {2, 6, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        assertFalse(descriptor.isCompleted());
+        Description description = new Description(false, 0, clues, wrappers);
+        assertFalse(description.isCompleted());
     }
 
     @Test
@@ -479,8 +479,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("_██X██████__██_");
         int[] clues = new int[] {2, 6, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        assertTrue(descriptor.isCompleted());
+        Description description = new Description(false, 0, clues, wrappers);
+        assertTrue(description.isCompleted());
     }
 
     @Test
@@ -488,8 +488,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("X█XXXX█XXX_██_█");
         int[] clues = new int[] {1, 1, 2, 1};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        assertTrue(descriptor.isCompleted());
+        Description description = new Description(false, 0, clues, wrappers);
+        assertTrue(description.isCompleted());
     }
 
     @Test
@@ -497,8 +497,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = parse("__█____________");
         int[] clues = new int[] {};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        assertFalse(descriptor.isCompleted());
+        Description description = new Description(false, 0, clues, wrappers);
+        assertFalse(description.isCompleted());
     }
 
 
@@ -508,8 +508,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = createEmpty(10);
         int[] clues = new int[] {};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.drawBetween(0, 10, 5);
         cellsEquals(wrappers, createEmpty(10));
 
@@ -522,8 +522,8 @@ public class DefaultLineSolverTest {
         CellWrapper[] wrappers = createEmpty(20);
         int[] clues = new int[] {};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.drawBetween(3, 10, 5);
         cellsEquals(wrappers, parse("_____███____________"));
 

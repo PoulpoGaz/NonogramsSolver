@@ -2,7 +2,7 @@ package fr.poulpogaz.nonogramssolver.solver;
 
 import fr.poulpogaz.nonogramssolver.Cell;
 
-public class Descriptor {
+public class Description {
 
     /**
      * row if true, column if false
@@ -21,7 +21,7 @@ public class Descriptor {
 
     private int status = Status.CHANGED;
 
-    public Descriptor(boolean isRow, int index, int[] clues, CellWrapper[] cells) {
+    public Description(boolean isRow, int index, int[] clues, CellWrapper[] cells) {
         this.isRow = isRow;
         this.index = index;
         this.cells = cells;

@@ -1,7 +1,7 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
 import fr.poulpogaz.nonogramssolver.solver.Clue;
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.Description;
 
 public class SolverUtils {
 
@@ -11,7 +11,7 @@ public class SolverUtils {
      *
      * @return true if a line of length line can be put at the position i
      */
-    public static boolean fit(Descriptor desc, int line, int i) {
+    public static boolean fit(Description desc, int line, int i) {
         int end = desc.size();
 
         if (i < 0 ||
@@ -30,18 +30,18 @@ public class SolverUtils {
         }
     }
 
-    public static boolean fit(Descriptor desc, Clue clue, int i) {
+    public static boolean fit(Description desc, Clue clue, int i) {
         return fit(desc, clue.getLength(), i);
     }
 
     /**
      * Returns true if a line of length line can be put from {@code i} (included) to {@code i - line} (excluded).
      */
-    public static boolean fitReverse(Descriptor desc, int line, int i) {
+    public static boolean fitReverse(Description desc, int line, int i) {
         return fit(desc, line, i - line + 1);
     }
 
-    public static boolean fitReverse(Descriptor desc, Clue clue, int i) {
+    public static boolean fitReverse(Description desc, Clue clue, int i) {
         return fitReverse(desc, clue.getLength(), i);
     }
 }

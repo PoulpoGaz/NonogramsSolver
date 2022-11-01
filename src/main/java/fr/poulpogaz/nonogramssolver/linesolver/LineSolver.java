@@ -1,8 +1,8 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.Description;
 
 public interface LineSolver {
 
-    void trySolve(Descriptor descriptor);
+    void trySolve(Description description);
 }

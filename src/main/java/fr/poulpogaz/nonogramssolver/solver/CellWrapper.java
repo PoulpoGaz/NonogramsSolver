@@ -11,8 +11,8 @@ public class CellWrapper {
     private final int y;
     private final Nonogram nonogram;
 
-    private Descriptor row;
-    private Descriptor column;
+    private Description row;
+    private Description column;
 
     private int status = Status.NO_CHANGE;
 
@@ -98,19 +98,19 @@ public class CellWrapper {
         status = Status.NO_CHANGE;
     }
 
-    public Descriptor getRow() {
+    public Description getRow() {
         return row;
     }
 
-    public void setRow(Descriptor row) {
+    public void setRow(Description row) {
         this.row = row;
     }
 
-    public Descriptor getColumn() {
+    public Description getColumn() {
         return column;
     }
 
-    public void setColumn(Descriptor column) {
+    public void setColumn(Description column) {
         this.column = column;
     }
 

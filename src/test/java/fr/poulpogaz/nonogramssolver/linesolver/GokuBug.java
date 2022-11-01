@@ -1,7 +1,7 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
 import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -21,8 +21,8 @@ public class GokuBug {
 
         int[] clues = new int[]{1, 2, 10, 2, 2, 1, 16};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.crossZeroCells();
@@ -39,8 +39,8 @@ public class GokuBug {
 
         int[] clues = new int[]{17, 2, 3, 2, 5, 2, 7};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.crossZeroCells();
@@ -56,8 +56,8 @@ public class GokuBug {
 
         int[] clues = new int[]{14, 20, 1, 14, 9, 8, 1};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
 
@@ -77,10 +77,10 @@ public class GokuBug {
 
         int[] clues = new int[] {2, 9, 1, 2, 2, 7, 2, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        assertTrue(descriptor.isCompleted());
+        Description description = new Description(false, 0, clues, wrappers);
+        assertTrue(description.isCompleted());
 
-        solver.setDescriptor(descriptor);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.crossZeroCells();

@@ -2,7 +2,7 @@ package fr.poulpogaz.nonogramssolver.linesolver;
 
 import fr.poulpogaz.nonogramssolver.Cell;
 import fr.poulpogaz.nonogramssolver.solver.Clue;
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.Description;
 
 import java.util.Objects;
 
@@ -16,57 +16,57 @@ public class CompleteLineSolver implements LineSolver {
     protected static final int FILLED = 2;
     protected static final int CROSSED_OR_FILLED = 3;
 
-    private Descriptor descriptor;
+    private Description description;
     private int[] cluesPosition;
     private int[] possibilities;
 
     @Override
-    public void trySolve(Descriptor descriptor) {
-        setDescriptor(descriptor);
+    public void trySolve(Description description) {
+        setDescriptor(description);
 
         init();
         fillPossibilities(0, 0);
 
         for (int i = 0; i < possibilities.length; i++) {
             if (possibilities[i] == FILLED) {
-                descriptor.setCell(i, Cell.FILLED);
+                description.setCell(i, Cell.FILLED);
             } else if (possibilities[i] == CROSSED) {
-                descriptor.setCell(i, Cell.CROSSED);
+                description.setCell(i, Cell.CROSSED);
             }
         }
 
         cluesPosition = null;
         possibilities = null;
-        this.descriptor = null;
+        this.description = null;
     }
 
-    protected void setDescriptor(Descriptor descriptor) {
-        this.descriptor = Objects.requireNonNull(descriptor);
-        cluesPosition = new int[descriptor.nClues()];
-        possibilities = new int[descriptor.size()];
+    protected void setDescriptor(Description description) {
+        this.description = Objects.requireNonNull(description);
+        cluesPosition = new int[description.nClues()];
+        possibilities = new int[description.size()];
     }
 
     protected void init() {
-        for (int i = 0; i < descriptor.size(); i++) {
-            if (descriptor.isFilled(i)) {
+        for (int i = 0; i < description.size(); i++) {
+            if (description.isFilled(i)) {
                 possibilities[i] = FILLED;
-            } else if (descriptor.isCrossed(i)) {
+            } else if (description.isCrossed(i)) {
                 possibilities[i] = CROSSED;
             }
         }
 
         // copied from AbstractRegion#initClues
         int minI = 0;
-        int maxI = descriptor.size() - descriptor.descriptorLength();
+        int maxI = description.size() - description.descriptorLength();
 
-        for (int i = 0; i < descriptor.nClues(); i++) {
-            Clue c = descriptor.getClue(i);
+        for (int i = 0; i < description.nClues(); i++) {
+            Clue c = description.getClue(i);
 
             if (i == 0) {
                 maxI += c.getLength();
             } else {
                 maxI += c.getLength() + 1;
-                minI += descriptor.getClueLength(i - 1) + 1;
+                minI += description.getClueLength(i - 1) + 1;
             }
 
             c.setMinI(minI);
@@ -75,24 +75,24 @@ public class CompleteLineSolver implements LineSolver {
     }
 
     protected void fillPossibilities(int clueIndex, int pos) {
-        Clue clue = descriptor.getClue(clueIndex);
+        Clue clue = description.getClue(clueIndex);
 
         int max = clue.getMaxI() - clue.getLength();
         int limit = max;
         for (int i = pos; i <= limit; i++) {
-            if (descriptor.isFilled(i) && limit == max) {
+            if (description.isFilled(i) && limit == max) {
                 limit = i;
             }
 
             if (fit(clue, i)) {
                 cluesPosition[clueIndex] = i;
 
-                if (clueIndex + 1 < descriptor.nClues()) {
+                if (clueIndex + 1 < description.nClues()) {
                     fillPossibilities(clueIndex + 1, i + 1 + clue.getLength());
                 } else {
                     boolean valid = true;
-                    for (int j = i + clue.getLength(); j < descriptor.size(); j++) {
-                        if (descriptor.isFilled(j)) {
+                    for (int j = i + clue.getLength(); j < description.size(); j++) {
+                        if (description.isFilled(j)) {
                             valid = false;
                             break;
                         }
@@ -112,7 +112,7 @@ public class CompleteLineSolver implements LineSolver {
     private void merge() {
         int min = 0;
         for (int i = 0; i < cluesPosition.length; i++) {
-            Clue clue = descriptor.getClue(i);
+            Clue clue = description.getClue(i);
             int pos = cluesPosition[i];
 
             for (int j = pos; j < pos + clue.getLength(); j++) {
@@ -126,7 +126,7 @@ public class CompleteLineSolver implements LineSolver {
             min = pos + clue.getLength();
         }
 
-        for (int j = min; j < descriptor.size(); j++) {
+        for (int j = min; j < description.size(); j++) {
             cross(j);
         }
 
@@ -134,7 +134,7 @@ public class CompleteLineSolver implements LineSolver {
     }
 
     private void fill(int j) {
-        if (descriptor.isEmpty(j)) {
+        if (description.isEmpty(j)) {
             if (possibilities[j] == CROSSED) {
                 possibilities[j] = CROSSED_OR_FILLED;
             } else if (possibilities[j] == UNKNOWN) {
@@ -144,7 +144,7 @@ public class CompleteLineSolver implements LineSolver {
     }
 
     private void cross(int j) {
-        if (descriptor.isEmpty(j)) {
+        if (description.isEmpty(j)) {
             if (possibilities[j] == FILLED) {
                 possibilities[j] = CROSSED_OR_FILLED;
             } else if (possibilities[j] == UNKNOWN) {
@@ -159,13 +159,13 @@ public class CompleteLineSolver implements LineSolver {
     private boolean fit(Clue clue, int i) {
         int l = clue.getLength();
 
-        if (i > 0 && descriptor.isFilled(i - 1)) {
+        if (i > 0 && description.isFilled(i - 1)) {
             return false;
-        } else if (i + l < descriptor.size() && descriptor.isFilled(i + l)) {
+        } else if (i + l < description.size() && description.isFilled(i + l)) {
             return false;
         } else {
             for (int j = 0; j < l; j++) {
-                if (descriptor.isCrossed(i + j)) {
+                if (description.isCrossed(i + j)) {
                     return false;
                 }
             }

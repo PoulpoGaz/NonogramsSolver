@@ -2,7 +2,7 @@ package fr.poulpogaz.nonogramssolver.linesolver;
 
 import fr.poulpogaz.nonogramssolver.Cell;
 import fr.poulpogaz.nonogramssolver.solver.Clue;
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.Description;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,16 +20,16 @@ public class DefaultLineSolver extends AbstractRegion implements LineSolver {
     }
 
     @Override
-    public void trySolve(Descriptor descriptor) {
-        setDescriptor(descriptor);
+    public void trySolve(Description description) {
+        setDescriptor(description);
 
-        if (!descriptor.hasChanged()) {
+        if (!description.hasChanged()) {
             return;
         }
-        descriptor.resetStatus();
+        description.resetStatus();
 
-        if (descriptor.nClues() == 0) {
-            draw(0, descriptor.size(), Cell.CROSSED);
+        if (description.nClues() == 0) {
+            draw(0, description.size(), Cell.CROSSED);
             return;
         }
 
@@ -38,7 +38,7 @@ public class DefaultLineSolver extends AbstractRegion implements LineSolver {
         List<Line> lines = createLines();
         comparePossibilitiesAndLines(lines);
 
-        if (!descriptor.hasContradiction()) {
+        if (!description.hasContradiction()) {
             crossZeroCells();
 
             List<Region> regions = split();
@@ -53,26 +53,26 @@ public class DefaultLineSolver extends AbstractRegion implements LineSolver {
         }
     }
 
-    protected void setDescriptor(Descriptor descriptor) {
-        this.descriptor = descriptor;
+    protected void setDescriptor(Description description) {
+        this.description = description;
 
         if (possibilities == null ||
-                possibilities.length < descriptor.size() ||
-                possibilities[0].length < descriptor.nClues()) {
-            possibilities = new boolean[descriptor.size()][descriptor.nClues()];
+                possibilities.length < description.size() ||
+                possibilities[0].length < description.nClues()) {
+            possibilities = new boolean[description.size()][description.nClues()];
         }
 
         start = 0;
-        end = descriptor.size();
+        end = description.size();
         firstClueIndex = 0;
-        lastClueIndex = descriptor.nClues();
+        lastClueIndex = description.nClues();
     }
 
     protected List<Region> split() {
         List<Region> regions = new ArrayList<>();
 
         int firstClue = 0;
-        for (int i = 0; i < descriptor.nClues() - 1; i++) {
+        for (int i = 0; i < description.nClues() - 1; i++) {
             Clue clue = getClue(i);
             Clue next = getClue(i + 1);
 
@@ -89,12 +89,12 @@ public class DefaultLineSolver extends AbstractRegion implements LineSolver {
             }
         }
 
-        if (firstClue < descriptor.nClues()) {
+        if (firstClue < description.nClues()) {
             Region r = new Region(this);
             r.setFirstClueIndex(firstClue);
-            r.setLastClueIndex(descriptor.nClues());
+            r.setLastClueIndex(description.nClues());
             r.setStart(getClue(firstClue).getMinI());
-            r.setEnd(getClue(descriptor.nClues() - 1).getMaxI());
+            r.setEnd(getClue(description.nClues() - 1).getMaxI());
 
             regions.add(r);
         }

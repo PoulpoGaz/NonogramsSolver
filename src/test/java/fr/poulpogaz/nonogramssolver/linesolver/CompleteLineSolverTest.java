@@ -1,7 +1,7 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
 import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
 import static fr.poulpogaz.nonogramssolver.linesolver.TestUtils.createEmpty;
@@ -17,8 +17,8 @@ public class CompleteLineSolverTest {
         CellWrapper[] wrappers = createEmpty(15);
         int[] clues = new int[] {2, 6, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.init();
         solver.fillPossibilities(0, 0);
 
@@ -31,8 +31,8 @@ public class CompleteLineSolverTest {
         CellWrapper[] wrappers = parse("____█________█");
         int[] clues = new int[] {2, 2, 2};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.init();
         solver.fillPossibilities(0, 0);
 
@@ -44,8 +44,8 @@ public class CompleteLineSolverTest {
         CellWrapper[] wrappers = parse("█___X_████_XXXX");
         int[] clues = new int[] {2, 5};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
-        solver.setDescriptor(descriptor);
+        Description description = new Description(false, 0, clues, wrappers);
+        solver.setDescriptor(description);
         solver.init();
         solver.fillPossibilities(0, 0);
 

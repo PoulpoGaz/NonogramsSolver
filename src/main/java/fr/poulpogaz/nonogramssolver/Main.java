@@ -1,6 +1,6 @@
 package fr.poulpogaz.nonogramssolver;
 
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.Description;
 import fr.poulpogaz.nonogramssolver.solver.NonogramSolver;
 import fr.poulpogaz.nonogramssolver.solver.SolverAdapter;
 import fr.poulpogaz.nonogramssolver.reader.WebpbnReader;
@@ -222,7 +222,7 @@ public class Main implements Runnable {
         }
 
         @Override
-        public void onColumnTrySolve(Nonogram n, Descriptor d) {
+        public void onColumnTrySolve(Nonogram n, Description d) {
             if (detailed) {
                 try {
                     ImageIO.write(n.asImage(squareSize), "png", nextFile());
@@ -233,7 +233,7 @@ public class Main implements Runnable {
         }
 
         @Override
-        public void onRowTrySolve(Nonogram n, Descriptor d) {
+        public void onRowTrySolve(Nonogram n, Description d) {
             if (detailed) {
                 try {
                     ImageIO.write(n.asImage(squareSize), "png", nextFile());
@@ -294,7 +294,7 @@ public class Main implements Runnable {
         }
 
         @Override
-        public void onColumnTrySolve(Nonogram n, Descriptor d) {
+        public void onColumnTrySolve(Nonogram n, Description d) {
             if (detailed) {
                 try {
                     writer.writeToSequence(n.asImage(squareSize));
@@ -305,7 +305,7 @@ public class Main implements Runnable {
         }
 
         @Override
-        public void onRowTrySolve(Nonogram n, Descriptor d) {
+        public void onRowTrySolve(Nonogram n, Description d) {
             if (detailed) {
                 try {
                     writer.writeToSequence(n.asImage(squareSize));

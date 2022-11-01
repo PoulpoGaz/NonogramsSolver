@@ -1,7 +1,7 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
 import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
-import fr.poulpogaz.nonogramssolver.solver.Descriptor;
+import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
 import static fr.poulpogaz.nonogramssolver.linesolver.TestUtils.*;
@@ -19,9 +19,9 @@ public class RedDeerBug {
 
         int[] clues = new int[] {6, 4, 4, 15, 1, 1};
 
-        Descriptor descriptor = new Descriptor(false, 0, clues, wrappers);
+        Description description = new Description(false, 0, clues, wrappers);
 
-        solver.setDescriptor(descriptor);
+        solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.comparePossibilitiesAndLines(solver.createLines());

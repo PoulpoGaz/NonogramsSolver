@@ -5,6 +5,7 @@ import fr.poulpogaz.nonogramssolver.Nonogram;
 import fr.poulpogaz.nonogramssolver.linesolver.DefaultLineSolver;
 import fr.poulpogaz.nonogramssolver.linesolver.LineSolver;
 
+import java.util.PriorityQueue;
 import java.util.Stack;
 
 public class NonogramSolver {
@@ -16,8 +17,8 @@ public class NonogramSolver {
     private Nonogram nonogram;
 
     private CellWrapper[][] cells;
-    private Descriptor[] rows;
-    private Descriptor[] columns;
+    private Description[] rows;
+    private Description[] columns;
 
     public NonogramSolver() {
 
@@ -76,12 +77,12 @@ public class NonogramSolver {
             }
         }
 
-        rows = new Descriptor[height()];
+        rows = new Description[height()];
         for (int y = 0; y < height(); y++) {
-            rows[y] = new Descriptor(true, y, nonogram.getRows()[y], cells[y]);
+            rows[y] = new Description(true, y, nonogram.getRows()[y], cells[y]);
         }
 
-        columns = new Descriptor[width()];
+        columns = new Description[width()];
         for (int x = 0; x < width(); x++) {
             CellWrapper[] wrappers = new CellWrapper[height()];
 
@@ -89,15 +90,17 @@ public class NonogramSolver {
                 wrappers[y] = cells[y][x];
             }
 
-            columns[x] = new Descriptor(false, x, nonogram.getColumns()[x], wrappers);
+            columns[x] = new Description(false, x, nonogram.getColumns()[x], wrappers);
         }
     }
 
 
     private int solveWithLineSolver(LineSolver solver) {
+        PriorityQueue<Description> queue = new PriorityQueue<>();
+
         while (!isSolved()) {
             boolean changed = false;
-            for (Descriptor col : columns) {
+            for (Description col : columns) {
                 if (col.hasChanged()) {
                     solver.trySolve(col);
 
@@ -109,7 +112,7 @@ public class NonogramSolver {
                 }
             }
 
-            for (Descriptor row : rows) {
+            for (Description row : rows) {
                 if (row.hasChanged()) {
                     solver.trySolve(row);
 
@@ -128,6 +131,14 @@ public class NonogramSolver {
 
         return SOLVED;
     }
+
+    private int lineSolvingDescriptorComparator() {
+
+    }
+
+
+
+
 
     private boolean solveContradiction(LineSolver solver) {
         System.out.println("Solving contradiction");
@@ -232,11 +243,11 @@ public class NonogramSolver {
         //System.out.printf("Undo guess %s at (%d; %d)%n", Cell.FILLED, guess.x(), guess.y());
         set(guess.cells());
 
-        for (Descriptor row : rows) {
+        for (Description row : rows) {
             row.resetStatus();
         }
 
-        for (Descriptor cols : columns) {
+        for (Description cols : columns) {
             cols.resetStatus();
         }
 
@@ -273,13 +284,13 @@ public class NonogramSolver {
     }
 
     private boolean isSolved() {
-        for (Descriptor col : columns) {
+        for (Description col : columns) {
             if (!col.isCompleted()) {
                 return false;
             }
         }
 
-        for (Descriptor row : rows) {
+        for (Description row : rows) {
             if (!row.isCompleted()) {
                 return false;
             }
