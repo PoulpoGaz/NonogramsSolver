@@ -145,20 +145,23 @@ public class Nonogram {
     public boolean solveRecursive() {
         Stack<Guess> guesses = new Stack<>();
 
+        int n = 0;
         LineSolver solver = new DefaultLineSolver();
         while (true) {
             int ret = solveWithLineSolver(solver);
 
             if (ret == NOT_SOLVED) { // new guess
-                Guess g = guess();
-
-                if (g == null) {
-                    return false;
+                n++;
+                System.out.println(n);
+                if (solveContradiction(solver) || n >= 2) {
+                    return true;
                 }
+                Guess g = guess();
 
                 guesses.push(g);
 
             } else if (ret == CONTRADICTION) {
+                System.out.println("Undo guess");
                 while (!guesses.isEmpty()) {
                     Guess g = guesses.peek();
 
@@ -214,40 +217,108 @@ public class Nonogram {
         return SOLVED;
     }
 
+    private boolean solveContradiction(LineSolver solver) {
+        System.out.println("Solving contradiction");
+
+        boolean foundAContradiction;
+        do {
+            foundAContradiction = false;
+
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int ret = contradictionAt(solver, x, y);
+
+                    if (ret == CONTRADICTION) {
+                        foundAContradiction = true;
+                    } else if (ret == SOLVED) {
+                        return true;
+                    }
+                }
+            }
+
+            if (foundAContradiction) {
+                System.out.println("redo");
+            }
+
+        } while (foundAContradiction);
+
+        return false;
+    }
+
+    private int contradictionAt(LineSolver solver, int x, int y) {
+        Cell[][] copy = getSolution();
+
+        set(Cell.FILLED, x, y);
+
+        int ret = solveWithLineSolver(solver);
+        if (ret == NOT_SOLVED) {
+            set(copy);
+            set(Cell.CROSSED, x, y);
+
+            ret = solveWithLineSolver(solver);
+            if (ret == NOT_SOLVED) {
+                set(copy);
+            } else if (ret == CONTRADICTION) {
+                // something weird is happening
+            }
+
+        } else if (ret == CONTRADICTION) {
+            set(copy);
+            set(Cell.CROSSED, x, y);
+        }
+
+        return ret;
+    }
+
+
+
     private Guess guess() {
+        System.out.println("Guessing");
+        int xFirst = -1;
+        int yFirst = -1;
+
         // bad guessing strategy
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (solution[y][x].isEmpty()) {
-                    System.out.printf("Guessing %s at (%d; %d)%n", Cell.FILLED, x, y);
+                    xFirst = x;
+                    yFirst = y;
 
-                    Cell[][] copy = getSolution();
-                    copy[y][x] = Cell.FILLED;
+                    if (filled(x - 1, y) || filled(x + 1, y) || filled(x, y - 1) || filled(x, y + 1)) {
+                        Cell[][] copy = getSolution();
+                        copy[y][x] = Cell.FILLED;
 
-                    solution[y][x].setForce(Cell.FILLED);
-                    solution[y][x].setChanged();
-                    columns[x].setChanged();
-                    rows[y].setChanged();
+                        set(Cell.FILLED, x, y);
 
-                    return new Guess(x, y, copy);
+                        return new Guess(x, y, copy);
+                    }
                 }
             }
         }
 
-        return null;
-        //System.out.println(this);
-        //throw new IllegalStateException("Nonogram solved");
+        if (xFirst < 0) {
+            return null;
+        }
+
+        Cell[][] copy = getSolution();
+        copy[yFirst][xFirst] = Cell.FILLED;
+
+        set(Cell.FILLED, xFirst, yFirst);
+
+        return new Guess(xFirst, yFirst, copy);
+    }
+
+    private boolean filled(int x, int y) {
+        if (x < 0 || y < 0 || x >= width || y >= height) {
+            return false;
+        }
+
+        return solution[y][x].isFilled();
     }
 
     private void undoGuess(Guess guess) {
-        System.out.printf("Undo guess %s at (%d; %d)%n", Cell.FILLED, guess.x(), guess.y());
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                solution[y][x].setForce(guess.cells()[y][x]);
-                solution[y][x].resetStatus();
-            }
-        }
+        //System.out.printf("Undo guess %s at (%d; %d)%n", Cell.FILLED, guess.x(), guess.y());
+        set(guess.cells());
 
         for (Descriptor row : rows) {
             row.resetStatus();
@@ -263,6 +334,22 @@ public class Nonogram {
         rows[guess.y()].setChanged();
 
         guess.cells()[guess.y()][guess.x()] = Cell.CROSSED;
+    }
+
+    private void set(Cell[][] cells) {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                solution[y][x].setForce(cells[y][x]);
+                solution[y][x].resetStatus();
+            }
+        }
+    }
+
+    private void set(Cell cell, int x, int y) {
+        solution[y][x].setForce(cell);
+        solution[y][x].setChanged();
+        columns[x].setChanged();
+        rows[y].setChanged();
     }
 
     public boolean solve(SolverListener listener) {
@@ -350,6 +437,14 @@ public class Nonogram {
 
     public int getHeight() {
         return height;
+    }
+
+    public Descriptor[] getRows() {
+        return rows;
+    }
+
+    public Descriptor[] getColumns() {
+        return columns;
     }
 
     public BufferedImage asImage(int squareSize) {
