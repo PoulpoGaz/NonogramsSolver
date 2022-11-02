@@ -86,14 +86,18 @@ public class Main implements Runnable {
     @CommandLine.Option(names = {"-t", "--time-between-frames"}, defaultValue = "-1")
     private int timeBetweenFrames;
 
-    @CommandLine.Option(names = {"-m", "--monitor"})
-    private boolean monitor;
-
     @CommandLine.Option(names = {"--no-contradiction"})
     private boolean noContradiction;
 
     @CommandLine.Option(names = {"--no-recursion"})
     private boolean noRecursion;
+
+    @CommandLine.Option(names = {"-m", "--monitor"})
+    private boolean monitor;
+
+    @CommandLine.Option(names = {"--auto-close", "--close-monitor-on-end"},
+            description = "Close automatically the monitor when the nonogram is solved")
+    private boolean shutdownOnEnd;
 
     @Override
     public void run() {
@@ -116,8 +120,9 @@ public class Main implements Runnable {
                     return;
                 }
 
+                Monitor m = null;
                 if (monitor) {
-                    Monitor m = new Monitor(nonogram);
+                    m = new Monitor(nonogram);
                     m.runAsynchronously();
                 }
 
@@ -128,6 +133,10 @@ public class Main implements Runnable {
                     listener.onSuccess(nonogram);
                 } else {
                     listener.onFail(nonogram);
+                }
+
+                if (m != null && shutdownOnEnd) {
+                    m.shutdown();
                 }
             }
         } catch (IOException e) {

@@ -46,12 +46,18 @@ public class Monitor extends Canvas {
         frame.add(this);
         frame.addWindowListener(createWindowListener());
 
-        frame.setSize(1024, 576);
+        frame.setSize(1600, 900);
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
         thread = new Thread(this::run);
         thread.setName("Monitor thread");
         thread.start();
+    }
+
+    public void shutdown() {
+        running = false;
+        frame.dispose();
     }
 
     private WindowListener createWindowListener() {

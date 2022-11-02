@@ -128,11 +128,10 @@ public class NonogramSolver {
                 }
             }
 
-            listener.onPassFinished(nonogram, mode);
-
             if (!changed) {
                 return NOT_SOLVED;
             } else {
+                listener.onPassFinished(nonogram, mode);
                 fillDescription(descriptions);
             }
         }

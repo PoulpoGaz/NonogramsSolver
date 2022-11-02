@@ -9,13 +9,13 @@ CLASSPATH="$PATH_TO_PROJECT"/target/classes:\
 
 JVM_ARGS="-Dfile.encoding=UTF-8 -classpath ${CLASSPATH} fr.poulpogaz.nonogramssolver.Main"
 
-for f in example/**.png; do
+for f in example/*.png; do
   echo "$f"
-  # if ! [ -f "${f//.png/.gif}" ]; then
-    java $JVM_ARGS --image "$f" -s 16 -o "temp.gif"
+  if ! [ -f "${f//.png/.gif}" ]; then
+    java $JVM_ARGS --image "$f" -s 16 -o "temp.gif" --monitor --auto-close
     # wow
     ffmpeg -y -i "temp.gif" -filter_complex "[0:v] palettegen [p]; [0:v][p] paletteuse" -loop -1 "${f//.png/.gif}" > /dev/null 2>&1
-  # fi
+  fi
 done
 
 rm "temp.gif"
