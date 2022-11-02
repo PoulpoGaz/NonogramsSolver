@@ -4,17 +4,23 @@ import fr.poulpogaz.nonogramssolver.Cell;
 import fr.poulpogaz.nonogramssolver.Nonogram;
 import fr.poulpogaz.nonogramssolver.linesolver.DefaultLineSolver;
 import fr.poulpogaz.nonogramssolver.linesolver.LineSolver;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.PriorityQueue;
 import java.util.Stack;
 
 public class NonogramSolver {
 
+    private static final Logger LOGGER = LogManager.getLogger(NonogramSolver.class);
+
     private static final int SOLVED = 0;
     private static final int NOT_SOLVED = 1;
     private static final int CONTRADICTION = 2;
 
+    private final LineSolver lineSolver = new DefaultLineSolver();
     private Nonogram nonogram;
+    private SolverListener listener;
 
     private CellWrapper[][] cells;
     private Description[] rows;
@@ -25,38 +31,33 @@ public class NonogramSolver {
     }
 
     public boolean solve(Nonogram nonogram, SolverListener listener, boolean contradiction, boolean recursive) {
-        initSolver(nonogram);
+        initSolver(nonogram, listener);
 
         try {
             Stack<Guess> guesses = new Stack<>();
 
-            LineSolver solver = new DefaultLineSolver();
             while (true) {
-                int ret = solveWithLineSolver(solver);
+                int ret = solveWithLineSolver();
 
                 if (ret == NOT_SOLVED) { // new guess
-                    if (solveContradiction(solver)) {
+                    if (contradiction && guesses.isEmpty() && solveContradiction()) {
                         return true;
                     }
                     Guess g = guess();
 
                     if (g == null) {
-                        return false;
-                    }
+                        undoGuess(guesses);
 
-                    guesses.push(g);
-                } else if (ret == CONTRADICTION) {
-                    System.out.println("Undo guess");
-                    while (!guesses.isEmpty()) {
-                        Guess g = guesses.peek();
-
-                        if (g.guess() == Cell.FILLED) {
-                            undoGuess(g);
-                            break;
+                        if (guesses.isEmpty()) {
+                            return false;
                         }
-
-                        guesses.pop();
+                    } else {
+                        guesses.push(g);
                     }
+
+                    LOGGER.debug("Guess stack size: {}", guesses.size());
+                } else if (ret == CONTRADICTION) {
+                    undoGuess(guesses);
 
                     if (guesses.isEmpty()) {
                         return false;
@@ -67,12 +68,14 @@ public class NonogramSolver {
             }
 
         } finally {
+            LOGGER.debug("Solved? {}", isSolved());
             cleanSolver();
         }
     }
 
-    private void initSolver(Nonogram nonogram) {
+    private void initSolver(Nonogram nonogram, SolverListener listener) {
         this.nonogram = nonogram;
+        this.listener = listener;
 
         cells = new CellWrapper[height()][width()];
         for (int y = 0; y < height(); y++) {
@@ -99,7 +102,7 @@ public class NonogramSolver {
     }
 
 
-    private int solveWithLineSolver(LineSolver lineSolver) {
+    private int solveWithLineSolver() {
         PriorityQueue<Description> descriptions = new PriorityQueue<>(this::descriptionComparator);
         fillDescription(descriptions);
 
@@ -115,8 +118,13 @@ public class NonogramSolver {
                     return CONTRADICTION;
                 }
 
-                changed = true;
+                if (desc.hasChanged()) {
+                    listener.onLineSolved(nonogram, desc);
+                    changed = true;
+                }
             }
+
+            listener.onPassFinished(nonogram);
 
             if (!changed) {
                 return NOT_SOLVED;
@@ -151,8 +159,8 @@ public class NonogramSolver {
 
 
 
-    private boolean solveContradiction(LineSolver solver) {
-        System.out.println("Solving contradiction");
+    private boolean solveContradiction() {
+        LOGGER.debug("Solving contradictions");
 
         PriorityQueue<Contradiction> queue = new PriorityQueue<>(this::contradictionComparator);
         fillContradiction(queue);
@@ -163,7 +171,7 @@ public class NonogramSolver {
 
             while (!queue.isEmpty()) {
                 Contradiction c = queue.poll();
-                int ret = contradictionAt(solver, c.x(), c.y());
+                int ret = contradictionAt(c.x(), c.y());
 
                 if (ret == CONTRADICTION) {
                     foundAContradiction = true;
@@ -173,6 +181,7 @@ public class NonogramSolver {
             }
 
             if (foundAContradiction) {
+                LOGGER.debug("Refilling contradictions");
                 fillContradiction(queue);
             }
 
@@ -203,17 +212,17 @@ public class NonogramSolver {
         }
     }
 
-    private int contradictionAt(LineSolver solver, int x, int y) {
+    private int contradictionAt(int x, int y) {
         Cell[][] copy = copy();
 
         set(Cell.FILLED, x, y);
 
-        int ret = solveWithLineSolver(solver);
+        int ret = solveWithLineSolver();
         if (ret == NOT_SOLVED) {
             set(copy);
             set(Cell.CROSSED, x, y);
 
-            ret = solveWithLineSolver(solver);
+            ret = solveWithLineSolver();
             if (ret == NOT_SOLVED) {
                 set(copy);
             } else if (ret == CONTRADICTION) {
@@ -231,40 +240,74 @@ public class NonogramSolver {
 
 
     private Guess guess() {
-        System.out.println("Guessing");
-        int xFirst = -1;
-        int yFirst = -1;
+        int xGuess = -1;
+        int yGuess = -1;
 
         // bad guessing strategy
         for (int y = 0; y < height(); y++) {
             for (int x = 0; x < width(); x++) {
                 if (cells[y][x].isEmpty()) {
-                    xFirst = x;
-                    yFirst = y;
+                    if (xGuess < 0) {
+                        xGuess = x;
+                        yGuess = y;
+                    }
 
                     if (filled(x - 1, y) || filled(x + 1, y) || filled(x, y - 1) || filled(x, y + 1)) {
-                        Cell[][] copy = copy();
-                        copy[y][x] = Cell.FILLED;
-
-                        set(Cell.FILLED, x, y);
-
-                        return new Guess(x, y, copy);
+                        xGuess = x;
+                        yGuess = y;
+                        break;
                     }
                 }
             }
         }
 
-        if (xFirst < 0) {
+        if (xGuess < 0) {
+            LOGGER.debug("Cannot guess: no empty cell");
             return null;
         }
 
+        LOGGER.debug("Guessing {} at {} {}", Cell.FILLED, xGuess, yGuess);
         Cell[][] copy = copy();
-        copy[yFirst][xFirst] = Cell.FILLED;
+        copy[yGuess][xGuess] = Cell.FILLED;
 
-        set(Cell.FILLED, xFirst, yFirst);
+        set(Cell.FILLED, xGuess, yGuess);
 
-        return new Guess(xFirst, yFirst, copy);
+        return new Guess(xGuess, yGuess, copy);
     }
+
+    private void undoGuess(Stack<Guess> guesses) {
+        while (!guesses.isEmpty()) {
+            Guess g = guesses.peek();
+
+            if (g.guess() == Cell.FILLED) {
+                undoGuess(g);
+                break;
+            }
+
+            guesses.pop();
+        }
+    }
+
+    private void undoGuess(Guess guess) {
+        LOGGER.debug("Undo guess: {} at ({}; {})", guess.guess(), guess.x(), guess.y());
+        set(guess.cells());
+
+        for (Description row : rows) {
+            row.resetStatus();
+        }
+
+        for (Description cols : columns) {
+            cols.resetStatus();
+        }
+
+        cells[guess.y()][guess.x()].setForce(Cell.CROSSED);
+        cells[guess.y()][guess.x()].setChanged();
+        columns[guess.x()].setChanged();
+        rows[guess.y()].setChanged();
+
+        guess.cells()[guess.y()][guess.x()] = Cell.CROSSED;
+    }
+
 
     private int countAdjacentCellSolved(int x, int y) {
         int n = 0;
@@ -313,26 +356,6 @@ public class NonogramSolver {
         return cells[y][x].isCrossed();
     }
 
-    private void undoGuess(Guess guess) {
-        //System.out.printf("Undo guess %s at (%d; %d)%n", Cell.FILLED, guess.x(), guess.y());
-        set(guess.cells());
-
-        for (Description row : rows) {
-            row.resetStatus();
-        }
-
-        for (Description cols : columns) {
-            cols.resetStatus();
-        }
-
-        cells[guess.y()][guess.x()].setForce(Cell.CROSSED);
-        cells[guess.y()][guess.x()].setChanged();
-        columns[guess.x()].setChanged();
-        rows[guess.y()].setChanged();
-
-        guess.cells()[guess.y()][guess.x()] = Cell.CROSSED;
-    }
-
     private void set(Cell[][] cells) {
         for (int y = 0; y < height(); y++) {
             for (int x = 0; x < width(); x++) {
@@ -355,6 +378,7 @@ public class NonogramSolver {
         this.cells = null;
         this.columns = null;
         this.rows = null;
+        this.listener = null;
     }
 
     private boolean isSolved() {

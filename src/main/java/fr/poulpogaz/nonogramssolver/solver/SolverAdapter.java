@@ -4,12 +4,7 @@ import fr.poulpogaz.nonogramssolver.Nonogram;
 
 public abstract class SolverAdapter implements SolverListener {
     @Override
-    public void onColumnTrySolve(Nonogram n, Description d) {
-
-    }
-
-    @Override
-    public void onRowTrySolve(Nonogram n, Description d) {
+    public void onLineSolved(Nonogram n, Description d) {
 
     }
 

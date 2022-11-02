@@ -4,6 +4,8 @@ import fr.poulpogaz.nonogramssolver.solver.Description;
 import fr.poulpogaz.nonogramssolver.solver.NonogramSolver;
 import fr.poulpogaz.nonogramssolver.solver.SolverAdapter;
 import fr.poulpogaz.nonogramssolver.reader.WebpbnReader;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
 
 import javax.imageio.ImageIO;
@@ -18,6 +20,8 @@ import java.nio.file.Path;
 
 @CommandLine.Command(version = "1.0")
 public class Main implements Runnable {
+
+    private static final Logger LOGGER = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
         new CommandLine(new Main())
@@ -222,24 +226,15 @@ public class Main implements Runnable {
         }
 
         @Override
-        public void onColumnTrySolve(Nonogram n, Description d) {
+        public void onLineSolved(Nonogram n, Description d) {
             if (detailed) {
+                LOGGER.debug("Writing...");
                 try {
                     ImageIO.write(n.asImage(squareSize), "png", nextFile());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-        }
-
-        @Override
-        public void onRowTrySolve(Nonogram n, Description d) {
-            if (detailed) {
-                try {
-                    ImageIO.write(n.asImage(squareSize), "png", nextFile());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                LOGGER.debug("Done!");
             }
         }
 
@@ -294,35 +289,28 @@ public class Main implements Runnable {
         }
 
         @Override
-        public void onColumnTrySolve(Nonogram n, Description d) {
+        public void onLineSolved(Nonogram n, Description d) {
             if (detailed) {
+                LOGGER.debug("Writing...");
                 try {
                     writer.writeToSequence(n.asImage(squareSize));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-        }
-
-        @Override
-        public void onRowTrySolve(Nonogram n, Description d) {
-            if (detailed) {
-                try {
-                    writer.writeToSequence(n.asImage(squareSize));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                LOGGER.debug("Done!");
             }
         }
 
         @Override
         public void onPassFinished(Nonogram n) {
             if (!detailed) {
+                LOGGER.debug("Writing...");
                 try {
                     writer.writeToSequence(n.asImage(squareSize));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                LOGGER.debug("Done!");
             }
         }
 
