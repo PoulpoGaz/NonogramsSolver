@@ -43,6 +43,10 @@ public class NonogramSolver {
                     if (contradiction && guesses.isEmpty() && solveContradiction()) {
                         return true;
                     }
+                    if (!recursive) {
+                        return false;
+                    }
+
                     Guess g = guess();
 
                     if (g == null) {

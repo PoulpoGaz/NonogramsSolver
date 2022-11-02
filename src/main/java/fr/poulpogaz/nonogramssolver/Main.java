@@ -4,6 +4,7 @@ import fr.poulpogaz.nonogramssolver.solver.Description;
 import fr.poulpogaz.nonogramssolver.solver.NonogramSolver;
 import fr.poulpogaz.nonogramssolver.solver.SolverAdapter;
 import fr.poulpogaz.nonogramssolver.reader.WebpbnReader;
+import fr.poulpogaz.nonogramssolver.solver.SolverListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
@@ -78,11 +79,20 @@ public class Main implements Runnable {
     @CommandLine.Option(names = {"-d", "--detailed"})
     private boolean detailed;
 
-    @CommandLine.Option(names = {"-s", "-size", "--square-size"}, defaultValue = "20")
+    @CommandLine.Option(names = {"-s", "-size", "--square-size"}, defaultValue = "8")
     private int squareSize;
 
     @CommandLine.Option(names = {"-t", "--time-between-frames"}, defaultValue = "-1")
     private int timeBetweenFrames;
+
+    @CommandLine.Option(names = {"-m", "--monitor"})
+    private boolean monitor;
+
+    @CommandLine.Option(names = {"--no-contradiction"})
+    private boolean noContradiction;
+
+    @CommandLine.Option(names = {"--no-recursion"})
+    private boolean noRecursion;
 
     @Override
     public void run() {
@@ -105,9 +115,13 @@ public class Main implements Runnable {
                     return;
                 }
 
+                if (monitor) {
+                    Monitor m = new Monitor(nonogram);
+                    m.runAsynchronously();
+                }
+
                 NonogramSolver solver = new NonogramSolver();
-                // TODO: arguments
-                boolean solved = solver.solve(nonogram, listener, true, true);
+                boolean solved = solver.solve(nonogram, listener, !noContradiction, !noRecursion);
 
                 if (solved) {
                     listener.onSuccess(nonogram);
@@ -124,7 +138,9 @@ public class Main implements Runnable {
     }
 
     protected BasicListener createOutput() throws IOException {
-        if ((Files.notExists(output) && Utils.getExtension(output).isEmpty()) ||
+        if (output == null) {
+            return new BasicListener();
+        } else if ((Files.notExists(output) && Utils.getExtension(output).isEmpty()) ||
                 Files.isDirectory(output)) {
             Utils.createDirectories(output);
 
@@ -158,20 +174,29 @@ public class Main implements Runnable {
 
 
 
-    protected static abstract class BasicListener extends SolverAdapter implements Closeable {
+    protected class BasicListener extends SolverAdapter implements Closeable {
 
         @Override
         public void onFail(Nonogram n) {
-            System.err.println("Failed to solve this nonogram. It probably requires recursion");
+            if (noRecursion || noContradiction) {
+                System.err.println("Failed to solve this nonogram. It probably requires recursion or contradiction method");
+            } else {
+                System.err.println("Failed to solve this nonogram. It doesn't have a solution");
+            }
         }
 
         @Override
         public void onSuccess(Nonogram n) {
             System.out.println("Nonogram solved!");
         }
+
+        @Override
+        public void close() throws IOException {
+
+        }
     }
 
-    private static class ImageOutput extends BasicListener {
+    private class ImageOutput extends BasicListener {
 
         private final int squareSize;
         private final File output;
@@ -209,7 +234,7 @@ public class Main implements Runnable {
         }
     }
 
-    private static class MultipleImageOutput extends BasicListener {
+    private class MultipleImageOutput extends BasicListener {
 
         private final Path outputFolder;
         private final String baseFileName;
@@ -261,7 +286,7 @@ public class Main implements Runnable {
         }
     }
 
-    private static class GifOutput extends BasicListener implements Closeable {
+    private class GifOutput extends BasicListener implements Closeable {
 
         private ImageOutputStream ios;
         private GifSequenceWriter writer;

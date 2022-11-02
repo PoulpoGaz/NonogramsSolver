@@ -105,42 +105,14 @@ public class Nonogram {
         }
     }
 
-
-
-    public BufferedImage asImage(int squareSize) {
-        return asImage(squareSize, true);
+    public BufferedImage asImage(int width, int height) {
+        return asImage(bestSquareSizeFor(width, height));
     }
 
-    public BufferedImage asImage(int squareSize, boolean withClues) {
-        int imgWidth = squareSize * width;
-        int imgHeight = squareSize * height;
-        int rowWidth = 0;
-        int colHeight = 0;
+    public BufferedImage asImage(int squareSize) {
+        NonogramDimension dim = imageDimensionFor(squareSize);
 
-        int maxDigit = 1;
-
-        if (withClues) {
-            for (int[] clues : rows) {
-                rowWidth = Math.max(clues.length * squareSize, rowWidth);
-
-                for (int clue : clues) {
-                    maxDigit = Math.max(maxDigit, Utils.nDigit(clue));
-                }
-            }
-
-            for (int[] clues : columns) {
-                colHeight = Math.max(clues.length * squareSize, colHeight);
-
-                for (int clue : clues) {
-                    maxDigit = Math.max(maxDigit, Utils.nDigit(clue));
-                }
-            }
-
-            imgWidth += rowWidth;
-            imgHeight += colHeight;
-        }
-
-        BufferedImage image = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_INT_RGB);
+        BufferedImage image = new BufferedImage(dim.imageWidth, dim.imageHeight, BufferedImage.TYPE_INT_RGB);
 
         Graphics2D g2d = image.createGraphics();
         try {
@@ -148,29 +120,92 @@ public class Nonogram {
             g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-            g2d.setFont(g2d.getFont().deriveFont((float) squareSize / maxDigit));
-
-            g2d.setColor(Color.WHITE);
-            g2d.fillRect(0, 0, imgWidth, imgHeight);
-
-            int gridOffsetX = rowWidth;
-            int gridOffsetY = colHeight;
-
-            if (rowWidth > 0 && colHeight > 0) {
-                drawColumnsClues(g2d, gridOffsetX, gridOffsetY, squareSize);
-                drawRowsClues(g2d, gridOffsetY, gridOffsetX, squareSize);
-
-                g2d.setClip(0, 0, imgWidth, imgHeight);
-            }
-
-            drawNonogram(g2d, gridOffsetX, gridOffsetY, squareSize);
-            drawGrid(g2d, gridOffsetX, gridOffsetY, imgWidth, imgHeight, squareSize);
+            drawNonogram(g2d, dim);
         } finally {
             g2d.dispose();
         }
 
         return image;
     }
+
+    public void drawNonogram(Graphics2D g2d, int width, int height) {
+        drawNonogram(g2d, imageDimensionFor(bestSquareSizeFor(width, height)));
+    }
+
+    public int bestSquareSizeFor(int width, int height) {
+        int maxNClueRow = 0;
+        for (int[] clues : rows) {
+            maxNClueRow = Math.max(clues.length, maxNClueRow);
+        }
+
+        int maxNClueCols = 0;
+        for (int[] clues : columns) {
+            maxNClueCols = Math.max(clues.length, maxNClueCols);
+        }
+
+        int nSquareWidth = this.width + maxNClueRow;
+        int nSquareHeight = this.height + maxNClueCols;
+
+        return Math.min(width / nSquareWidth, height / nSquareHeight);
+    }
+
+    private void drawNonogram(Graphics2D g2d, NonogramDimension dim) {
+        Font oldFont = g2d.getFont();
+        g2d.setFont(g2d.getFont().deriveFont((float) dim.squareSize / dim.maxDigit));
+
+        int gridOffsetX = dim.rowWidth;
+        int gridOffsetY = dim.colHeight;
+
+        if (dim.rowWidth > 0 &&  dim.colHeight > 0) {
+            Shape oldClip = g2d.getClip();
+
+            drawColumnsClues(g2d, gridOffsetX, gridOffsetY, dim.squareSize);
+            drawRowsClues(g2d, gridOffsetY, gridOffsetX, dim.squareSize);
+
+            g2d.setClip(oldClip);
+        }
+
+        drawNonogram(g2d, gridOffsetX, gridOffsetY, dim.squareSize);
+        drawGrid(g2d, gridOffsetX, gridOffsetY, dim.imageWidth, dim.imageHeight, dim.squareSize);
+
+        g2d.setFont(oldFont);
+    }
+
+
+    private NonogramDimension imageDimensionFor(int squareSize) {
+        int imageWidth = squareSize * width;
+        int imageHeight = squareSize * height;
+
+        int rowWidth = 0;
+        int colHeight = 0;
+
+        int maxDigit = 1;
+
+        for (int[] clues : rows) {
+            rowWidth = Math.max(clues.length * squareSize, rowWidth);
+
+            for (int clue : clues) {
+                maxDigit = Math.max(maxDigit, Utils.nDigit(clue));
+            }
+        }
+
+        for (int[] clues : columns) {
+            colHeight = Math.max(clues.length * squareSize, colHeight);
+
+            for (int clue : clues) {
+                maxDigit = Math.max(maxDigit, Utils.nDigit(clue));
+            }
+        }
+
+        imageWidth += rowWidth;
+        imageHeight += colHeight;
+
+        return new NonogramDimension(squareSize, imageWidth, imageHeight, rowWidth, colHeight, maxDigit);
+    }
+
+    private record NonogramDimension(int squareSize, int imageWidth, int imageHeight,
+                                     int rowWidth, int colHeight, int maxDigit) {}
+
 
     private void drawNonogram(Graphics2D g2d, int offsetX, int offsetY, int squareSize) {
         int drawX;
