@@ -3,6 +3,7 @@ package fr.poulpogaz.nonogramssolver;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Nonogram {
@@ -105,6 +106,24 @@ public class Nonogram {
         }
     }
 
+    public Nonogram(Nonogram nonogram, Cell[][] cells) {
+        this.width = nonogram.getWidth();
+        this.height = nonogram.getHeight();
+        this.rows = nonogram.getRows();
+        this.columns = nonogram.getColumns();
+        this.cells = cells;
+
+        if (cells.length != height) {
+            throw new IllegalArgumentException();
+        }
+
+        for (Cell[] cells2 : cells) {
+            if (cells2.length != width) {
+                throw new IllegalArgumentException();
+            }
+        }
+    }
+
     public BufferedImage asImage(int width, int height) {
         return asImage(bestSquareSizeFor(width, height));
     }
@@ -119,6 +138,9 @@ public class Nonogram {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+            g2d.setColor(Color.WHITE);
+            g2d.fillRect(0, 0, dim.imageWidth, dim.imageHeight);
 
             drawNonogram(g2d, dim);
         } finally {
@@ -309,6 +331,16 @@ public class Nonogram {
     }
 
     public Cell[][] getCells() {
+        return cells;
+    }
+
+    public Cell[][] getCellsCopy() {
+        Cell[][] cells = new Cell[height][width];
+
+        for (int y = 0; y < height; y++) {
+            cells[y] = Arrays.copyOf(this.cells[y], width);
+        }
+
         return cells;
     }
 

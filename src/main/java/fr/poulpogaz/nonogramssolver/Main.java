@@ -4,7 +4,6 @@ import fr.poulpogaz.nonogramssolver.solver.Description;
 import fr.poulpogaz.nonogramssolver.solver.NonogramSolver;
 import fr.poulpogaz.nonogramssolver.solver.SolverAdapter;
 import fr.poulpogaz.nonogramssolver.reader.WebpbnReader;
-import fr.poulpogaz.nonogramssolver.solver.SolverListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
@@ -18,6 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 @CommandLine.Command(version = "1.0")
 public class Main implements Runnable {
@@ -234,45 +235,90 @@ public class Main implements Runnable {
         }
     }
 
-    private class MultipleImageOutput extends BasicListener {
 
-        private final Path outputFolder;
-        private final String baseFileName;
-        private final boolean detailed;
-        private final int squareSize;
+    private abstract class MultipleOutput extends BasicListener {
 
-        private int i = 0;
+        protected final boolean detailed;
+        protected final int squareSize;
 
-        public MultipleImageOutput(Path outputFolder, String baseFileName, boolean detailed, int squareSize) {
-            this.outputFolder = outputFolder;
-            this.baseFileName = baseFileName;
+        protected final Queue<Cell[][]> cells = new ArrayDeque<>();
+
+        public MultipleOutput(boolean detailed, int squareSize) {
             this.detailed = detailed;
             this.squareSize = squareSize;
         }
 
         @Override
-        public void onLineSolved(Nonogram n, Description d) {
+        public void onLineSolved(Nonogram n, Description d, int mode) {
             if (detailed) {
-                LOGGER.debug("Writing...");
-                try {
-                    ImageIO.write(n.asImage(squareSize), "png", nextFile());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (mode == CONTRADICTION) {
+                    cells.offer(n.getCellsCopy());
+                } else if (mode == LINE_SOLVING) {
+                    newImage(n);
                 }
-                LOGGER.debug("Done!");
             }
         }
 
         @Override
-        public void onPassFinished(Nonogram n) {
+        public void onPassFinished(Nonogram n, int mode) {
             if (!detailed) {
-                try {
-                    ImageIO.write(n.asImage(squareSize), "png", nextFile());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (mode == CONTRADICTION) {
+                    cells.offer(n.getCellsCopy());
+                } else if (mode == LINE_SOLVING) {
+                    newImage(n);
                 }
             }
         }
+
+        @Override
+        public void onContradiction(Nonogram n, boolean found) {
+            if (found) {
+                newImage(n);
+            }
+            cells.clear();
+        }
+
+        @Override
+        public void onSuccess(Nonogram n) {
+            while (!cells.isEmpty()) {
+                newImage(new Nonogram(n, cells.remove()));
+            }
+
+            super.onSuccess(n);
+        }
+
+        protected abstract void newImage(Nonogram nonogram);
+    }
+
+
+
+
+
+
+    private class MultipleImageOutput extends MultipleOutput {
+
+        private final Path outputFolder;
+        private final String baseFileName;
+
+        private int i = 0;
+
+        public MultipleImageOutput(Path outputFolder, String baseFileName, boolean detailed, int squareSize) {
+            super(detailed, squareSize);
+            this.outputFolder = outputFolder;
+            this.baseFileName = baseFileName;
+        }
+
+        @Override
+        protected void newImage(Nonogram nonogram) {
+            LOGGER.debug("Writing...");
+            try {
+                ImageIO.write(nonogram.asImage(squareSize), "png", nextFile());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            LOGGER.debug("Done!");
+        }
+
 
         private File nextFile() {
             i++;
@@ -286,14 +332,13 @@ public class Main implements Runnable {
         }
     }
 
-    private class GifOutput extends BasicListener implements Closeable {
+    private class GifOutput extends MultipleOutput implements Closeable {
 
         private ImageOutputStream ios;
         private GifSequenceWriter writer;
-        private final boolean detailed;
-        private final int squareSize;
 
         public GifOutput(Path output, int timeBetweenFrames, boolean detailed, int squareSize) throws IOException {
+            super(detailed, squareSize);
             ios = new FileImageOutputStream(output.toFile());
 
             if (timeBetweenFrames < 0) {
@@ -308,35 +353,17 @@ public class Main implements Runnable {
                     BufferedImage.TYPE_INT_RGB,
                     timeBetweenFrames,
                     false);
-
-            this.detailed = detailed;
-            this.squareSize = squareSize;
         }
 
         @Override
-        public void onLineSolved(Nonogram n, Description d) {
-            if (detailed) {
-                LOGGER.debug("Writing...");
-                try {
-                    writer.writeToSequence(n.asImage(squareSize));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                LOGGER.debug("Done!");
+        protected void newImage(Nonogram nonogram) {
+            LOGGER.debug("Writing...");
+            try {
+                writer.writeToSequence(nonogram.asImage(squareSize));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }
-
-        @Override
-        public void onPassFinished(Nonogram n) {
-            if (!detailed) {
-                LOGGER.debug("Writing...");
-                try {
-                    writer.writeToSequence(n.asImage(squareSize));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                LOGGER.debug("Done!");
-            }
+            LOGGER.debug("Done!");
         }
 
         @Override

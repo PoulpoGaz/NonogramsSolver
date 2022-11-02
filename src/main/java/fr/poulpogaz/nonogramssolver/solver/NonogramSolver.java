@@ -37,7 +37,7 @@ public class NonogramSolver {
             Stack<Guess> guesses = new Stack<>();
 
             while (true) {
-                int ret = solveWithLineSolver();
+                int ret = solveWithLineSolver(guesses.size() > 0 ? SolverListener.RECURSION : SolverListener.LINE_SOLVING);
 
                 if (ret == NOT_SOLVED) { // new guess
                     if (contradiction && guesses.isEmpty() && solveContradiction()) {
@@ -106,7 +106,7 @@ public class NonogramSolver {
     }
 
 
-    private int solveWithLineSolver() {
+    private int solveWithLineSolver(int mode) {
         PriorityQueue<Description> descriptions = new PriorityQueue<>(this::descriptionComparator);
         fillDescription(descriptions);
 
@@ -123,12 +123,12 @@ public class NonogramSolver {
                 }
 
                 if (desc.hasChanged()) {
-                    listener.onLineSolved(nonogram, desc);
+                    listener.onLineSolved(nonogram, desc, mode);
                     changed = true;
                 }
             }
 
-            listener.onPassFinished(nonogram);
+            listener.onPassFinished(nonogram, mode);
 
             if (!changed) {
                 return NOT_SOLVED;
@@ -175,10 +175,25 @@ public class NonogramSolver {
 
             while (!queue.isEmpty()) {
                 Contradiction c = queue.poll();
+
+                if (!nonogram.isEmpty(c.x(), c.y())) { // not empty -> continue!
+                    continue;
+                }
+
                 int ret = contradictionAt(c.x(), c.y());
 
                 if (ret == CONTRADICTION) {
                     foundAContradiction = true;
+                } else if (ret == SOLVED) {
+                    return true;
+                }
+
+                listener.onContradiction(nonogram, ret == CONTRADICTION);
+
+                ret = solveWithLineSolver(SolverListener.LINE_SOLVING);
+
+                if (ret == CONTRADICTION) {
+                    return false;
                 } else if (ret == SOLVED) {
                     return true;
                 }
@@ -221,12 +236,12 @@ public class NonogramSolver {
 
         set(Cell.FILLED, x, y);
 
-        int ret = solveWithLineSolver();
+        int ret = solveWithLineSolver(SolverListener.CONTRADICTION);
         if (ret == NOT_SOLVED) {
             set(copy);
             set(Cell.CROSSED, x, y);
 
-            ret = solveWithLineSolver();
+            ret = solveWithLineSolver(SolverListener.CONTRADICTION);
             if (ret == NOT_SOLVED) {
                 set(copy);
             } else if (ret == CONTRADICTION) {
