@@ -4,6 +4,7 @@ import fr.poulpogaz.nonogramssolver.solver.Description;
 import fr.poulpogaz.nonogramssolver.solver.NonogramSolver;
 import fr.poulpogaz.nonogramssolver.solver.SolverAdapter;
 import fr.poulpogaz.nonogramssolver.reader.WebpbnReader;
+import fr.poulpogaz.nonogramssolver.solver.SolverListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
@@ -115,15 +116,16 @@ public class Main implements Runnable {
 
         long time = System.currentTimeMillis();
         try {
-            try (BasicListener listener = createOutput()) {
-                if (listener == null) {
+            try (BasicListener outputListener = createOutput()) {
+                if (outputListener == null) {
                     return;
                 }
 
+                SolverListener listener = outputListener;
                 Monitor m = null;
                 if (monitor) {
                     m = new Monitor(nonogram);
-                    m.runAsynchronously();
+                    listener = m.runAsynchronously(outputListener);
                 }
 
                 NonogramSolver solver = new NonogramSolver();
