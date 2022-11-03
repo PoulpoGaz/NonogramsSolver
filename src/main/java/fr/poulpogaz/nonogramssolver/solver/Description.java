@@ -115,6 +115,18 @@ public class Description {
         return n;
     }
 
+    public int countChanged() {
+        int n = 0;
+
+        for (CellWrapper cell : cells) {
+            if (cell.hasChanged()) {
+                n++;
+            }
+        }
+
+        return n;
+    }
+
     public double solvedRate() {
         return (double) countSolved() / cells.length;
     }

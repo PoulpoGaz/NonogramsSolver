@@ -1,6 +1,7 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
 import fr.poulpogaz.nonogramssolver.Cell;
+import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.solver.Clue;
 import fr.poulpogaz.nonogramssolver.solver.Description;
 
@@ -27,6 +28,9 @@ public class DefaultLineSolver extends AbstractRegion implements LineSolver {
             return;
         }
         description.resetStatus();
+        for (int i = 0; i < description.size(); i++) {
+            getCell(i).resetStatus();
+        }
 
         if (description.nClues() == 0) {
             draw(0, description.size(), Cell.CROSSED);

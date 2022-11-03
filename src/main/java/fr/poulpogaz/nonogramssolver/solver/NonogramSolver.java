@@ -4,10 +4,10 @@ import fr.poulpogaz.nonogramssolver.Cell;
 import fr.poulpogaz.nonogramssolver.Nonogram;
 import fr.poulpogaz.nonogramssolver.linesolver.DefaultLineSolver;
 import fr.poulpogaz.nonogramssolver.linesolver.LineSolver;
+import fr.poulpogaz.nonogramssolver.utils.PriorityQueue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.PriorityQueue;
 import java.util.Stack;
 
 public class NonogramSolver {
@@ -25,6 +25,10 @@ public class NonogramSolver {
     private CellWrapper[][] cells;
     private Description[] rows;
     private Description[] columns;
+
+    private PriorityQueue<Description> descriptionQueue;
+    private PriorityQueue<Contradiction> contradictionQueue;
+    private Contradiction[] contradictions;
 
     public NonogramSolver() {
 
@@ -103,18 +107,35 @@ public class NonogramSolver {
 
             columns[x] = new Description(false, x, nonogram.getColumns()[x], wrappers);
         }
+
+
+        descriptionQueue = new PriorityQueue<>(this::descriptionToIndex, rows.length + columns.length);
+        contradictionQueue = new PriorityQueue<>(this::contradictionToIndex, width() * height());
+        contradictions = new Contradiction[height() * width()];
+    }
+
+    private int descriptionToIndex(Description d) {
+        if (d.isRow()) {
+            return d.getIndex();
+        } else {
+            return rows.length + d.getIndex();
+        }
+    }
+
+    private int contradictionToIndex(Contradiction c) {
+        return c.y * width() + c.x;
     }
 
 
     private int solveWithLineSolver(int mode) {
-        PriorityQueue<Description> descriptions = new PriorityQueue<>(this::descriptionComparator);
-        fillDescription(descriptions);
+        descriptionQueue.clear();
+        fillDescription();
 
         while (!isSolved()) {
             boolean changed = false;
 
-            while (!descriptions.isEmpty()) {
-                Description desc = descriptions.poll();
+            while (!descriptionQueue.isEmpty()) {
+                Description desc = descriptionQueue.poll();
 
                 lineSolver.trySolve(desc);
 
@@ -124,6 +145,8 @@ public class NonogramSolver {
 
                 if (desc.hasChanged()) {
                     listener.onLineSolved(nonogram, desc, mode);
+                    updateContradictionPriority(desc);
+
                     changed = true;
                 }
             }
@@ -132,32 +155,44 @@ public class NonogramSolver {
                 return NOT_SOLVED;
             } else {
                 listener.onPassFinished(nonogram, mode);
-                fillDescription(descriptions);
+                fillDescription();
             }
         }
 
         return SOLVED;
     }
 
-    private int descriptionComparator(Description a, Description b) {
-        double sumA = (double) (a.descriptionLength() + a.countSolved()) / (2 * a.size());
-        double sumB = (double) (b.descriptionLength() + b.countSolved()) / (2 * b.size());
-
-        return Double.compare(sumA, sumB);
-    }
-
-    private void fillDescription(PriorityQueue<Description> descriptions) {
+    private void fillDescription() {
         for (Description row : rows) {
             if (row.hasChanged()) {
-                descriptions.offer(row);
+                descriptionQueue.insert(row, descriptionPriority(row));
             }
         }
 
         for (Description col : columns) {
             if (col.hasChanged()) {
-                descriptions.offer(col);
+                descriptionQueue.insert(col, descriptionPriority(col));
             }
         }
+    }
+
+    private void updateContradictionPriority(Description from) {
+        for (int i = 0; i < from.size(); i++) {
+            Description parallel;
+            if (from.isRow()) {
+                parallel = columns[i];
+            } else {
+                parallel = rows[i];
+            }
+
+            if (descriptionQueue.contains(parallel)) {
+                descriptionQueue.setPriority(parallel, descriptionPriority(parallel));
+            }
+        }
+    }
+
+    private double descriptionPriority(Description a) {
+        return (double) (a.descriptionLength() + a.countSolved() + a.countChanged()) / (3 * a.size());
     }
 
 
@@ -165,15 +200,15 @@ public class NonogramSolver {
     private boolean solveContradiction() {
         LOGGER.debug("Solving contradictions");
 
-        PriorityQueue<Contradiction> queue = new PriorityQueue<>(this::contradictionComparator);
-        fillContradiction(queue);
+        contradictionQueue.clear();
+        fillContradiction();
 
         boolean foundAContradiction;
         do {
             foundAContradiction = false;
 
-            while (!queue.isEmpty()) {
-                Contradiction c = queue.poll();
+            while (!contradictionQueue.isEmpty()) {
+                Contradiction c = contradictionQueue.poll();
 
                 if (!nonogram.isEmpty(c.x(), c.y())) { // not empty -> continue!
                     continue;
@@ -190,6 +225,7 @@ public class NonogramSolver {
                 listener.onContradiction(nonogram, ret == CONTRADICTION);
 
                 ret = solveWithLineSolver(SolverListener.LINE_SOLVING);
+                updateContradictionPriority(c);
 
                 if (ret == CONTRADICTION) {
                     return false;
@@ -200,7 +236,7 @@ public class NonogramSolver {
 
             if (foundAContradiction) {
                 LOGGER.debug("Refilling contradictions");
-                fillContradiction(queue);
+                fillContradiction();
             }
 
         } while (foundAContradiction);
@@ -208,24 +244,40 @@ public class NonogramSolver {
         return false;
     }
 
-    private int contradictionComparator(Contradiction a, Contradiction b) {
-        int n = countAdjacentCellSolved(a.x(), a.y()) +
-                rows[a.y()].countSolved() +
-                columns[a.x()].countSolved();
-
-        int n2 = countAdjacentCellSolved(b.x(), b.y()) +
-                rows[b.y()].countSolved() +
-                columns[b.x()].countSolved();
-
-        return Integer.compare(n, n2);
-    }
-
-    private void fillContradiction(PriorityQueue<Contradiction> queue) {
+    private void fillContradiction() {
         for (int y = 0; y < height(); y++) {
             for (int x = 0; x < width(); x++) {
                 if (cells[y][x].isEmpty()) {
-                    queue.offer(new Contradiction(x, y));
+                    Contradiction contradiction = new Contradiction(x, y);
+                    contradictions[y * width() + x] = contradiction;
+                    contradictionQueue.insert(contradiction, contradictionPriority(contradiction));
+                } else {
+                    contradictions[y * width() + x] = null;
                 }
+            }
+        }
+    }
+
+    private int contradictionPriority(Contradiction a) {
+        return (rows[a.y()].size() + columns[a.x()].size()) * countAdjacentCellSolved(a.x(), a.y()) +
+                rows[a.y()].countSolved() +
+                columns[a.x()].countSolved();
+    }
+
+    private void updateContradictionPriority(Contradiction from) {
+        for (int y = 0; y < height(); y++) {
+            Contradiction c = contradictions[y * width() + from.x];
+
+            if (c != null && contradictionQueue.contains(c)) {
+                contradictionQueue.setPriority(c, contradictionPriority(c));
+            }
+        }
+
+        for (int x = 0; x < width(); x++) {
+            Contradiction c = contradictions[from.y * width() + x];
+
+            if (c != null && contradictionQueue.contains(c)) {
+                contradictionQueue.setPriority(c, contradictionPriority(c));
             }
         }
     }
