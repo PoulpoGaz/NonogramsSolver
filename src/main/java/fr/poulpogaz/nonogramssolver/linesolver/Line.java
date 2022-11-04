@@ -5,16 +5,18 @@ package fr.poulpogaz.nonogramssolver.linesolver;
  */
 public class Line {
 
-    private int start;
-    private int end;
+    private final int start;
+    private final int end;
+    private final int color;
 
     /**
      * @param start line start, inclusive
      * @param end line end, exclusive
      */
-    public Line(int start, int end) {
+    public Line(int start, int end, int color) {
         this.start = start;
         this.end = end;
+        this.color = color;
 
         if (end <= start) {
             throw new IllegalArgumentException();
@@ -47,16 +49,12 @@ public class Line {
         return end;
     }
 
+    public int color() {
+        return color;
+    }
+
     public int length() {
         return end - start;
-    }
-
-    public void setStart(int start) {
-        this.start = start;
-    }
-
-    public void setEnd(int end) {
-        this.end = end;
     }
 
     @Override

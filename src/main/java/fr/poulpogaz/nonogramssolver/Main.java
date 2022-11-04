@@ -1,10 +1,10 @@
 package fr.poulpogaz.nonogramssolver;
 
 import fr.poulpogaz.nonogramssolver.reader.ImageReader;
+import fr.poulpogaz.nonogramssolver.reader.WebpbnReader;
 import fr.poulpogaz.nonogramssolver.solver.Description;
 import fr.poulpogaz.nonogramssolver.solver.NonogramSolver;
 import fr.poulpogaz.nonogramssolver.solver.SolverAdapter;
-import fr.poulpogaz.nonogramssolver.reader.WebpbnReader;
 import fr.poulpogaz.nonogramssolver.solver.SolverListener;
 import fr.poulpogaz.nonogramssolver.utils.Utils;
 import org.apache.logging.log4j.LogManager;

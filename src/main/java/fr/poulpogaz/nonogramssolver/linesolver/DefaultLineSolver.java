@@ -1,7 +1,6 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
 import fr.poulpogaz.nonogramssolver.Cell;
-import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.solver.Clue;
 import fr.poulpogaz.nonogramssolver.solver.Description;
 

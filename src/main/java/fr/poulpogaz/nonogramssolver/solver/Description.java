@@ -1,6 +1,5 @@
 package fr.poulpogaz.nonogramssolver.solver;
 
-import fr.poulpogaz.nonogramssolver.Cell;
 import fr.poulpogaz.nonogramssolver.Nonogram;
 
 public class Description {

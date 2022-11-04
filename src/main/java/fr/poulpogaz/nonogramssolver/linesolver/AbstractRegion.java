@@ -51,11 +51,17 @@ public abstract class AbstractRegion {
         List<Line> lines = new ArrayList<>();
 
         int length = 0;
+        int color = 0;
         for (int i = start; i < end; i++) {
-            if (isFilled(i)) {
+            if (length == 0) {
+                if (isFilled(i)) {
+                    length = 1;
+                    color = getColor(i);
+                }
+            } else if (isFilled(i, color)) {
                 length++;
-            } else if (length > 0) {
-                lines.add(new Line(i - length, i));
+            } else {
+                lines.add(new Line(i - length, i, color));
                 length = 0;
             }
         }
@@ -225,9 +231,22 @@ public abstract class AbstractRegion {
      * Actually, I don't know why it works lol
      */
     protected void comparePossibilitiesAndLines(List<Line> lines) {
-        if (description.hasContradiction() || true) {
+        if (description.hasContradiction()) {
             return;
         }
+
+        for (Line line : lines) {
+            for (int j = firstClueIndex; j < lastClueIndex; j++) {
+                Clue clue = getClue(j);
+
+                if (clue.getColor() != line.color()) {
+                    for (int k = line.start(); k < line.end(); k++) {
+                        setPossibility(k, clue, false);
+                    }
+                }
+            }
+        }
+        recalculateMinIMaxI();
 
         for (int i = 0; i < lines.size(); i++) {
             Line line = lines.get(i);
@@ -546,6 +565,10 @@ public abstract class AbstractRegion {
         return description.isFilled(i);
     }
 
+    protected boolean isFilled(int i, int color) {
+        return description.isFilled(i, color);
+    }
+
     protected boolean isCrossed(int i) {
         return description.isCrossed(i);
     }
@@ -560,6 +583,10 @@ public abstract class AbstractRegion {
 
     protected CellWrapper getCell(int index) {
         return description.getCell(index);
+    }
+
+    protected int getColor(int index) {
+        return description.getCell(index).get().getColor();
     }
 
     protected void setCell(int index, int type) {
