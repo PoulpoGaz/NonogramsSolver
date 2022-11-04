@@ -145,7 +145,7 @@ public class NonogramSolver {
 
                 if (desc.hasChanged()) {
                     listener.onLineSolved(nonogram, desc, mode);
-                    updateContradictionPriority(desc);
+                    updateDescriptionPriority(desc);
 
                     changed = true;
                 }
@@ -176,7 +176,7 @@ public class NonogramSolver {
         }
     }
 
-    private void updateContradictionPriority(Description from) {
+    private void updateDescriptionPriority(Description from) {
         for (int i = 0; i < from.size(); i++) {
             Description parallel;
             if (from.isRow()) {

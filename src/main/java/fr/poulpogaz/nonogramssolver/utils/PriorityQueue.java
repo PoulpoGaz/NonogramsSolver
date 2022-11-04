@@ -1,13 +1,15 @@
 package fr.poulpogaz.nonogramssolver.utils;
 
+import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 
 /**
- * A priority queue that guarantees O(log(n)) complexity for all operations
+ * A priority queue that guarantees O(log(n)) complexity for all operations except clear...
  */
 public class PriorityQueue<E> {
 
-    private final Element<E>[] elements;
+    private final Node<E>[] nodes;
 
     /**
      * Converts an element to an index in the indices array
@@ -25,11 +27,21 @@ public class PriorityQueue<E> {
     public PriorityQueue(Function<E, Integer> elementToIndex, int maxSize) {
         this.elementToIndex = elementToIndex;
         this.indices = new int[maxSize];
-        elements = (Element<E>[]) new Element[maxSize];
+        nodes = (Node<E>[]) new Node[maxSize];
+
+        Arrays.fill(indices, -1);
     }
 
     public void clear() {
         size = 0;
+        Arrays.fill(indices, -1);
+
+        for (Node<E> node : nodes) {
+            if (node != null) {
+                node.index = -1;
+                node.element = null;
+            }
+        }
     }
 
     public int size() {
@@ -44,7 +56,7 @@ public class PriorityQueue<E> {
         if (isEmpty()) {
             return null;
         } else {
-            return elements[0].element;
+            return nodes[0].element;
         }
     }
 
@@ -56,33 +68,42 @@ public class PriorityQueue<E> {
             swap(0, size);
             shiftDown(0);
 
-            elements[size].index = -1;
-            return elements[size].element;
+            Node<E> removed = nodes[size];
+
+            indices[removed.index] = -1;
+            removed.index = -1;
+
+            E e = removed.element;
+            removed.element = null;
+
+            return e;
         }
     }
 
     public void insert(E element, double priority) {
         checkSize();
-        Element<E> e = getOrCreate(size, element, priority);
-        elements[size] = e;
+        Node<E> e = getOrCreate(size, element, priority);
+        nodes[size] = e;
         indices[e.index] = size;
         size++;
         shiftUp(size - 1);
     }
 
     public void setPriority(E element, double newPriority) {
-        Element<E> e = get(element);
+        int i = indices[elementToIndex.apply(element)];
+
+        if (i < 0) {
+            throw new NoSuchElementException();
+        }
+
+        Node<E> e = nodes[i];
         double old = e.priority;
         e.priority = newPriority;
 
-        if (indices[elementToIndex.apply(element)] != indices[e.index]) {
-            throw new IllegalStateException();
-        }
-
         if (old < newPriority) {
-            shiftUp(indices[e.index]);
+            shiftUp(i);
         } else if (old > newPriority) {
-            shiftDown(indices[e.index]);
+            shiftDown(i);
         }
     }
 
@@ -90,30 +111,22 @@ public class PriorityQueue<E> {
      * O(1) complexity
      */
     public boolean contains(E element) {
-        Element<E> e = get(element);
+        int i = indices[elementToIndex.apply(element)];
 
-        if (e == null) {
-            return false;
-        } else {
-            return e.index >= 0;
-        }
-    }
-
-    private Element<E> get(E element) {
-        return elements[indices[elementToIndex.apply(element)]];
+        return i >= 0;
     }
 
     private void checkSize() {
-        if (size >= elements.length) {
+        if (size >= nodes.length) {
             throw new IllegalStateException("Buffer overflow");
         }
     }
 
-    private Element<E> getOrCreate(int i, E element, double priority) {
-        Element<E> e = elements[i];
+    private Node<E> getOrCreate(int i, E element, double priority) {
+        Node<E> e = nodes[i];
 
         if (e == null) {
-            e = new Element<>(element, priority, elementToIndex.apply(element));
+            e = new Node<>(element, priority, elementToIndex.apply(element));
         } else {
             e.element = element;
             e.priority = priority;
@@ -156,7 +169,7 @@ public class PriorityQueue<E> {
     }
 
     private double getPriority(int node) {
-        return elements[node].priority;
+        return nodes[node].priority;
     }
 
     private int leftChild(int i) {
@@ -176,15 +189,15 @@ public class PriorityQueue<E> {
      * the indices array
      */
     private void swap(int i, int j) {
-        Element<E> temp = elements[i];
-        elements[i] = elements[j];
-        elements[j] = temp;
+        Node<E> temp = nodes[i];
+        nodes[i] = nodes[j];
+        nodes[j] = temp;
 
-        indices[elements[i].index] = i;
-        indices[elements[j].index] = j;
+        indices[nodes[i].index] = i;
+        indices[nodes[j].index] = j;
     }
 
-    private static class Element<E> {
+    private static class Node<E> {
 
         private E element;
         private double priority;
@@ -194,7 +207,7 @@ public class PriorityQueue<E> {
          */
         private int index;
 
-        public Element(E element, double priority, int index) {
+        public Node(E element, double priority, int index) {
             this.element = element;
             this.priority = priority;
             this.index = index;

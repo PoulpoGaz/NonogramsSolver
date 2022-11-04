@@ -32,10 +32,18 @@ public class PriorityQueueTest {
 
         queue.setPriority(2, 5);
         queue.setPriority(4, 2);
-
         assertEquals(2, queue.poll());
-        assertEquals(3, queue.poll());
+
+        queue.setPriority(3, 0);
         assertEquals(4, queue.poll());
+
+        queue.setPriority(3, 5);
+        assertEquals(3, queue.poll());
+
+        queue.insert(5, 5);
+        queue.setPriority(5, 0);
+
         assertEquals(1, queue.poll());
+        assertEquals(5, queue.poll());
     }
 }
