@@ -60,6 +60,10 @@ public class Nonogram {
         return cells[y][x].isFilled();
     }
 
+    public boolean isFilled(int x, int y, int color) {
+        return cells[y][x].isFilled(color);
+    }
+
     public boolean isCrossed(int x, int y) {
         return cells[y][x].isCrossed();
     }

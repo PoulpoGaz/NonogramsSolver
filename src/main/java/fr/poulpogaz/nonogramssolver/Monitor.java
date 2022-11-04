@@ -20,6 +20,8 @@ public class Monitor extends JPanel {
 
     private final NonogramRenderer renderer = NonogramRenderer.DEFAULT;
 
+    private boolean solved = false;
+
     public Monitor(Nonogram nonogram) {
         this.nonogram = nonogram;
 
@@ -45,9 +47,13 @@ public class Monitor extends JPanel {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        timer = new Timer(1000 / 30, e -> repaint());
-        timer.setRepeats(true);
-        timer.start();
+        synchronized (this) {
+            if (!solved) {
+                timer = new Timer(1000 / 30, e -> repaint());
+                timer.setRepeats(true);
+                timer.start();
+            }
+        }
     }
 
     public void shutdown() {
@@ -73,7 +79,13 @@ public class Monitor extends JPanel {
 
             @Override
             public void onSuccess(Nonogram n) {
-                timer.stop();
+                synchronized (this) {
+                    solved = true;
+
+                    if (timer != null) {
+                        timer.stop();
+                    }
+                }
                 repaint();
 
                 listener.onSuccess(n);
@@ -81,10 +93,16 @@ public class Monitor extends JPanel {
 
             @Override
             public void onFail(Nonogram n) {
-                timer.stop();
+                synchronized (this) {
+                    solved = true;
+
+                    if (timer != null) {
+                        timer.stop();
+                    }
+                }
                 repaint();
 
-                listener.onSuccess(n);
+                listener.onFail(n);
             }
         };
     }
@@ -95,7 +113,7 @@ public class Monitor extends JPanel {
         return new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (timer.isRunning()) {
+                if (timer != null && timer.isRunning()) {
                     timer.stop();
                 }
             }

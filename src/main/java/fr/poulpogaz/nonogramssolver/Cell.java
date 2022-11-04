@@ -57,6 +57,10 @@ public class Cell {
         return type == FILLED;
     }
 
+    public boolean isFilled(int color) {
+        return type == FILLED && color == this.color;
+    }
+
     public boolean isCrossed() {
         return type == CROSSED;
     }

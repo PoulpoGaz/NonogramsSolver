@@ -440,10 +440,10 @@ public class DefaultLineSolverTest {
     void drawBetween() {
         Description description = createEmpty(10, new int[0]);
         solver.setDescriptor(description);
-        solver.drawBetween(0, 10, 5);
+        solver.drawBetween(0, 10, 5, 0);
         cellsEquals(description, createEmptyCell(10));
 
-        solver.drawBetween(0, 10, 6);
+        solver.drawBetween(0, 10, 6, 0);
         cellsEquals(description, parseCell("____██____"));
     }
 
@@ -452,10 +452,10 @@ public class DefaultLineSolverTest {
         Description description = createEmpty(20, new int[0]);
 
         solver.setDescriptor(description);
-        solver.drawBetween(3, 10, 5);
+        solver.drawBetween(3, 10, 5, 0);
         cellsEquals(description, parseCell("_____███____________"));
 
-        solver.drawBetween(6, 15, 8);
+        solver.drawBetween(6, 15, 8, 0);
         cellsEquals(description, parseCell("_____█████████______"));
     }
 }

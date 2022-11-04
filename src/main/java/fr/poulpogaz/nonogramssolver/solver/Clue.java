@@ -52,10 +52,15 @@ public class Clue {
         this.maxI = maxI;
     }
 
+    public int getColor() {
+        return color;
+    }
+
     @Override
     public String toString() {
         return "Clue{" +
                 "length=" + length +
+                ", color=" + color +
                 ", index=" + index +
                 ", minI=" + minI +
                 ", maxI=" + maxI +

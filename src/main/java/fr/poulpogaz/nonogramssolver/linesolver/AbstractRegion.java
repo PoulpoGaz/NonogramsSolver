@@ -78,11 +78,15 @@ public abstract class AbstractRegion {
             }
 
             c.setMinI(minI);
-            minI += c.getLength() + 1;
+            minI += c.getLength();
+
+            if (i + 1 < lastClueIndex && getClue(i + 1).getColor() == c.getColor()) {
+                minI++;
+            }
         }
 
         int maxI = end;
-        for (int i =  lastClueIndex - 1; i >= firstClueIndex; i--) {
+        for (int i = lastClueIndex - 1; i >= firstClueIndex; i--) {
             Clue c = getClue(i);
 
             while (!fitReverse(c, maxI - 1)) {
@@ -95,7 +99,11 @@ public abstract class AbstractRegion {
             }
 
             c.setMaxI(maxI);
-            maxI -= (c.getLength() + 1);
+            maxI -= c.getLength();
+
+            if (i - 1 >= firstClueIndex && getClue(i - 1).getColor() == c.getColor()) {
+                maxI--;
+            }
         }
 
         clearPossibilities();
@@ -105,7 +113,7 @@ public abstract class AbstractRegion {
 
             int j = clue.getMinI();
             for (; j + clue.getLength() <= clue.getMaxI(); j++) {
-                if (fit(clue.getLength(), j)) {
+                if (fit(clue, j)) {
                     markPossible(j, clue);
                 }
             }
@@ -129,16 +137,6 @@ public abstract class AbstractRegion {
         for (int j = i; j < i + clue.getLength(); j++) {
             setPossibility(j, clue, true);
         }
-    }
-
-    protected boolean checkClue(Clue clue, int i) {
-        for (int j = i; j > i - clue.getLength(); j--) {
-            if (!isPossible(j, clue)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     protected void optimizeCluesBoundWithOnePossibility() {
@@ -227,7 +225,7 @@ public abstract class AbstractRegion {
      * Actually, I don't know why it works lol
      */
     protected void comparePossibilitiesAndLines(List<Line> lines) {
-        if (description.hasContradiction()) {
+        if (description.hasContradiction() || true) {
             return;
         }
 
@@ -305,7 +303,7 @@ public abstract class AbstractRegion {
         for (int i = firstClueIndex; i < lastClueIndex; i++) {
             Clue clue = getClue(i);
 
-            drawBetween(clue.getMinI(), clue.getMaxI(), clue.getLength());
+            drawBetween(clue.getMinI(), clue.getMaxI(), clue.getLength(), clue.getColor());
         }
 
         // check line length
@@ -313,7 +311,7 @@ public abstract class AbstractRegion {
         // and we try to draw a line between the minimum and maximum possible
         // of length l
         // see TurtleBug 1 and 3
-        for (Line line : lines) {
+        /*for (Line line : lines) {
             int minLength = minClueLength(line.start());
 
             if (minLength < 0) {
@@ -344,7 +342,7 @@ public abstract class AbstractRegion {
             }
 
             drawBetween(minPossible, maxPossible + 1, minLength);
-        }
+        }*/
     }
 
     // =======================================
@@ -356,16 +354,8 @@ public abstract class AbstractRegion {
         return SolverUtils.fit(description, clue, i);
     }
 
-    protected boolean fit(int line, int i) {
-        return SolverUtils.fit(description, line, i);
-    }
-
     protected boolean fitReverse(Clue clue, int i) {
         return SolverUtils.fitReverse(description, clue, i);
-    }
-
-    protected boolean fitReverse(int line, int i) {
-        return SolverUtils.fitReverse(description, line, i);
     }
 
     /**
@@ -459,12 +449,12 @@ public abstract class AbstractRegion {
      * @param max max index (exclusive)
      * @param lineLength the length of the line
      */
-    protected void drawBetween(int min, int max, int lineLength) {
+    protected void drawBetween(int min, int max, int lineLength, int color) {
         int totalLength = max - min;
         if (totalLength < 2 * lineLength) {
             int s = totalLength - lineLength;
 
-            draw(min + s, max - s, Cell.FILLED);
+            draw(min + s, max - s, Cell.FILLED, color);
         }
     }
 
@@ -536,30 +526,13 @@ public abstract class AbstractRegion {
             }
 
             if (minI == Integer.MAX_VALUE) {
-                //descriptor.setContradiction();
+                description.setContradiction();
                 return;
             }
 
             clue.setMinI(minI);
             clue.setMaxI(maxI + 1);
         }
-    }
-
-    /**
-     * @return the minimal number of cell needed to match the descriptor
-     */
-    protected int descriptorLength() {
-        int length = 0;
-
-        for (int i = firstClueIndex; i < lastClueIndex; i++) {
-            length += getClueLength(i);
-
-            if (i + 1 < lastClueIndex) {
-                length++;
-            }
-        }
-
-        return length;
     }
 
     /**

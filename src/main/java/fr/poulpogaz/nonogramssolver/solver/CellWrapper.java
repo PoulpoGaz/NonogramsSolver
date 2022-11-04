@@ -30,6 +30,10 @@ public class CellWrapper {
         return nonogram.isFilled(x, y);
     }
 
+    public boolean isFilled(int color) {
+        return nonogram.isFilled(x, y, color);
+    }
+
     public boolean isCrossed() {
         return nonogram.isCrossed(x, y);
     }

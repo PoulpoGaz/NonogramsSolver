@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Objects;
 
 import static fr.poulpogaz.nonogramssolver.Cell.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -78,9 +79,8 @@ public class TestUtils {
         return cells;
     }
 
-
     public static Description parse(String str, int[] clues) {
-        Description desc = create(str.length(), clues);
+        Description desc = create(str.length(), asObjectClues(clues));
 
         for (int i = 0; i < str.length(); i++) {
             switch (str.charAt(i)) {
@@ -94,6 +94,49 @@ public class TestUtils {
     }
 
     public static Description createEmpty(int length, int[] clues) {
+        Description desc = create(length, asObjectClues(clues));
+
+        for (int i = 0; i < length; i++) {
+            desc.setCell(i, EMPTY);
+        }
+
+        return desc;
+    }
+
+    private static Object[] asObjectClues(int[] clues) {
+        Object[] c = new Object[clues.length * 2];
+
+        for (int i = 0; i < clues.length; i++) {
+            c[2 * i] = clues[i];
+            c[2 * i + 1] = Color.BLACK;
+        }
+
+        return c;
+    }
+
+
+    /**
+     * Max ten colors
+     */
+    public static Description parse(String str, Object[] clues) {
+        Description desc = create(str.length(), clues);
+
+        for (int i = 0; i < str.length(); i++) {
+            switch (str.charAt(i)) {
+                case ' ', '_' -> desc.setCell(i, EMPTY);
+                case 'F', '█' -> desc.setCell(i, FILLED);
+                case 'X' -> desc.setCell(i, CROSSED);
+                default -> {
+                    int color = str.charAt(i) - '0';
+                    desc.setCell(i, FILLED, color);
+                }
+            }
+        }
+
+        return desc;
+    }
+
+    public static Description createEmpty(int length, Object[] clues) {
         Description desc = create(length, clues);
 
         for (int i = 0; i < length; i++) {
@@ -103,14 +146,28 @@ public class TestUtils {
         return desc;
     }
 
-    private static Description create(int length, int[] clues) {
+    /**
+     * @param clues an array containing a clue (int) then a color (Color or int)
+     */
+    private static Description create(int length, Object[] clues) {
+        if (clues.length % 2 != 0) {
+            throw new IllegalStateException();
+        }
+
         Nonogram.Builder builder = new Nonogram.Builder();
         builder.setWidth(length);
         builder.setHeight(1);
-        builder.setNumberOfClue(0, true, clues.length);
+        builder.setNumberOfClue(0, true, clues.length / 2);
 
-        for (int i = 0; i < clues.length; i++) {
-            builder.addClue(0, true, clues[i], Color.BLACK);
+        for (int i = 0; i < clues.length; i += 2) {
+            Color color;
+            if (clues[i + 1] instanceof Color col) {
+                color = col;
+            } else {
+                color = new Color((int) clues[i + 1]);
+            }
+
+            builder.addClue(0, true, (int) clues[i], color);
         }
 
         for (int i = 0; i < length; i++) {

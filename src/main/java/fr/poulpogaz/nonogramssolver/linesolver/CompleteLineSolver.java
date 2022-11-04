@@ -9,6 +9,7 @@ import java.util.Objects;
 /**
  * A solver that gets all information from a line.
  */
+@Deprecated
 public class CompleteLineSolver implements LineSolver {
 
     protected static final int UNKNOWN = 0;
@@ -153,9 +154,6 @@ public class CompleteLineSolver implements LineSolver {
         }
     }
 
-    /**
-     * same as {@link AbstractRegion#fit(int, int)}
-     */
     private boolean fit(Clue clue, int i) {
         int l = clue.getLength();
 

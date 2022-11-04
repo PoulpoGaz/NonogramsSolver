@@ -48,6 +48,10 @@ public class Description {
         return cells[i].isFilled();
     }
 
+    public boolean isFilled(int i, int color) {
+        return cells[i].isFilled(color);
+    }
+
     public boolean isCrossed(int i) {
         return cells[i].isCrossed();
     }
@@ -70,39 +74,50 @@ public class Description {
 
             return true;
         } else {
-            int clueIndex = 0;
-            int count = 0;
+            int pos = 0;
+            for (int i = 0; i < clues.length; i++) {
+                Clue clue = clues[i];
+                pos = skipNotFilled(pos);
 
-            for (CellWrapper cell : cells) {
-                if (clueIndex >= clues.length) {
-                    if (cell.isFilled()) {
-                        return false;
-                    }
-                } else {
-                    if (cell.isFilled()) {
-                        count++;
-
-                        if (count > getClue(clueIndex).getLength()) { // invalid
-                            return false;
-                        }
-                    } else if (count > 0) {
-                        if (count != getClue(clueIndex).getLength()) {
-                            return false;
-                        }
-
-                        clueIndex++;
-                        count = 0;
-                    }
+                if (pos < 0) {
+                    return false;
                 }
+
+                int length = lineLength(pos, clue.getColor());
+
+                if (length != clue.getLength()) {
+                    return false;
+                }
+                pos += length;
             }
 
-            if (clueIndex == clues.length) {
-                return true;
-            } else {
-                return getClue(clueIndex).getLength() == count;
-            }
+            return skipNotFilled(pos) == -1;
         }
     }
+
+    private int skipNotFilled(int i) {
+        for (; i < cells.length; i++) {
+            if (cells[i].isFilled()) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private int lineLength(int pos, int color) {
+        int length = 0;
+        for (; pos < cells.length; pos++) {
+            if (cells[pos].isFilled(color)) {
+                length++;
+            } else {
+                break;
+            }
+        }
+
+        return length;
+    }
+
 
     public int countSolved() {
         int n = 0;
