@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static fr.poulpogaz.nonogramssolver.linesolver.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DrakkarBug {
+public class DrakkarTest {
 
     private static final DefaultLineSolver solver = new DefaultLineSolver();
 

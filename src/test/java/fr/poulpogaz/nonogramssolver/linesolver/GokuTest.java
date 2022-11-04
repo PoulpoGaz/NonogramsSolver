@@ -10,7 +10,7 @@ import static fr.poulpogaz.nonogramssolver.linesolver.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class GokuBug {
+public class GokuTest {
 
     private static final DefaultLineSolver solver = new DefaultLineSolver();
     

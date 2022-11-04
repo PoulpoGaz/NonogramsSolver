@@ -42,21 +42,15 @@ public class TestUtils {
         }
     }
 
-    public static CellWrapper[] create(Cell... cells) {
-        CellWrapper[] wrappers = create(cells.length);
-
-        for (int i = 0; i < cells.length; i++) {
-            wrappers[i].setForce(cells[i]);
-        }
-
-        return wrappers;
-    }
-
     public static CellWrapper[] parse(String str) {
         CellWrapper[] wrappers = create(str.length());
 
         for (int i = 0; i < str.length(); i++) {
-            wrappers[i].setForce(Cell.valueOf(str.charAt(i)));
+            switch (str.charAt(i)) {
+                case ' ', '_' -> wrappers[i].get().setEmpty();
+                case 'F', '█' -> wrappers[i].get().setFilled();
+                case 'X' -> wrappers[i].get().setCrossed();
+            }
         }
 
         return wrappers;
@@ -66,7 +60,7 @@ public class TestUtils {
         CellWrapper[] wrappers = create(length);
 
         for (int i = 0; i < length; i++) {
-            wrappers[i].setForce(EMPTY);
+            wrappers[i].get().setEmpty();
         }
 
         return wrappers;

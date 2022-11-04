@@ -9,7 +9,7 @@ import java.util.List;
 import static fr.poulpogaz.nonogramssolver.linesolver.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TurtleBug {
+public class TurtleTest {
 
     private static final DefaultLineSolver solver = new DefaultLineSolver();
     

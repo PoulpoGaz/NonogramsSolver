@@ -9,7 +9,7 @@ import java.util.List;
 import static fr.poulpogaz.nonogramssolver.linesolver.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TotoroBug {
+public class TotoroTest {
 
     private static final DefaultLineSolver solver = new DefaultLineSolver();
 
@@ -55,7 +55,7 @@ public class TotoroBug {
         solver.crossZeroCells();
 
         List<Region> regions = solver.split();
-        regions.get(2).trySolve();
+        regions.get(3).trySolve();
 
         cellsEquals(wrappers, parse("█X_______________XXXXXXXXX_________███_X___█__█_X██X██XXXXXXXXXXXXXXX█"));
     }

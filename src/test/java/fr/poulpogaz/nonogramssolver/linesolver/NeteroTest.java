@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static fr.poulpogaz.nonogramssolver.linesolver.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class NeteroBug {
+public class NeteroTest {
 
     private static final DefaultLineSolver solver = new DefaultLineSolver();
 
@@ -24,11 +24,8 @@ public class NeteroBug {
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
-        System.out.println(solver);
         solver.comparePossibilitiesAndLines(solver.createLines());
         solver.crossZeroCells();
-
-        printRegions(solver.split());
 
         for (Region r : solver.split()) {
             r.trySolve();

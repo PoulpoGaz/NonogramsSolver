@@ -76,5 +76,41 @@ public class Cell {
             case FILLED -> '█';
             default -> throw new IllegalStateException();
         };
-    };
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (!(o instanceof Cell cell)) {
+            return false;
+        } else {
+            if (cell.type != type) {
+                return false;
+            }
+
+            if (cell.type == FILLED) {
+                return cell.color == color;
+            } else {
+                return true;
+            }
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type;
+        result = 31 * result + color;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return switch (type) {
+            case EMPTY -> "EMPTY";
+            case CROSSED -> "CROSSED";
+            case FILLED -> "FILLED(" + color + ")";
+            default -> throw new IllegalStateException();
+        };
+    }
 }
