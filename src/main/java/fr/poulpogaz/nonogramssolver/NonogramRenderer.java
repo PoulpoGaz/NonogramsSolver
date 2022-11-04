@@ -145,7 +145,8 @@ public class NonogramRenderer {
                     g2d.setColor(colors[cell.getColor()]);
                     g2d.fillRect(drawX, drawY, squareSize, squareSize);
                 } else if (cell.isEmpty()) {
-                    g2d.setColor(n.getBackground());
+                    //g2d.setColor(n.getBackground());
+                    g2d.setColor(Color.WHITE);
                     g2d.fillRect(drawX, drawY, squareSize, squareSize);
                 } else if (cell.isCrossed() && squareSize >= 3) {
                     g2d.setColor(n.getBackground());

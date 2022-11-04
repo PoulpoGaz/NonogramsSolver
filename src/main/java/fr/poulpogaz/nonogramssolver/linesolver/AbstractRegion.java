@@ -330,7 +330,7 @@ public abstract class AbstractRegion {
         // and we try to draw a line between the minimum and maximum possible
         // of length l
         // see TurtleBug 1 and 3
-        /*for (Line line : lines) {
+        for (Line line : lines) {
             int minLength = minClueLength(line.start());
 
             if (minLength < 0) {
@@ -360,8 +360,8 @@ public abstract class AbstractRegion {
 
             }
 
-            drawBetween(minPossible, maxPossible + 1, minLength);
-        }*/
+            drawBetween(minPossible, maxPossible + 1, minLength, line.color());
+        }
     }
 
     // =======================================
