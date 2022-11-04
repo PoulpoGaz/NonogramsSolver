@@ -175,8 +175,12 @@ public class Description {
         return cells[index];
     }
 
-    public void setCell(int index, Cell cell) {
-        cells[index].set(cell);
+    public void setCell(int index, int type) {
+        cells[index].set(type, 0);
+    }
+
+    public void setCell(int index, int type, int color) {
+        cells[index].set(type, color);
     }
 
     public Clue getClue(int index) {

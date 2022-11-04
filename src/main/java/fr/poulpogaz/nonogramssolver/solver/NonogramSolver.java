@@ -224,7 +224,7 @@ public class NonogramSolver {
 
                 listener.onContradiction(nonogram, ret == CONTRADICTION);
 
-                ret = solveWithLineSolver(SolverListener.LINE_SOLVING);
+                ret = solveWithLineSolver(SolverListener.LINE_SOLVING); // TODO: copy and check for contradiction
                 updateContradictionPriority(c);
 
                 if (ret == CONTRADICTION) {
@@ -338,7 +338,7 @@ public class NonogramSolver {
 
         LOGGER.debug("Guessing {} at {} {}", Cell.FILLED, xGuess, yGuess);
         Cell[][] copy = copy();
-        copy[yGuess][xGuess] = Cell.FILLED;
+        copy[yGuess][xGuess].setFilled();;
 
         set(Cell.FILLED, xGuess, yGuess);
 
@@ -349,7 +349,7 @@ public class NonogramSolver {
         while (!guesses.isEmpty()) {
             Guess g = guesses.peek();
 
-            if (g.guess() == Cell.FILLED) {
+            if (g.guess().isFilled()) {
                 undoGuess(g);
                 break;
             }
@@ -370,12 +370,12 @@ public class NonogramSolver {
             cols.resetStatus();
         }
 
-        cells[guess.y()][guess.x()].setForce(Cell.CROSSED);
+        cells[guess.y()][guess.x()].setForce(Cell.CROSSED, 0);
         cells[guess.y()][guess.x()].setChanged();
         columns[guess.x()].setChanged();
         rows[guess.y()].setChanged();
 
-        guess.cells()[guess.y()][guess.x()] = Cell.CROSSED;
+        guess.cells()[guess.y()][guess.x()].setCrossed();
     }
 
 
@@ -435,13 +435,31 @@ public class NonogramSolver {
         }
     }
 
-    private void set(Cell cell, int x, int y) {
-        cells[y][x].setForce(cell);
+    private void set(int type, int x, int y) {
+        set(type, 0, x, y);
+    }
+
+    private void set(int type, int color, int x, int y) {
+        cells[y][x].setForce(type, color);
         cells[y][x].setChanged();
         columns[x].setChanged();
         rows[y].setChanged();
     }
-    
+
+    public Cell[][] copy() {
+        Cell[][] cells = new Cell[height()][width()];
+
+        for (int y = 0; y < height(); y++) {
+            for (int x = 0; x < width(); x++) {
+                cells[y][x] = new Cell(this.cells[y][x].get());
+            }
+        }
+
+        return cells;
+    }
+
+
+
 
     private void cleanSolver() {
         this.nonogram = null;
@@ -449,6 +467,8 @@ public class NonogramSolver {
         this.columns = null;
         this.rows = null;
         this.listener = null;
+        this.descriptionQueue = null;
+        this.contradictionQueue = null;
     }
 
     private boolean isSolved() {
@@ -465,18 +485,6 @@ public class NonogramSolver {
         }
 
         return true;
-    }
-
-    public Cell[][] copy() {
-        Cell[][] cells = new Cell[height()][width()];
-
-        for (int y = 0; y < height(); y++) {
-            for (int x = 0; x < width(); x++) {
-                cells[y][x] = this.cells[y][x].get();
-            }
-        }
-
-        return cells;
     }
 
     private int width() {

@@ -38,15 +38,23 @@ public class CellWrapper {
         return nonogram.get(x, y);
     }
 
-    public void setForce(Cell cell) {
-        nonogram.set(cell, x, y);
+    public void setForce(int type, int color) {
+        get().set(type, color);
     }
 
-    public void set(Cell cell) {
+    public void setForce(Cell cell) {
+        get().set(cell);
+    }
+
+    public void set(int type) {
+        set(type, 0);
+    }
+
+    public void set(int type, int color) {
         Cell current = nonogram.get(x, y);
 
-        if (current != cell) {
-            if (current != null && current != Cell.EMPTY) {
+        if (current.getType() != type) {
+            if (!current.isEmpty()) {
                 // throw new IllegalStateException("Changing cell at (%d; %d) from %s to %s".formatted(x, y, this.cell, cell));
                 setContradiction();
 
@@ -57,7 +65,7 @@ public class CellWrapper {
                     column.setContradiction();
                 }
             } else {
-                nonogram.set(cell, x, y);
+                current.set(type, color);
                 setChanged();
 
                 if (row != null) {

@@ -468,15 +468,18 @@ public abstract class AbstractRegion {
         }
     }
 
+    protected void draw(int start, int end, int cellType) {
+        draw(start, end, cellType, 0);
+    }
+
     /**
      * Draw a line from start (inclusive) to end (exclusive)
      * @param start start of the line (inclusive)
      * @param end end of the line (exclusive)
-     * @param cell of what the line is composed
      */
-    protected void draw(int start, int end, Cell cell) {
+    protected void draw(int start, int end, int cellType, int cellColor) {
         for (int i = start; i < end; i++) {
-            setCell(i, cell);
+            setCell(i, cellType, cellColor);
         }
     }
 
@@ -586,8 +589,12 @@ public abstract class AbstractRegion {
         return description.getCell(index);
     }
 
-    protected void setCell(int index, Cell cell) {
-        description.setCell(index, cell);
+    protected void setCell(int index, int type) {
+        description.setCell(index, type);
+    }
+
+    protected void setCell(int index, int type, int color) {
+        description.setCell(index, type, color);
     }
 
     protected Clue getClue(int index) {

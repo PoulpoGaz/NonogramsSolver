@@ -92,6 +92,9 @@ public class Nonogram {
 
     private final Cell[][] cells;
 
+    private Color background = Color.WHITE;
+    private Color[] colors = new Color[] {Color.BLACK};
+
     public Nonogram(int[][] rows, int[][] columns) {
         this.width = columns.length;
         this.height = rows.length;
@@ -101,7 +104,7 @@ public class Nonogram {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                cells[y][x] = Cell.EMPTY;
+                cells[y][x] = new Cell();
             }
         }
     }
@@ -238,25 +241,19 @@ public class Nonogram {
             for (int x = 0; x < width; x++) {
                 Cell cell = cells[y][x];
 
-                switch (cell) {
-                    case FILLED -> {
-                        g2d.setColor(Color.BLACK);
-                        g2d.fillRect(drawX, drawY, squareSize, squareSize);
-                    }
-                    case EMPTY -> {
-                        g2d.setColor(Color.WHITE);
-                        g2d.fillRect(drawX, drawY, squareSize, squareSize);
-                    }
-                    case CROSSED -> {
-                        if (squareSize >= 3) {
-                            g2d.setColor(Color.WHITE);
-                            g2d.fillRect(drawX, drawY, squareSize, squareSize);
+                if (cell.isFilled()) {
+                    g2d.setColor(colors[cell.getColor()]);
+                    g2d.fillRect(drawX, drawY, squareSize, squareSize);
+                } else if (cell.isEmpty()) {
+                    g2d.setColor(background);
+                    g2d.fillRect(drawX, drawY, squareSize, squareSize);
+                } else if (cell.isCrossed() && squareSize >= 3) {
+                    g2d.setColor(background);
+                    g2d.fillRect(drawX, drawY, squareSize, squareSize);
 
-                            g2d.setColor(Color.BLACK);
-                            g2d.drawLine(drawX, drawY, drawX + squareSize, drawY + squareSize);
-                            g2d.drawLine(drawX + squareSize, drawY, drawX, drawY + squareSize);
-                        }
-                    }
+                    g2d.setColor(Color.BLACK);
+                    g2d.drawLine(drawX, drawY, drawX + squareSize, drawY + squareSize);
+                    g2d.drawLine(drawX + squareSize, drawY, drawX, drawY + squareSize);
                 }
 
                 drawX += squareSize;
@@ -348,20 +345,16 @@ public class Nonogram {
         return cells[y][x];
     }
 
-    public void set(Cell cell, int x, int y) {
-        cells[y][x] = cell;
-    }
-
     public boolean isEmpty(int x, int y) {
-        return cells[y][x] == Cell.EMPTY;
+        return cells[y][x].isEmpty();
     }
 
     public boolean isFilled(int x, int y) {
-        return cells[y][x] == Cell.FILLED;
+        return cells[y][x].isFilled();
     }
 
     public boolean isCrossed(int x, int y) {
-        return cells[y][x] == Cell.CROSSED;
+        return cells[y][x].isCrossed();
     }
 
     public int getWidth() {
