@@ -1,6 +1,5 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
-import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
@@ -12,9 +11,7 @@ public class SolverUtilsTest {
 
     @Test
     void fit() {
-        CellWrapper[] wrappers = parse("__________"); // 10
-
-        Description description = new Description(false, 0, new int[0], wrappers);
+        Description description = parse("__________", new int[0]); // 10
         assertTrue(SolverUtils.fit(description, 5, 0));
         assertTrue(SolverUtils.fit(description, 5, 5));
         assertFalse(SolverUtils.fit(description, 5, 6));
@@ -22,9 +19,7 @@ public class SolverUtilsTest {
 
     @Test
     void fit2() {
-        CellWrapper[] wrappers = parse("█_________"); // 10
-
-        Description description = new Description(false, 0, new int[0], wrappers);
+        Description description = parse("█_________", new int[0]); // 10
         assertFalse(SolverUtils.fit(description, 5, 1));
         assertTrue(SolverUtils.fit(description, 5, 5));
         assertFalse(SolverUtils.fit(description, 5, 6));
@@ -32,9 +27,7 @@ public class SolverUtilsTest {
 
     @Test
     void fit3() {
-        CellWrapper[] wrappers = parse("______X___"); // 10
-
-        Description description = new Description(false, 0, new int[0], wrappers);
+        Description description = parse("______X___", new int[0]); // 10
         assertTrue(SolverUtils.fit(description, 5, 0));
         assertTrue(SolverUtils.fit(description, 5, 1));
         assertFalse(SolverUtils.fit(description, 5, 2));
@@ -44,9 +37,7 @@ public class SolverUtilsTest {
 
     @Test
     void fitReverse() {
-        CellWrapper[] wrappers = parse("__________"); // 10
-
-        Description description = new Description(false, 0, new int[0], wrappers);
+        Description description = parse("__________", new int[0]); // 10
         assertFalse(SolverUtils.fitReverse(description, 5, 0));
         assertTrue(SolverUtils.fitReverse(description, 5, 5));
         assertTrue(SolverUtils.fitReverse(description, 5, 6));
@@ -55,18 +46,14 @@ public class SolverUtilsTest {
 
     @Test
     void fitReverse2() {
-        CellWrapper[] wrappers = parse("█_________"); // 10
-
-        Description description = new Description(false, 0, new int[0], wrappers);
+        Description description = parse("█_________", new int[0]); // 10
         assertTrue(SolverUtils.fitReverse(description, 5, 4));
         assertFalse(SolverUtils.fitReverse(description, 5, 5));
     }
 
     @Test
     void fitReverse3() {
-        CellWrapper[] wrappers = parse("______X___"); // 10
-
-        Description description = new Description(false, 0, new int[0], wrappers);
+        Description description = parse("______X___", new int[0]); // 10
         assertFalse(SolverUtils.fitReverse(description, 5, 7));
         assertFalse(SolverUtils.fitReverse(description, 5, 6));
         assertTrue(SolverUtils.fitReverse(description, 5, 5));

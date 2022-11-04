@@ -1,6 +1,5 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
-import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
@@ -16,47 +15,42 @@ public class GokuTest {
     
     @Test
     void gokuBug1() {
-        CellWrapper[] wrappers = parse("█XX██XXXXXXXXXXXXX__________________________________________█XXX████████████████");
-        assertEquals(80, wrappers.length);
+        // must be crossed                                                                  here --> <--
+        Description description = parse("█XX██XXXXXXXXXXXXX__________________________________________█XXX████████████████",
+                new int[] {1, 2, 10, 2, 2, 1, 16});
+        assertEquals(80, description.size());
 
-        int[] clues = new int[]{1, 2, 10, 2, 2, 1, 16};
-
-        Description description = new Description(false, 0, clues, wrappers);
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.crossZeroCells();
 
-        cellsEquals(wrappers, parse("█XX██XXXXXXXXXXXXX_________________________________________X█XXX████████████████"));
+        cellsEquals(description, parseCell("█XX██XXXXXXXXXXXXX_________________________________________X█XXX████████████████"));
 
     }
 
     @Test
     void gokuBug2() {
-        // must be crossed                            here --> <--
-        CellWrapper[] wrappers = parse("X_████████████████_XXX_██X____██X____________________________XXXXXXXXXXXXXXXXXXX");
-        assertEquals(80, wrappers.length);
+        // must be crossed                             here --> <--
+        Description description = parse("X_████████████████_XXX_██X____██X____________________________XXXXXXXXXXXXXXXXXXX",
+                new int[] {17, 2, 3, 2, 5, 2, 7});
+        assertEquals(80, description.size());
 
-        int[] clues = new int[]{17, 2, 3, 2, 5, 2, 7};
-
-        Description description = new Description(false, 0, clues, wrappers);
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.crossZeroCells();
 
-        cellsEquals(wrappers, parse("X_████████████████_XXXX██X____██X____________________________XXXXXXXXXXXXXXXXXXX"));
+        cellsEquals(description, parseCell("X_████████████████_XXXX██X____██X____________________________XXXXXXXXXXXXXXXXXXX"));
     }
 
     @Test
     void gokuBug3() {
-        //                                                            must be filled here -->  <--
-        CellWrapper[] wrappers = parse("██████████████XX████████████████████X______██████████__██XXX█████████X████████X█");
-        assertEquals(80, wrappers.length);
+        //                                                             must be filled here -->  <--
+        Description description = parse("██████████████XX████████████████████X______██████████__██XXX█████████X████████X█",
+                new int[]{14, 20, 1, 14, 9, 8, 1});
+        assertEquals(80, description.size());
 
-        int[] clues = new int[]{14, 20, 1, 14, 9, 8, 1};
-
-        Description description = new Description(false, 0, clues, wrappers);
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
@@ -66,18 +60,16 @@ public class GokuTest {
         Region r3 = regions.get(3);
         r3.trySolve();
 
-        cellsEquals(wrappers, parse("██████████████XX████████████████████X______██████████████XXX█████████X████████X█"));
+        cellsEquals(description, parseCell("██████████████XX████████████████████X______██████████████XXX█████████X████████X█"));
     }
 
     @Test
     void gokuBug4() {
-        // must be crossed                      here -->  <-->    <--
-        CellWrapper[] wrappers = parse("██XX█████████X█X__X██X____XXXX██XXX███████X██XXXXX██XXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-        assertEquals(80, wrappers.length);
+        // must be crossed                       here -->  <-->    <--
+        Description description = parse("██XX█████████X█X__X██X____XXXX██XXX███████X██XXXXX██XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                new int[] {2, 9, 1, 2, 2, 7, 2, 2});
+        assertEquals(80, description.size());
 
-        int[] clues = new int[] {2, 9, 1, 2, 2, 7, 2, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
         assertTrue(description.isCompleted());
 
         solver.setDescriptor(description);
@@ -85,6 +77,6 @@ public class GokuTest {
         solver.optimizeCluesBoundWithOnePossibility();
         solver.crossZeroCells();
 
-        cellsEquals(wrappers, parse("██XX█████████X█XXXX██XXXXXXXXX██XXX███████X██XXXXX██XXXXXXXXXXXXXXXXXXXXXXXXXXXX"));
+        cellsEquals(description, parseCell("██XX█████████X█XXXX██XXXXXXXXX██XXX███████X██XXXXX██XXXXXXXXXXXXXXXXXXXXXXXXXXXX"));
     }
 }

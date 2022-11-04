@@ -1,6 +1,5 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
-import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
@@ -19,12 +18,7 @@ public class DefaultLineSolverTest {
 
     @Test
     void computePossibilitiesTest1() {
-        // 15 | 2 6 2
-
-        CellWrapper[] wrappers = createEmpty(15);
-        int[] clues = new int[] {2, 6, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = createEmpty(15, new int[] {2, 6, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
 
@@ -57,12 +51,7 @@ public class DefaultLineSolverTest {
 
     @Test
     void computePossibilitiesTest2() {
-        // 15 | 5 2
-
-        CellWrapper[] wrappers = createEmpty(15);
-        int[] clues = new int[] {5, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = createEmpty(15, new int[] {5, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
 
@@ -93,12 +82,7 @@ public class DefaultLineSolverTest {
 
     @Test
     void computePossibilitiesTest3() {
-        // 15 | 2 2 2 2
-
-        CellWrapper[] wrappers = createEmpty(15);
-        int[] clues = new int[] {2, 2, 2, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = createEmpty(15, new int[] {2, 2, 2, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
 
@@ -134,12 +118,8 @@ public class DefaultLineSolverTest {
 
     @Test
     void computePossibilitiesWithCellTest1() {
-        // 15 | 2 6 2
-
-        CellWrapper[] wrappers = parse("__█____█____█__");
-        int[] clues = new int[] {2, 6, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        // 15
+        Description description = parse("__█____█____█__",  new int[] {2, 6, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
 
@@ -172,12 +152,8 @@ public class DefaultLineSolverTest {
 
     @Test
     void computePossibilitiesWithCellTest2() {
-        // 15 | 5 2
-
-        CellWrapper[] wrappers = parse("__█___█____██__");
-        int[] clues = new int[] {5, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        // 15
+        Description description = parse("__█___█____██__", new int[] {5, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
 
@@ -208,12 +184,8 @@ public class DefaultLineSolverTest {
 
     @Test
     void computePossibilitiesWithCellTest3() {
-        // 15 | 5 2 2
-
-        CellWrapper[] wrappers = parse("__██_██___█_█__");
-        int[] clues = new int[] {5, 2, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        // 15
+        Description description = parse("__██_██___█_█__", new int[] {5, 2, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
@@ -246,12 +218,8 @@ public class DefaultLineSolverTest {
 
     @Test
     void computePossibilitiesWithCellTest4() {
-        // 15 | 2 6 2
-
-        CellWrapper[] wrappers = parse("__█X___█__X_█XX");
-        int[] clues = new int[] {2, 6, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        // 15
+        Description description = parse("__█X___█__X_█XX", new int[] {2, 6, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
 
@@ -289,12 +257,8 @@ public class DefaultLineSolverTest {
 
     @Test
     void optimizeCluesBoundWithOnePossibilitiesTest() {
-        // 15 | 5 2
-
-        CellWrapper[] wrappers = parse("__█___█____██__");
-        int[] clues = new int[] {5, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        // 15
+        Description description = parse("__█___█____██__", new int[] {5, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
@@ -328,12 +292,8 @@ public class DefaultLineSolverTest {
 
     @Test
     void optimizeCluesBoundWithOnePossibilitiesTest2() {
-        // 15 | 5 2 2
-
-        CellWrapper[] wrappers = parse("__██_██___█_█__");
-        int[] clues = new int[] {5, 2, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        // 15
+        Description description = parse("__██_██___█_█__", new int[] {5, 2, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
@@ -372,10 +332,7 @@ public class DefaultLineSolverTest {
 
     @Test
     void splitTest1() {
-        CellWrapper[] wrappers = createEmpty(15);
-        int[] clues = new int[] {2, 6, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = createEmpty(15, new int[] {2, 6, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
@@ -387,10 +344,7 @@ public class DefaultLineSolverTest {
 
     @Test
     void splitTest2() {
-        CellWrapper[] wrappers = parse("__█___█____██__");
-        int[] clues = new int[] {5, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = parse("__█___█____██__", new int[] {5, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
@@ -403,10 +357,7 @@ public class DefaultLineSolverTest {
 
     @Test
     void splitTest3() {
-        CellWrapper[] wrappers = parse("__██_██___█_█__");
-        int[] clues = new int[] {5, 2, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = parse("__██_██___█_█__", new int[] {5, 2, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
@@ -431,10 +382,7 @@ public class DefaultLineSolverTest {
 
     @Test
     void completeTest1() {
-        CellWrapper[] wrappers = parse("_____█______X_█");
-        int[] clues = new int[] {2, 2, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = parse("_____█______X_█", new int[] {2, 2, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
@@ -442,20 +390,17 @@ public class DefaultLineSolverTest {
         List<Region> regions = solver.split();
         regions.get(1).trySolve();
 
-        cellsEquals(wrappers, parse("_____█______X██"));
+        cellsEquals(description, parseCell("_____█______X██"));
     }
 
     @Test
     void completeTest2() {
-        CellWrapper[] wrappers = parse("X_____███______");
-        int[] clues = new int[] {2, 6, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = parse("X_____███______", new int[] {2, 6, 2});
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
         solver.tryFill(List.of());
-        cellsEquals(wrappers, parse("X_____████_____"));
+        cellsEquals(description, parseCell("X_____████_____"));
     }
 
 
@@ -467,37 +412,25 @@ public class DefaultLineSolverTest {
 
     @Test
     void isCompletedTest1() {
-        CellWrapper[] wrappers = createEmpty(15);
-        int[] clues = new int[] {2, 6, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = createEmpty(15, new int[] {2, 6, 2});
         assertFalse(description.isCompleted());
     }
 
     @Test
     void isCompletedTest2() {
-        CellWrapper[] wrappers = parse("_██X██████__██_");
-        int[] clues = new int[] {2, 6, 2};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = parse("_██X██████__██_", new int[] {2, 6, 2});
         assertTrue(description.isCompleted());
     }
 
     @Test
     void isCompletedTest3() {
-        CellWrapper[] wrappers = parse("X█XXXX█XXX_██_█");
-        int[] clues = new int[] {1, 1, 2, 1};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = parse("X█XXXX█XXX_██_█", new int[] {1, 1, 2, 1});
         assertTrue(description.isCompleted());
     }
 
     @Test
     void isCompletedTest4() {
-        CellWrapper[] wrappers = parse("__█____________");
-        int[] clues = new int[] {};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = parse("__█____________", new int[0]);
         assertFalse(description.isCompleted());
     }
 
@@ -505,29 +438,24 @@ public class DefaultLineSolverTest {
 
     @Test
     void drawBetween() {
-        CellWrapper[] wrappers = createEmpty(10);
-        int[] clues = new int[] {};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = createEmpty(10, new int[0]);
         solver.setDescriptor(description);
         solver.drawBetween(0, 10, 5);
-        cellsEquals(wrappers, createEmpty(10));
+        cellsEquals(description, createEmptyCell(10));
 
         solver.drawBetween(0, 10, 6);
-        cellsEquals(wrappers, parse("____██____"));
+        cellsEquals(description, parseCell("____██____"));
     }
 
     @Test
     void drawBetween2() {
-        CellWrapper[] wrappers = createEmpty(20);
-        int[] clues = new int[] {};
+        Description description = createEmpty(20, new int[0]);
 
-        Description description = new Description(false, 0, clues, wrappers);
         solver.setDescriptor(description);
         solver.drawBetween(3, 10, 5);
-        cellsEquals(wrappers, parse("_____███____________"));
+        cellsEquals(description, parseCell("_____███____________"));
 
         solver.drawBetween(6, 15, 8);
-        cellsEquals(wrappers, parse("_____█████████______"));
+        cellsEquals(description, parseCell("_____█████████______"));
     }
 }

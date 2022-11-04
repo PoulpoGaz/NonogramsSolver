@@ -1,6 +1,5 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
-import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
@@ -15,15 +14,12 @@ public class TotoroTest {
 
     @Test
     void totoroBug() {
-        // must be crossed                          here --> <-- -->      <--
-        CellWrapper[] wrappers = parse("_________________XX█__█XX_█X______X████████████████████████████████XXX");
+        // must be crossed                           here --> <-- -->      <--
+        Description description = parse("_________________XX█__█XX_█X______X████████████████████████████████XXX",
+                new int[] {3, 1, 2, 2, 32});
         // must be filled                            here --> <-> <--
-        assertEquals(70, wrappers.length);
-
-        int[] clues = new int[] {3, 1, 2, 2, 32};
-
-        Description description = new Description(false, 0, clues, wrappers);
-
+        assertEquals(70, description.size());
+        
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
@@ -35,19 +31,16 @@ public class TotoroTest {
             r.trySolve();
         }
 
-        cellsEquals(wrappers, parse("_________________XX█X██XX██XXXXXXXX████████████████████████████████XXX"));
+        cellsEquals(description, parseCell("_________________XX█X██XX██XXXXXXXX████████████████████████████████XXX"));
     }
 
     @Test
     void totoroBug2() {
-        // must be filled                                                  here --> <> <--
-        CellWrapper[] wrappers = parse("█X_______________XXXXXXXXX_________███_X________X██X██XXXXXXXXXXXXXXX█");
-        assertEquals(70, wrappers.length);
-
-        int[] clues = new int[] {1, 1, 2, 8, 4, 1, 2, 2, 2, 2, 1};
-
-        Description description = new Description(false, 0, clues, wrappers);
-
+        // must be filled                                                   here --> <> <--
+        Description description = parse("█X_______________XXXXXXXXX_________███_X________X██X██XXXXXXXXXXXXXXX█",
+                new int[] {1, 1, 2, 8, 4, 1, 2, 2, 2, 2, 1});
+        assertEquals(70, description.size());
+        
         solver.setDescriptor(description);
         solver.computePossibilities();
         solver.optimizeCluesBoundWithOnePossibility();
@@ -57,6 +50,6 @@ public class TotoroTest {
         List<Region> regions = solver.split();
         regions.get(3).trySolve();
 
-        cellsEquals(wrappers, parse("█X_______________XXXXXXXXX_________███_X___█__█_X██X██XXXXXXXXXXXXXXX█"));
+        cellsEquals(description, parseCell("█X_______________XXXXXXXXX_________███_X___█__█_X██X██XXXXXXXXXXXXXXX█"));
     }
 }

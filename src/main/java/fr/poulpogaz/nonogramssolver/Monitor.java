@@ -2,8 +2,6 @@ package fr.poulpogaz.nonogramssolver;
 
 import fr.poulpogaz.nonogramssolver.solver.Description;
 import fr.poulpogaz.nonogramssolver.solver.SolverListener;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,6 +17,8 @@ public class Monitor extends JPanel {
     private double offsetX;
     private double offsetY;
     private double scale = 1;
+
+    private final NonogramRenderer renderer = NonogramRenderer.DEFAULT;
 
     public Monitor(Nonogram nonogram) {
         this.nonogram = nonogram;
@@ -171,7 +171,7 @@ public class Monitor extends JPanel {
         g2d.fillRect(0, 0, getWidth(), getHeight());
 
         g2d.translate(this.offsetX, this.offsetY);
-        nonogram.drawNonogram(g2d, (int) (getWidth() * this.scale), (int) (getHeight() * this.scale));
+        renderer.drawNonogram(nonogram, g2d, (int) (getWidth() * this.scale), (int) (getHeight() * this.scale));
         g2d.translate(-this.offsetX, -this.offsetY);
 
         g2d.setColor(Color.BLACK);

@@ -1,5 +1,6 @@
-package fr.poulpogaz.nonogramssolver;
+package fr.poulpogaz.nonogramssolver.utils;
 
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,5 +69,9 @@ public class Utils {
         if (Files.notExists(p)) {
             Files.createDirectories(p);
         }
+    }
+
+    public static boolean isDark(Color c) {
+        return (c.getRed() + c.getGreen() + c.getBlue()) / (3 * 255f) < 0.5;
     }
 }

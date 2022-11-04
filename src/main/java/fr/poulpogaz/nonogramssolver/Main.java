@@ -1,10 +1,12 @@
 package fr.poulpogaz.nonogramssolver;
 
+import fr.poulpogaz.nonogramssolver.reader.ImageReader;
 import fr.poulpogaz.nonogramssolver.solver.Description;
 import fr.poulpogaz.nonogramssolver.solver.NonogramSolver;
 import fr.poulpogaz.nonogramssolver.solver.SolverAdapter;
 import fr.poulpogaz.nonogramssolver.reader.WebpbnReader;
 import fr.poulpogaz.nonogramssolver.solver.SolverListener;
+import fr.poulpogaz.nonogramssolver.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
@@ -12,6 +14,7 @@ import picocli.CommandLine;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Closeable;
 import java.io.File;
@@ -32,24 +35,47 @@ public class Main implements Runnable {
                 .execute(args);
     }
 
-    private static class Input {
+    private static class ImageInput {
+
+        private static final ImageReader reader = new ImageReader();
 
         @CommandLine.Option(names = {"--image"})
-        private Path image;
+        private Path path;
+
+        @CommandLine.Option(names = {"--multicolor"})
+        private boolean multicolor;
+
+        @CommandLine.Option(names = "--background", arity = "3")
+        private int[] background;
+
+        public Nonogram createNonogram() throws IOException {
+            if (Files.isDirectory(path)) {
+                System.err.println("Input isn't an image");
+                return null;
+            } else {
+                if (background != null) {
+                    Color background = new Color(this.background[0], this.background[1], this.background[2]);
+
+                    return reader.read(path, !multicolor, background);
+                } else {
+                    return reader.read(path, !multicolor, null);
+                }
+            }
+        }
+    }
+
+
+    private static class Input {
+
+        @CommandLine.ArgGroup(exclusive = false)
+        private ImageInput image;
 
         @CommandLine.Option(names = {"-w", "--webpbn"})
         private String webpbn;
 
         public Nonogram createNonogram() throws IOException, InterruptedException {
             if (image != null) {
-                if (Files.isDirectory(image)) {
-                    System.err.println("Input isn't an image");
-                    return null;
-                }
-
-                BufferedImage image = ImageIO.read(this.image.toFile());
-
-                return Nonogram.fromImage(image);
+                return image.createNonogram();
             } else {
                 return new WebpbnReader().read(webpbn);
             }
@@ -57,7 +83,7 @@ public class Main implements Runnable {
 
         public String name() {
             if (image != null) {
-                return Utils.getFileName(image);
+                return Utils.getFileName(image.path);
             } else {
                 return webpbn;
             }
@@ -72,7 +98,12 @@ public class Main implements Runnable {
         }
     }
 
-    @CommandLine.ArgGroup(exclusive = true)
+
+
+
+
+
+    @CommandLine.ArgGroup
     private Input input;
 
     @CommandLine.Option(names = {"-o", "--output"}, description = "output")
@@ -99,6 +130,8 @@ public class Main implements Runnable {
     @CommandLine.Option(names = {"--auto-close", "--close-monitor-on-end"},
             description = "Close automatically the monitor when the nonogram is solved")
     private boolean shutdownOnEnd;
+
+    private final NonogramRenderer renderer = NonogramRenderer.DEFAULT;
 
     @Override
     public void run() {
@@ -223,7 +256,7 @@ public class Main implements Runnable {
             super.onFail(n);
 
             try {
-                ImageIO.write(n.asImage(squareSize), "png", output);
+                ImageIO.write(renderer.asImage(n, squareSize), "png", output);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -234,7 +267,7 @@ public class Main implements Runnable {
             super.onSuccess(n);
 
             try {
-                ImageIO.write(n.asImage(squareSize), "png", output);
+                ImageIO.write(renderer.asImage(n, squareSize), "png", output);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -291,9 +324,10 @@ public class Main implements Runnable {
 
         @Override
         public void onSuccess(Nonogram n) {
-            while (!cells.isEmpty()) {
+            // TODO: remake
+            /*while (!cells.isEmpty()) {
                 newImage(new Nonogram(n, cells.remove()));
-            }
+            }*/
 
             super.onSuccess(n);
         }
@@ -323,7 +357,7 @@ public class Main implements Runnable {
         protected void newImage(Nonogram nonogram) {
             LOGGER.debug("Writing...");
             try {
-                ImageIO.write(nonogram.asImage(squareSize), "png", nextFile());
+                ImageIO.write(renderer.asImage(nonogram, squareSize), "png", nextFile());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -370,7 +404,7 @@ public class Main implements Runnable {
         protected void newImage(Nonogram nonogram) {
             LOGGER.debug("Writing...");
             try {
-                writer.writeToSequence(nonogram.asImage(squareSize));
+                writer.writeToSequence(renderer.asImage(nonogram, squareSize));
             } catch (IOException e) {
                 e.printStackTrace();
             }

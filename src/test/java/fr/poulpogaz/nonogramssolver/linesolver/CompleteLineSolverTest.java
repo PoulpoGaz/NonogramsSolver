@@ -1,6 +1,5 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
-import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
@@ -14,10 +13,8 @@ public class CompleteLineSolverTest {
 
     @Test
     void emptyTest() {
-        CellWrapper[] wrappers = createEmpty(15);
-        int[] clues = new int[] {2, 6, 2};
+        Description description= createEmpty(15, new int[] {2, 6, 2});
 
-        Description description = new Description(false, 0, clues, wrappers);
         solver.setDescriptor(description);
         solver.init();
         solver.fillPossibilities(0, 0);
@@ -28,10 +25,8 @@ public class CompleteLineSolverTest {
 
     @Test
     void filledTest() {
-        CellWrapper[] wrappers = parse("____█________█");
-        int[] clues = new int[] {2, 2, 2};
+        Description description = parse("____█________█", new int[] {2, 2, 2});
 
-        Description description = new Description(false, 0, clues, wrappers);
         solver.setDescriptor(description);
         solver.init();
         solver.fillPossibilities(0, 0);
@@ -41,10 +36,8 @@ public class CompleteLineSolverTest {
 
     @Test
     void filledTest2() {
-        CellWrapper[] wrappers = parse("█___X_████_XXXX");
-        int[] clues = new int[] {2, 5};
+        Description description = parse("█___X_████_XXXX", new int[] {2, 5});
 
-        Description description = new Description(false, 0, clues, wrappers);
         solver.setDescriptor(description);
         solver.init();
         solver.fillPossibilities(0, 0);

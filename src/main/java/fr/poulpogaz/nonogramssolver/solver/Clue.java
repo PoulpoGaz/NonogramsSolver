@@ -1,14 +1,24 @@
 package fr.poulpogaz.nonogramssolver.solver;
 
+import fr.poulpogaz.nonogramssolver.Nonogram;
+
 public class Clue {
 
     private final int length;
+    private final int color;
     private final int index;
     private int minI;
     private int maxI;
 
-    public Clue(int length, int index) {
+    public Clue(Nonogram.Clue clue, int index) {
+        this.length = clue.length();
+        this.color = clue.color();
+        this.index = index;
+    }
+
+    public Clue(int length, int color, int index) {
         this.length = length;
+        this.color = color;
         this.index = index;
     }
 

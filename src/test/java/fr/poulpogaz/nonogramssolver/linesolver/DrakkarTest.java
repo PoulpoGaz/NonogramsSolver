@@ -1,6 +1,5 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
-import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
@@ -14,12 +13,9 @@ public class DrakkarTest {
     @Test
     void drakkarBug1() {
         // must be filled                              here -->  <--
-        CellWrapper[] wrappers = parse("XXXX███X___X__█X███______█X_______█X█____XX______X█____█XXXX___XXXXX███X█XX");
-        assertEquals(75, wrappers.length);
-
-        int[] clues = new int[] {3, 1, 1, 3, 4, 3, 1, 2, 1, 3, 3, 1};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        Description description = parse("XXXX███X___X__█X███______█X_______█X█____XX______X█____█XXXX___XXXXX███X█XX",
+                new int[] {3, 1, 1, 3, 4, 3, 1, 2, 1, 3, 3, 1});
+        assertEquals(75, description.size());
 
         solver.setDescriptor(description);
         solver.computePossibilities();
@@ -31,6 +27,6 @@ public class DrakkarTest {
             r.trySolve();
         }
 
-        cellsEquals(wrappers, parse("XXXX███X___X__█X███____███X_______█X█____XX______X█____█XXXX___XXXXX███X█XX"));
+        cellsEquals(description, parseCell("XXXX███X___X__█X███____███X_______█X█____XX______X█____█XXXX___XXXXX███X█XX"));
     }
 }

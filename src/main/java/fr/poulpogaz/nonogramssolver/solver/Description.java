@@ -1,6 +1,7 @@
 package fr.poulpogaz.nonogramssolver.solver;
 
 import fr.poulpogaz.nonogramssolver.Cell;
+import fr.poulpogaz.nonogramssolver.Nonogram;
 
 public class Description {
 
@@ -21,7 +22,7 @@ public class Description {
 
     private int status = Status.CHANGED;
 
-    public Description(boolean isRow, int index, int[] clues, CellWrapper[] cells) {
+    public Description(boolean isRow, int index, Nonogram.Clue[] clues, CellWrapper[] cells) {
         this.isRow = isRow;
         this.index = index;
         this.cells = cells;

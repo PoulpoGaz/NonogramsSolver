@@ -1,6 +1,5 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
-import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
@@ -13,13 +12,10 @@ public class RedDeerTest {
 
     @Test
     void redDeerBug() {
-        // must be filled                                                   here --> <--
-        CellWrapper[] wrappers = parse("XXXX██████XXXXXXXXX████XX████XXXXXXXXXXX______█████████_______XX_");
-        assertEquals(65, wrappers.length);
-
-        int[] clues = new int[] {6, 4, 4, 15, 1, 1};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        // must be filled                                                    here --> <--
+        Description description = parse("XXXX██████XXXXXXXXX████XX████XXXXXXXXXXX______█████████_______XX_",
+                new int[] {6, 4, 4, 15, 1, 1});
+        assertEquals(65, description.size());
 
         solver.setDescriptor(description);
         solver.computePossibilities();
@@ -31,6 +27,6 @@ public class RedDeerTest {
             r.trySolve();
         }
 
-        cellsEquals(wrappers, parse("XXXX██████XXXXXXXXX████XX████XXXXXXXXXXX_____██████████_______XX_"));
+        cellsEquals(description, parseCell("XXXX██████XXXXXXXXX████XX████XXXXXXXXXXX_____██████████_______XX_"));
     }
 }

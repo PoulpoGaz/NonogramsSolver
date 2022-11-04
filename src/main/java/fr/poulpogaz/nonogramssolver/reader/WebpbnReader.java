@@ -1,11 +1,8 @@
 package fr.poulpogaz.nonogramssolver.reader;
 
 import fr.poulpogaz.nonogramssolver.Nonogram;
-import fr.poulpogaz.nonogramssolver.Utils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
 import java.io.IOException;
@@ -14,17 +11,13 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
 
-public class WebpbnReader implements IReader {
+// TODO: color support
+public class WebpbnReader {
 
     private static final SAXReader reader = new SAXReader();
     private static final URI uri = URI.create("https://webpbn.com/XMLpuz.cgi");
 
-    @Override
     public Nonogram read(String id) throws IOException, InterruptedException {
         String post = "id=%s&version=0&restore=undefined&sid=undefined".formatted(id);
 
@@ -49,10 +42,10 @@ public class WebpbnReader implements IReader {
             rep.body().close();
         }
 
-        return parseDocument(document);
+        return null;// parseDocument(document);
     }
 
-    private Nonogram parseDocument(Document document) {
+    /*private Nonogram parseDocument(Document document) {
         List<Node> clues = document.selectNodes("//clues");
 
         int[][] rows = null;
@@ -94,5 +87,5 @@ public class WebpbnReader implements IReader {
         }
 
         return array;
-    }
+    }*/
 }

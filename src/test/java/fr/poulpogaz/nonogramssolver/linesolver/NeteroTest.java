@@ -1,6 +1,5 @@
 package fr.poulpogaz.nonogramssolver.linesolver;
 
-import fr.poulpogaz.nonogramssolver.solver.CellWrapper;
 import fr.poulpogaz.nonogramssolver.solver.Description;
 import org.junit.jupiter.api.Test;
 
@@ -13,13 +12,10 @@ public class NeteroTest {
 
     @Test
     void neteroBug() {
-        // must be filled                                        here --> <--
-        CellWrapper[] wrappers = parse("█XXXXXXXXXXXXX____________█____██____X█X████X█X██████X█XXXXX█████████XXX████████");
-        assertEquals(80, wrappers.length);
-
-        int[] clues = new int[] {1, 3, 2, 6, 1, 4, 1, 6, 1, 9, 8};
-
-        Description description = new Description(false, 0, clues, wrappers);
+        // must be filled                                         here --> <--
+        Description description = parse("█XXXXXXXXXXXXX____________█____██____X█X████X█X██████X█XXXXX█████████XXX████████",
+                new int[] {1, 3, 2, 6, 1, 4, 1, 6, 1, 9, 8});
+        assertEquals(80, description.size());
 
         solver.setDescriptor(description);
         solver.computePossibilities();
@@ -31,6 +27,6 @@ public class NeteroTest {
             r.trySolve();
         }
 
-        cellsEquals(wrappers, parse("█XXXXXXXXXXXXX____________█____███___X█X████X█X██████X█XXXXX█████████XXX████████"));
+        cellsEquals(description, parseCell("█XXXXXXXXXXXXX____________█____███___X█X████X█X██████X█XXXXX█████████XXX████████"));
     }
 }
