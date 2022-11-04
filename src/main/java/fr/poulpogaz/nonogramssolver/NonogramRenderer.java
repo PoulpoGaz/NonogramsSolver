@@ -164,20 +164,12 @@ public class NonogramRenderer {
     }
 
     private void drawColumnsClues(Graphics2D g2d, Nonogram n, int xOffset, int maxY, int squareSize) {
-        g2d.setColor(Color.BLACK);
-        FontMetrics fm = g2d.getFontMetrics();
-
         int x = xOffset;
         for (Nonogram.Clue[] clues : n.getColumns()) {
             int y = maxY - squareSize;
 
             for (int i = clues.length - 1; i >= 0; i--) {
-                String str = Integer.toString(clues[i].length());
-
-                g2d.setClip(x, y, squareSize, squareSize);
-                g2d.drawString(str,
-                        x + (squareSize - fm.stringWidth(str)) / 2,
-                        y + (squareSize - fm.getHeight()) / 2 + fm.getAscent());
+                drawClue(g2d, x, y, n, clues[i], squareSize);
 
                 y -= squareSize;
             }
@@ -187,26 +179,43 @@ public class NonogramRenderer {
     }
 
     private void drawRowsClues(Graphics2D g2d, Nonogram n, int yOffset, int maxX, int squareSize) {
-        g2d.setColor(Color.BLACK);
-        FontMetrics fm = g2d.getFontMetrics();
-
         int y = yOffset;
         for (Nonogram.Clue[] clues : n.getRows()) {
             int x = maxX - squareSize;
 
             for (int i = clues.length - 1; i >= 0; i--) {
-                String str = Integer.toString(clues[i].length());
-
-                g2d.setClip(x, y, squareSize, squareSize);
-                g2d.drawString(str,
-                        x + (squareSize - fm.stringWidth(str)) / 2,
-                        y + (squareSize - fm.getHeight()) / 2 + fm.getAscent());
+                drawClue(g2d, x, y, n, clues[i], squareSize);
 
                 x -= squareSize;
             }
 
             y += squareSize;
         }
+    }
+
+    private void drawClue(Graphics2D g2d, int x, int y, Nonogram n, Nonogram.Clue clue, int squareSize) {
+        FontMetrics fm = g2d.getFontMetrics();
+
+        String str = Integer.toString(clue.length());
+
+        g2d.setClip(x, y, squareSize, squareSize);
+
+        Color background = n.getColors()[clue.color()];
+
+        if (!n.isMonochrome()) {
+            g2d.setColor(background);
+            g2d.fillRect(x, y, squareSize, squareSize);
+
+            if (Utils.isDark(n.getColors()[clue.color()])) {
+                g2d.setColor(Color.WHITE);
+            } else {
+                g2d.setColor(Color.BLACK);
+            }
+        }
+
+        g2d.drawString(str,
+                x + (squareSize - fm.stringWidth(str)) / 2,
+                y + (squareSize - fm.getHeight()) / 2 + fm.getAscent());
     }
 
     private void drawGrid(Graphics2D g2d, Nonogram n, NonogramDimension dim) {

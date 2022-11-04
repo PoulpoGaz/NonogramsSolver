@@ -88,6 +88,10 @@ public class Nonogram {
         return colors;
     }
 
+    public boolean isMonochrome() {
+        return colors.length == 1;
+    }
+
     public record Clue(int length, int color) {
     }
 
