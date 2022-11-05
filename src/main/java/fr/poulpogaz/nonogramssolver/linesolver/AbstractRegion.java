@@ -229,6 +229,8 @@ public abstract class AbstractRegion {
      * This is also done in reverse order
      * See TurtleBug 1 and 2 and TotoroBug 1.
      * Actually, I don't know why it works lol
+     *
+     * TODO: optimize this function, avoid using {@link #recalculateMinIMaxI()}
      */
     protected void comparePossibilitiesAndLines(List<Line> lines) {
         if (description.hasContradiction()) {

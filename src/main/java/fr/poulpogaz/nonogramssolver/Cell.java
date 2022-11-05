@@ -1,7 +1,7 @@
 package fr.poulpogaz.nonogramssolver;
 
 /**
- * A cell cna be empty, filled for a particular color or crossed
+ * A cell can be empty, filled for a particular color or crossed
  */
 public class Cell {
 

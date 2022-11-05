@@ -203,15 +203,17 @@ public class NonogramRenderer {
 
         Color background = n.getColors()[clue.color()];
 
-        if (!n.isMonochrome()) {
+        if (!n.isMonochrome() || !background.equals(Color.BLACK)) {
             g2d.setColor(background);
             g2d.fillRect(x, y, squareSize, squareSize);
 
-            if (Utils.isDark(n.getColors()[clue.color()])) {
+            if (Utils.isDark(background)) {
                 g2d.setColor(Color.WHITE);
             } else {
                 g2d.setColor(Color.BLACK);
             }
+        } else {
+            g2d.setColor(Color.BLACK);
         }
 
         g2d.drawString(str,
